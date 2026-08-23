@@ -8,7 +8,9 @@ ACTIVE.
 ## AUTHORITY / REMOTE SYNC
 Canonical evidence base remains `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`, augmented by the 2026-08-24 cross-branch sync.
 
-During this sync, `main` advanced from `20f76e6bbd849b5aff5f25d00ae63505ef1b96c0` to `fb2adabdc2e735526ca4281c94848ed106f8810d` via 8 concurrent commits. Those commits were read and their useful evidence was imported before this handoff was committed. See `research/BRANCH_SYNC_20260824.md`.
+During synchronization multiple branches advanced `main`. Their state was read before this final handoff; useful evidence was imported rather than overwritten. See both:
+- `research/BRANCH_SYNC_20260824.md`
+- `research/TRANSPORT_SYNC_20260824.md`
 
 ## FROZEN TARGET / DEPENDENCIES
 - legacy CS:GO x86, Steam AppID `4465480`, BuildID `22100934`
@@ -19,8 +21,9 @@ During this sync, `main` advanced from `20f76e6bbd849b5aff5f25d00ae63505ef1b96c0
 - HLAE `2.191.1`; AdvancedFX source pin `b97636852b8eecae09285b5a386192bb285638eb`
 - HLAE package/exe SHA256 `D7BA05E1E540D82AC485A9B39F13D5C4CCF9FD94F460E0C9ECF069B94C880A59`
 - `AfxHookSource.dll` SHA256 `5B9D13AE9ABFFEEF80851E10861302162A47D1B43D8483B4A8FCEC7EAA19B035`
-- Meta/Oculus OpenXR `1.205.0`, Quest 3
+- Meta/Oculus OpenXR `1.205.0` in the retained diagnostic, Quest 3
 - shared tools root: `C:\GOG Games\VR Research Tools`
+- frozen lab: local `sv_lan`, Dust II, windowed, `mat_queue_mode 0`, no persistent patch
 
 ## LATEST RESULT
 Latest accepted scientific result overall:
@@ -36,8 +39,9 @@ Current-gate supporting accepted results:
 
 Prepared, NOT accepted RESULT:
 - `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`, SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70` — UNRUN; matrix-only phase is G3-primary-useful, FOV/aspect phases diagnostic only.
-- `CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip` — UNRUN; CPU readback/shared-memory transport; COLD-SUPERSEDED AS PRIMARY, not runtime-falsified.
 - `experiments/quest_projection_child/` — prepared byte-locked projection implementation; not runtime-PROVEN.
+- `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`, artifact SHA256 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3` — PREPARED/STATIC-AUDITED CPU-readback transport fallback; not LIVE-proven.
+- prepared `v0.7.0_XR_TRANSPORT` is superseded within the CPU lineage by v0.7.1 before LIVE.
 
 ## PROVEN
 ### Stereo GOLDEN
@@ -92,6 +96,13 @@ At exact `b976368...` the frozen HLAE lineage already contains:
 - `WaitForGpu -> AfxD3D_WaitForGPU()`
 This proves capability exists without upgrading HLAE. End-to-end CSGOVR transport is still runtime-UNPROVEN.
 
+### D3D9 CPU readback primitive — PROVEN subprimitive
+Historical CSGOVR runtime code/results establish:
+- passive Present hook can latch the real `IDirect3DDevice9*`
+- CPU snapshot/readback executes in frozen retail
+- MSAA-safe form is source RT -> non-MSAA DEFAULT RT via `StretchRect` -> SYSTEMMEM -> `GetRenderTargetData` -> `LockRect`
+This proves the fallback primitive, not v0.7.1 end-to-end XR transport.
+
 ### Culling / world-view lineage
 - `client+0x003A16A6..+0x003A16DC` exact pre-eye reader/dataflow site with recovered call stack and bounded dataflow; destination semantics PENDING
 - second reader `client+0x003A01E4..+0x003A021A`
@@ -122,7 +133,8 @@ Conclusion: only that exact late intervention point is negative. Do not generali
 - repeated sign/transpose projection roulette
 - sequential screenshots as quantitative stereo/culling truth
 - broad 8–12 point eye-origin batch until a concrete post-G3 defect exists
-- CPU-readback `XR_TRANSPORT_v0.7.0` as PRIMARY transport architecture: COLD-SUPERSEDED, not runtime-falsified
+- CPU-readback v0.7.0 specifically: SUPERSEDED by v0.7.1 in the CPU fallback lineage
+- CPU-readback architecture as T0 PRIMARY: COLD-SUPERSEDED by the stronger pinned-HLAE GPU-interoperability finalist, not runtime-falsified
 
 ## RETAINED INFRASTRUCTURE ONLY
 - origin seam `client+0x0038D123`
@@ -132,24 +144,36 @@ Conclusion: only that exact late intervention point is negative. Do not generali
 Do not promote to ownership without new causal evidence.
 
 ## CURRENT FINALISTS
-1. **T0 / G2.5:** pinned HLAE `afx_interop` GPU replacement eye targets -> GPU completion -> external x64 D3D11/Meta OpenXR host.
-2. **G3/T1 after T0 PASS:** repo byte-locked minimal Quest projection child, exact P00 + Source-native scalar FOV `110°`, engine zNear/zFar retained.
-3. **Conditional only after visible post-P00 clipping:** aspect `0.9254939479` and/or FOV150 as diagnostic controls, not production fixes.
-4. **Only if a concrete culling blocker survives:** `+0x3A16A6`, `+0x3A01E4`, `+0x86E9C0`, CSimpleWorldView lineage.
+1. **T0 / G2.5 FINALIST A — PRIMARY:** pinned HLAE `afx_interop` GPU replacement eye targets -> GPU completion -> external x64 D3D11/Meta OpenXR host.
+2. **T0 / G2.5 FINALIST B — PREPARED FALLBACK:** `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`, CPU readback + atomic shared pair. Use only if A reaches a concrete interop blocker or as a bounded compatibility control.
+3. **G3/T1 after T0 PASS:** repo byte-locked minimal Quest projection child, exact P00 + Source-native scalar FOV `110°`, engine zNear/zFar retained.
+4. **Conditional only after visible post-P00 clipping:** aspect `0.9254939479` and/or FOV150 as diagnostic controls, not production fixes.
+5. **Only if a concrete culling blocker survives:** `+0x3A16A6`, `+0x3A01E4`, `+0x86E9C0`, CSimpleWorldView lineage.
+
+### v0.7.1 fallback-specific working fixes
+- same `CAfxStreams*` required for both eyes
+- LEFT HLAE count `0 -> 1`, RIGHT `1 -> 2`
+- complete pair only becomes READY
+- one-shot producer `DISTINCT PAIR PROOF`
+- one-shot host `PAIR PROOF PASS`
+- `#pragma pack(4)` ABI
+- Reset generation invalidation
+- RGB-only hashes for X8R8G8B8
+- no inherited diagnostic camera freeze
+- stale control INI cleanup and PowerShell `$PID` avoidance
 
 ## CURRENT GATE
 **T0 / G2.5 — GPU XR TRANSPORT CERTIFICATION.**
 
-Remote concurrent branch had G3 current and explicitly noted final XR transport was still unproven. This sync inserts a transport-only certification before G3 to serialize mutations; G3 is queued, not falsified.
+The projection gate is queued and not falsified.
 
 ## NEXT
 1. Preserve exact v0.5.5 geometry/pass schedule and pass3 monitor.
-2. Use pinned HLAE interop replacement eye RT(s); pass1 LEFT + pass2 RIGHT from same HLAE cycle = one `pairSeq`.
-3. GPU-complete before publication.
-4. External x64 host uses D3D11 on OpenXR adapter LUID, imports eye resources, acquire/wait/copy/release both swapchains, one `xrEndFrame` per coherent pair.
-5. T0 must not change Quest projection, origin, HMD pose, culling, viewmodel or HUD.
-6. T0 PASS -> freeze transport -> immediately run G3/T1 exact Quest P00 + FOV110.
-7. T0 FAIL -> fix only the concrete transport defect; do not widen search.
+2. Run FINALIST A: pinned HLAE GPU interop, same-cycle pass1 LEFT + pass2 RIGHT -> one `pairSeq`, GPU completion before publish, external x64 D3D11/OpenXR host.
+3. T0 must not change Quest projection, origin, HMD pose, culling, viewmodel or HUD.
+4. T0 PASS -> freeze transport -> immediately run G3/T1 exact Quest P00 + FOV110.
+5. T0 FAIL with a concrete GPU-interop blocker -> activate prepared FINALIST B v0.7.1 without repeating its research.
+6. Do not widen search before an exact failure demands it.
 
 ## METHOD ALREADY USED
 - source/donor corpus harvest
@@ -165,11 +189,15 @@ Remote concurrent branch had G3 current and explicitly noted final XR transport 
 - x32dbg origin/yaw infrastructure controls
 - CRendering3dView class funnel
 - exact source recovery / projection transplant / integrity verifier + CI
-- prepared G3 and CPU transport package review without promotion to RESULT
+- HLAE pinned GPU-interoperability source review
+- D3D9 Present/readback/MSAA fallback work
+- OBS / FEAR-VR / CallOfDuty4-VR / capture-engine transport donor comparison
+- AdvancedFX D3D9Ex history review
 
 ## EXISTING REPO ARTIFACTS
 - `runtime/golden_v0.5.5/src/eye_patch.c`, `injector.c`, `BUILD_REPRO.md`, `SOURCE_SHA256.txt`
 - `runtime/children/v0.6.1_projection_oracle/`
+- `runtime/children/v0.7.1_xr_transport/README.md`
 - `experiments/quest_projection_child/PREFLIGHT.txt`
 - `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
@@ -177,9 +205,12 @@ Remote concurrent branch had G3 current and explicitly noted final XR transport 
 - `.github/workflows/evidence-integrity.yml`
 - `research/RESULT_INDEX.md`
 - `research/BRANCH_SYNC_20260824.md`
+- `research/TRANSPORT_SYNC_20260824.md`
 
 ## UNRESOLVED
 - end-to-end frozen-CSGO HLAE GPU pair -> x64 Meta OpenXR runtime proof
+- whether pinned GPU interop A is runtime-compatible under the exact lab mode
+- whether CPU fallback B is needed
 - atomic pairSeq / no L(N)+R(N+1) mixing
 - G3/T1 headset fusion after T0
 - same-frame/repeated-eye quantitative capture certification
