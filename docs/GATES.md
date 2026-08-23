@@ -1,29 +1,32 @@
 # CSGOVR — GATES
 
-## G0 — OpenXR input baseline
-**PASS:** valid two-eye view/FOV data can be acquired reproducibly from the tested runtime.
+## G0 — OpenXR / Quest input
+**PASS.** Two valid Quest 3 views, asymmetric FOV and projection coefficients are already established.
 
-## G1 — Retail game-side camera ownership
-**PASS:** persistent `CViewSetup` ownership/control is causally anchored.
+## G1 — HLAE stereo GOLDEN
+**PASS.** `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX` provides two real world streams: LEFT, RIGHT, plus monitor pass; full `CViewSetup` copy size `0x198`.
 
-Concrete proof:
-- writer/control `client.dll+0x0038D123`
-- persistent `CViewSetup` `client.dll+0x052632CC`
-- proven field `origin.x +0xB8`
-- downstream `RenderView` boundary `client.dll+0x003A5280`
+## G2 — Projection-control semantics
+**PASS.** Custom projection bool `+0x68`, matrix `+0x6C..+0xAB`, and off-center fields `+0x138/+0x13C/+0x140/+0x144` with flags `+0x148` bit0 are established strongly enough for integration. M00/M02/M11/M12 were causally measured.
 
-## G2 — Main-world view classification + projection/frustum map
-**PASS:** classify the proven persistent view lineage as main-world versus shadow/aux state, then locate projection/FOV/frustum/culling-relevant fields without broad candidate expansion.
+## G3 — Quest asymmetric projection integration
+**PASS:** integrate the known Quest 3 asymmetric projection into the known-good LEFT/RIGHT eye path, preserve the stereo GOLDEN, and validate in-headset/same-frame.
 
-Current read-only target: `client+0x05263788`.
+**CURRENT GATE: G3**
 
-**CURRENT GATE: G2**
+## G4 — Concrete remaining culling blocker, if any
+Only opens if a visible blocker survives G3.
 
-## G3 — Same-frame coherent stereo
-**PASS:** both eyes render from one simulation/HMD pose with the measured asymmetric per-eye projection and correct eye separation.
+Current evidence anchors if needed:
+- pre-eye reader `client.dll+0x003A16A6`
+- second reader `client.dll+0x003A01E4`
+- `GeneratePerspectiveFrustum` `client.dll+0x0086E9C0`
+- CSimpleWorldView lineage PROVEN
 
-## G4 — Stereo-safe culling / post path
-**PASS:** geometry, overlays and post effects needed by either eye remain stable; mono assumptions are corrected or given documented fallbacks.
+Do not reopen `client.dll+0x0525BA60` both-eye reuse hypothesis; it is FALSIFIED.
 
-## G5 — Camera / weapon separation
-**PASS:** HMD camera pose and weapon/controller pose can be driven independently without reintroducing stereo regressions.
+## G5 — Authoritative eye translation / camera integration
+Late `DoRenderView` origin nudge was not authoritative for final captured raster. Resolve only if it remains a visible blocker after projection integration.
+
+## G6 — Weapon / controller separation
+Proceed only after stereo/projection/culling/camera gates are regression-green.
