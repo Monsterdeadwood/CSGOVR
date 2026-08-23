@@ -1,72 +1,57 @@
 # CSGOVR — NEXT
 
 ## CURRENT GATE
-**G3 — Quest asymmetric projection integration.**
+**XR TRANSPORT / headset-submission precondition.**
+
+The Quest asymmetric projection child is already prepared and remains the immediate next gate after transport PASS.
 
 ## NEXT ONE STEP
-Run the already-committed byte-locked minimal Quest projection child and obtain a runtime/headset verdict.
+Run:
+`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
 
-Primary files:
-- `experiments/quest_projection_child/eye_patch_quest_projection.c`
-- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
-- `experiments/NEXT_EXPERIMENT.md`
-- `tools/verify_quest_projection_child.py`
+Artifact SHA256:
+`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
 
-## Before LIVE
-Run the integrity verifier / CI-equivalent checks and preserve:
-- frozen `client.dll` SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
-- exact HLAE 2.191.1 / `AfxHookSource.dll` lineage
-- exact `-insecure`
-- v0.5.5 pass scheduling
-- full local `0x198` eye copies
-- pass3 monitor untouched
+Manifest:
+`runtime/children/v0.7.1_xr_transport/README.md`
 
-## PRIMARY mutation
-Only the already-proven Quest custom projection matrix is added to the existing local LEFT/RIGHT eye copies.
+## PREFLIGHT
+**MISSING FACT:** can the already-proven HLAE pass1/pass2 world images from one HLAE outer-pass contract be transported into a live Quest 3 OpenXR projection layer?  
+**WHY NOT COLD:** HLAE scheduling, D3D9 readback, OpenXR input and projection controls are already known; only a LIVE can close end-to-end submission.  
+**PASS:** T0 XR diagnostic green; one structural same-HLAE L/R pair crosses x86->x64; both eyes non-black/RGB-distinct; game projection layer submits; no >2 s freeze.  
+**FAIL:** exact stage evidence identifies T0 XR, HLAE pair, D3D9 capture, shared memory, x64 upload or XR submission failure.  
+**BASELINE MUST HOLD:** v0.5.5, `CViewSetup=0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, exact frozen hashes, no culling/head/weapon mutation.
 
-Do not add in the same PRIMARY:
-- new origin write point
-- culling mutation
-- head pose
-- weapon/hands
-- HUD
-- new OpenXR FOV discovery
+## Evidence required from the run
+- T0 host/session/diagnostic state
+- same `CAfxStreams*` for both eyes
+- LEFT `m_DoRenderViewCount 0 -> 1`
+- RIGHT `1 -> 2`
+- producer `DISTINCT PAIR PROOF`
+- host `PAIR PROOF PASS`
+- RGB hashes / non-black status
+- pair age and LEFT->RIGHT gap telemetry
+- GAME layer submit status
+- one exact same-pair LEFT/RIGHT capture
+- cleanup/regression status
 
-## PASS
-- pass1 gets LEFT Quest matrix (`M02<0`)
-- pass2 gets RIGHT Quest matrix (`M02>0`)
-- M00/M11/M12 match the proven Quest coefficients
-- LEFT/RIGHT world streams remain healthy
-- pass3 monitor remains healthy
-- headset/same-frame visual verdict is coherent enough to close projection integration
-- regression: NONE or only explicitly expected projection change
+## PASS path
+1. Freeze v0.7.1 transport as the accepted transport baseline.
+2. STOP transport research.
+3. Run the already-committed byte-locked Quest projection child:
+   - `experiments/quest_projection_child/eye_patch_quest_projection.c`
+   - `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
+   - `tools/verify_quest_projection_child.py`
+4. If projection convention still needs discrimination, use only the bounded `P00..P07` family. Do not rediscover FOV or offsets.
 
-## FAIL handling
-If matrix logging/write timing fails, fix only that integration defect.
+## FAIL path
+Adapt only the exact failed transport stage.
 
-If matrix application is proven but headset is black/absent, promote **XR transport/submission** as the concrete blocker; do not reopen projection math.
+Do not reopen:
+- projection math
+- Quest FOV discovery
+- broad camera archaeology
+- `+0x0525BA60` both-eye theory
+- broad origin/culling batches
 
-If matrix application is proven and a peripheral geometry/culling defect remains, open G4 using existing targets:
-- `client+0x003A16A6`
-- `client+0x003A01E4`
-- `client+0x0086E9C0`
-- CSimpleWorldView lineage
-
-If eye-origin/parallax is visibly wrong after G3, reconcile against the existing v0.5.5 parallax evidence before any new origin-owner reverse.
-
-## Prepared diagnostic batch
-`CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`
-SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`
-
-Status: **UNRUN / NOT BASELINE**.
-Use matrix-only as the PRIMARY-useful phase. Its FOV/aspect/150 phases are secondary harvest for a future G4 culling question and must not be allowed to redefine G3 PASS/FAIL.
-
-## After RESULT
-Record exactly:
-- PRIMARY FACT: RESOLVED / NOT RESOLVED
-- REGRESSION: NONE / EXPECTED / UNEXPECTED
-- KEEP: exact source/build/matrix/path retained
-- headset-visible blocker, if any
-- NEXT ONE STEP
-
-Then sync GitHub before opening a new expensive branch.
+until a concrete visible/runtime blocker requires them.
