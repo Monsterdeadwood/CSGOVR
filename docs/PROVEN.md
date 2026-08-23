@@ -15,7 +15,17 @@ From the recorded FOVs, an independent projection calculation produced approxima
 - both eyes: M00 ~= 0.9027383311
 - both eyes: M11 ~= 0.8354788620
 - both eyes: M12 ~= -0.1931874395
-- LEFT M02 ~= -0.242512 (RIGHT should carry the mirrored horizontal asymmetry under the same convention)
+- LEFT M02 ~= -0.242512 (RIGHT carries the mirrored horizontal asymmetry under the same convention)
 
-## Interpretation boundary
-These values prove that valid asymmetric two-eye OpenXR view data can be acquired in the tested environment. They do **not** by themselves prove that CSGO is consuming the correct projection or rendering both eyes correctly.
+## Retail game-side camera control — CONTROL PROVEN
+- Persistent `CViewSetup` object: `client.dll+0x052632CC`.
+- Proven field: `origin.x` at object offset `+0xB8`.
+- Retail control/writer instruction: `client.dll+0x0038D123`.
+- Downstream render boundary: `client.dll+0x003A5280` (`RenderView`).
+- A targeted causal experiment demonstrated that changing the proven camera-origin path controls the persistent object and the change reaches the downstream `RenderView` path.
+
+## Current interpretation boundary
+- The project now has a proven game-side camera ownership/control anchor, not merely OpenXR input.
+- Projection/FOV/frustum fields on the persistent view lineage are not yet causally mapped.
+- `client+0x05263788` is a current read-only classification path/target, not yet a proven projection/culling field.
+- Valid OpenXR eye data plus a proven camera origin path still does **not** by itself prove correct stereo rendering.
