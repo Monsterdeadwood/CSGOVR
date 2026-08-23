@@ -1,0 +1,93 @@
+--- runtime/golden_v0.5.5/src/eye_patch.c
++++ experiments/quest_projection_child/eye_patch_quest_projection.c
+@@
+ #define VIEW_BYTES 0x198u
+ #define OFF_ORIGIN 0x0B8u
+ #define OFF_ANGLES 0x0C4u
++#define OFF_ZNEAR 0x0D0u
++#define OFF_ZFAR 0x0D4u
++#define OFF_CUSTOM_PROJ_BOOL 0x068u
++#define OFF_CUSTOM_PROJ_MATRIX 0x06Cu
++
++/* Quest 3 FOV validation oracle from the proven OpenXR capture:
++   LEFT  L=-54 R=+40 U=+44 D=-55
++   RIGHT L=-40 R=+54 U=+44 D=-55
++
++   Source custom-projection convention already proved by the v0.6.x
++   projection oracle: M00/M02/M11/M12 at [0]/[2]/[5]/[6]. */
++#define QUEST_M00 0.902738278f
++#define QUEST_M02_ABS 0.242512644f
++#define QUEST_M11 0.835478849f
++#define QUEST_M12 -0.193187454f
+@@
+ static void angle_right(const float *ang, float out[3]) {
+@@
+     out[2] = -sr * cp;
+ }
++
++static int apply_quest_asymmetric_projection(uint8_t *localView, int pass) {
++    if (!localView || (pass != 1 && pass != 2)) return 0;
++
++    const float zNear = *(const float*)(localView + OFF_ZNEAR);
++    const float zFar  = *(const float*)(localView + OFF_ZFAR);
++    if (!isfinite(zNear) || !isfinite(zFar) ||
++        !(zNear > 0.001f) || !(zFar > zNear + 1.0f)) {
++        return 0;
++    }
++
++    float matrix[16];
++    memset(matrix, 0, sizeof(matrix));
++
++    matrix[0]  = QUEST_M00;                         /* M00 */
++    matrix[2]  = (pass == 1) ? -QUEST_M02_ABS
++                             : +QUEST_M02_ABS;      /* M02 */
++    matrix[5]  = QUEST_M11;                         /* M11 */
++    matrix[6]  = QUEST_M12;                         /* M12 */
++    matrix[10] = zFar / (zNear - zFar);             /* M22 */
++    matrix[11] = (zNear * zFar) / (zNear - zFar);   /* M23 */
++    matrix[14] = -1.0f;                             /* M32 */
++    matrix[15] = 0.0f;                              /* M33 */
++
++    for (int i = 0; i < 16; ++i) {
++        if (!isfinite(matrix[i])) return 0;
++    }
++
++    /* Commit the complete matrix first. Enable custom projection last. */
++    memcpy(localView + OFF_CUSTOM_PROJ_MATRIX, matrix, sizeof(matrix));
++    localView[OFF_CUSTOM_PROJ_BOOL] = 1;
++    return 1;
++}
+@@
+         origin[0] += sign * right[0] * HALF_EYE_SEP;
+         origin[1] += sign * right[1] * HALF_EYE_SEP;
+         origin[2] += sign * right[2] * HALF_EYE_SEP;
++
++        /* The ONLY behavioral addition in this child: write the known Quest
++           asymmetric projection into the already-local v0.5.5 eye copy. */
++        int projectionOk = apply_quest_asymmetric_projection(localView, pass);
++        if (!projectionOk) {
++            log_fmt("PROJECTION_REJECT pass=%d zNear=%.7f zFar=%.7f; using untouched GOLDEN projection state",
++                    pass,
++                    *(float*)(localView + OFF_ZNEAR),
++                    *(float*)(localView + OFF_ZFAR));
++        }
+ 
+         LONG seen = InterlockedIncrement(&g_loggedPairs);
+         if (seen <= 24) {
+             uint32_t tail = *(const uint32_t*)((const uint8_t*)view + 0x194);
++            const float *proj = (const float*)(localView + OFF_CUSTOM_PROJ_MATRIX);
+             log_fmt("EYE pass=%d forceCache=%d yaw=%.4f pitch=%.4f roll=%.4f "
+-                    "right=(%.5f,%.5f,%.5f) origin=(%.5f,%.5f,%.5f)->(%.5f,%.5f,%.5f) tail194=0x%08X",
++                    "right=(%.5f,%.5f,%.5f) origin=(%.5f,%.5f,%.5f)->(%.5f,%.5f,%.5f) "
++                    "questProj=%d custom=%u M00=%.8f M02=%.8f M11=%.8f M12=%.8f tail194=0x%08X",
+                     pass, forceCache, angles[1], angles[0], angles[2],
+                     right[0], right[1], right[2],
+-                    oldx, oldy, oldz, origin[0], origin[1], origin[2], tail);
++                    oldx, oldy, oldz, origin[0], origin[1], origin[2],
++                    projectionOk, (unsigned)localView[OFF_CUSTOM_PROJ_BOOL],
++                    proj[0], proj[2], proj[5], proj[6], tail);
+         }
+@@
+     log_line("CSGOVR HLAE EYE PATCH v0.5.5 starting");
+     log_line("MODE: exact HLAE DoRenderView hook; local CViewSetup copies only; pass3 untouched");
++    log_line("CHILD: Quest asymmetric custom projection only; no camera freeze, no INI canary controller, no culling mutation");
