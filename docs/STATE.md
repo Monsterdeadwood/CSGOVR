@@ -1,23 +1,32 @@
 # CSGOVR State
 
+## Status
+ACTIVE.
+
 ## Current gate
-Turn the confirmed OpenXR eye/FOV data into a correct in-game stereo projection/render path for Counter-Strike: Global Offensive.
+Classify the proven persistent `CViewSetup` ownership path as main-world versus shadow/aux state using read-only inspection, then map the projection/FOV/frustum/culling-relevant fields on that same proven path.
 
 ## Current known state
-- OpenXR idle acquisition succeeded on the tested Meta/Oculus runtime with Quest 3.
-- `XR_KHR_win32_convert_performance_counter_time` was available and the Win32 performance-counter conversion call succeeded in the tested diagnostic path.
-- `xrLocateViews` succeeded while idle with two views and a fully valid view-state flag set in the recorded run.
-- Quest 3 eye FOVs are asymmetric left/right and therefore require per-eye asymmetric projection rather than a single symmetric frustum.
-- Recommended eye size observed in the diagnostic path: 1504x1616 per eye.
-- Derived projection matrices were calculated independently from the returned FOV values and are available as a numerical reference.
+- OpenXR/Quest 3 two-eye view/FOV acquisition is already proven input and is no longer the blocker.
+- CONTROL PROVEN: `client.dll+0x0038D123` controls persistent `CViewSetup` at `client.dll+0x052632CC`.
+- Proven field: `origin.x` at `CViewSetup+0xB8`.
+- The controlled value reaches the downstream render boundary at `client.dll+0x003A5280` (`RenderView`) in the tested path.
+- Read-only classification path/pointer: `client+0x05263788`.
+- Projection/asymmetric-eye field mapping inside the proven object lineage remains OPEN.
+- Main-world versus shadow/aux classification and culling-relevant view/frustum state remain OPEN.
 
 ## Operating protocol
-- Treat OpenXR eye data as proven input, not as proof that the game render path is already correct.
-- Next work must map these proven inputs onto the CSGO/Source render/view/projection path with retail runtime evidence.
+- Stop broad analyzers now that a concrete persistent object and control instruction are proven.
+- Read-only classification comes before the next intrusive mutation.
+- Converge frozen-retail static lineage, HLAE/source evidence, and runtime/TTD ownership on the proven path.
 - PARALLELIZE EVIDENCE, SERIALIZE MUTATION.
-- One causal render mutation at a time with a written prediction and flat-baseline regression check.
+- Preserve the frozen known-good baseline.
 
 ## Next
-1. Map the game-side view/projection writer and render-pass schedule.
-2. Prove the per-eye projection insertion point.
-3. Establish same-frame stereo before controller/weapon work.
+1. Read-only ReClass/object inspection through `client+0x05263788`.
+2. Separate main-world from shadow/aux view objects.
+3. Locate projection/FOV/frustum/culling-relevant fields on the proven `CViewSetup` lineage.
+4. Keep `origin.x +0xB8` as the causal anchor.
+5. Only then perform the next single predicted mutation.
+
+See `docs/SYNC.md` for the canonical cross-branch snapshot.
