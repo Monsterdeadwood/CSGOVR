@@ -1,60 +1,47 @@
 # CSGOVR — NEXT EXPERIMENT
 
 ## Decision
-**KEEP GOLDEN, integrate known projection.** Do not reopen broad OpenXR/camera/culling archaeology before this integration is tested.
+**XR TRANSPORT FIRST.**
+
+The remote projection child remains valid and queued, but no exact completed headset transport PASS exists in the current evidence ledger.
 
 ## Primary question
-Can the proven Quest 3 asymmetric LEFT/RIGHT projection be applied through the known-good v0.5.5 HLAE projection path while preserving the existing two-world-stream stereo GOLDEN and monitor pass?
+Can v0.5.5 HLAE pass1/pass2 be captured from one HLAE outer-pass contract and submitted live to Quest 3 by the separate x64 OpenXR host?
 
 ## PREFLIGHT — exactly 5 lines
-**MISSING FACT:** whether the already-proven Quest asymmetric projection coefficients, when fed through the proven `CViewSetup` custom/off-center path, produce correct in-headset eye geometry without destabilizing the v0.5.5 stereo schedule.
-**WHY NOT COLD:** field layout, eye FOV and projection semantics are already proven COLD/causally; only headset/same-frame LIVE can establish visual correctness and regression of the integrated eye path.
-**PASS:** LEFT/RIGHT retain real distinct world streams, Quest asymmetry is applied to the correct eye, monitor pass remains intact, geometry/depth is comfortable and coherent in-headset, and no new eye-specific corruption appears.
-**FAIL:** symmetric/incorrect frustum remains, eye asymmetry is swapped/wrong, one stream regresses, monitor pass breaks, final raster ignores the matrix/off-center change, or a new visible culling/camera defect appears.
-**BASELINE MUST HOLD:** `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`, full `CViewSetup=0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, custom projection path `+0x68/+0x6C..+0xAB`, exact restore of the untouched baseline path.
+**MISSING FACT:** end-to-end same-HLAE-pair XR transport from frozen CS:GO to Quest 3.  
+**WHY NOT COLD:** HLAE scheduling, D3D9 readback, Quest XR input and projection APIs are already structurally known; only a LIVE proves transport.  
+**PASS:** T0 XR diagnostic green; same-HLAE L/R pair crosses shared memory; both RGB images are non-black/distinct; GAME projection layer submits; no >2 s freeze.  
+**FAIL:** exact stage/API evidence identifies XR startup, HLAE pairing, D3D9 capture, shared memory, D3D11 upload or XR submission blocker.  
+**BASELINE MUST HOLD:** v0.5.5, full `0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, frozen game/HLAE hashes, no origin/culling/weapon mutation.
 
-## Inputs already proven
-Quest FOV:
-- LEFT L=-54°, R=+40°, U=+44°, D=-55°
-- RIGHT L=-40°, R=+54°, U=+44°, D=-55°
+## Candidate
+`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
 
-Known projection controls:
-- custom projection enable `+0x68`
-- matrix `+0x6C..+0xAB`
-- off-center top `+0x138`
-- bottom `+0x13C`
-- left `+0x140`
-- right `+0x144`
-- `m_bOffCenter` flags `+0x148 bit0`
+Artifact SHA256:
+`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
 
-## Mutation scope
-One integration only:
-1. preserve v0.5.5 pass scheduling and full-object copying;
-2. assign the proven LEFT Quest projection only to LEFT pass;
-3. assign the proven RIGHT Quest projection only to RIGHT pass;
-4. preserve pass3 monitor behavior;
-5. do not add origin/yaw/culling mutations in the same build;
-6. restore stock/Golden projection state when experiment is disabled.
+Repo package/manifest:
+`runtime/children/v0.7.1_xr_transport/`
 
 ## Same-run evidence
-Collect:
-- eye/pass id and applied projection coefficients
-- matrix/off-center path selected per pass
-- pass counts LEFT/RIGHT/monitor
-- same-frame screenshot/capture if available
-- headset user verdict for depth/fusion/peripheral geometry
-- baseline restore confirmation
-
-Sequential screenshots taken at different times are not quantitative disparity/culling proof. Prefer same-frame capture or headset comparison under deterministic controls.
-
-## Prediction
-If the remaining projection mismatch is simply that known Quest asymmetry has not been installed into the already-proven eye path, this mutation should improve the headset geometry while leaving v0.5.5 stereo scheduling untouched.
+- T0 host/session/diagnostic status
+- HLAE count/object provenance
+- producer `DISTINCT PAIR PROOF`
+- host `PAIR PROOF PASS`
+- RGB hashes
+- pair age / L->R gap telemetry
+- GAME projection-layer submit
+- one exact same-pair LEFT/RIGHT BMP
+- cleanup / baseline status
 
 ## Conditional next step
-Only if a concrete geometry/culling blocker remains after this PASS/FAIL:
-- use `client.dll+0x003A16A6` / `+0x003A01E4` / CSimpleWorldView lineage;
-- do not reopen `client.dll+0x0525BA60` both-eye cache reuse;
-- do not promote `+0x0038D123/+0x052632CC` infrastructure seams to camera ownership without new causal proof.
+PASS:
+- freeze transport;
+- start the already-prepared Quest projection integration;
+- if convention needs a batch, restrict first family to `P00..P07`.
 
-## After PASS
-Freeze projection integration. Define the next gate from the actual remaining headset-visible blocker, not from historical speculation.
+FAIL:
+- adapt only the exact failed stage.
+
+Do not open new reverse work before the transport verdict.
