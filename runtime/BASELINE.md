@@ -1,7 +1,19 @@
 # CSGOVR — RUNTIME BASELINE
 
+## Target identity
+- legacy CS:GO x86
+- AppID `4465480`
+- BuildID `22100934`
+- client.dll SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
+
 ## GOLDEN
 `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
+
+Canonical result:
+`CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip`
+
+Generated package SHA256:
+`20D382A537CF97AA432CA0BA94DE279EB12764B4724793C217722538BCB78A6D`
 
 This is the protected stereo baseline for current integration work.
 
@@ -52,4 +64,4 @@ Resume from existing evidence only:
 - CSimpleWorldView lineage
 
 ## Source recovery status
-The canonical evidence proves the v0.5.5 GOLDEN and its layout. The exact standalone v0.5.5 source/package has not yet been imported into GitHub as source; older v0.5.3/v0.5.4 package identities are present in the Library and are historical only.
+The canonical evidence proves the v0.5.5 GOLDEN and its layout and now provides exact package identity. The standalone package/source has not yet been materialized into GitHub source form; older v0.5.3/v0.5.4 package identities are historical only.
