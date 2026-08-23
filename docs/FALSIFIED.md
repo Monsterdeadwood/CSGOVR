@@ -1,10 +1,15 @@
 # CSGOVR — FALSIFIED / CLOSED
 
-- **Assuming OpenXR view data is unavailable while the runtime is idle** — falsified by the successful idle `xrLocateViews` diagnostic.
-- **Assuming a symmetric per-eye frustum is sufficient for the tested Quest 3 configuration** — falsified by the measured asymmetric horizontal FOVs for left and right eyes.
-- **Treating successful OpenXR pose/FOV acquisition as proof of solved in-game stereo** — rejected as an inference.
-- **Repeating broad OpenXR availability/FOV diagnostics** — closed unless new evidence specifically reopens runtime-input availability.
-- **Broad camera analyzers after identifying persistent `CViewSetup` and `client.dll+0x0038D123`** — stopped as the primary path. A concrete control target already exists.
-- **Mutating another camera field before classifying main-world versus shadow/aux view state** — stopped by process. Read-only classification must come first.
+Canonical source: `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`.
 
-Keep this file narrow: failed build attempts or environment mistakes are not automatically architectural falsifications.
+- **`client.dll+0x0525BA60` reused inside BOTH LEFT and RIGHT eye marker regions** — FALSIFIED. The region is real, but observed accesses in the canonical replay occurred outside the eye marker brackets.
+- **Persistent helper arg2 output outside first `0x40` bytes (`+0x40..+0x1FF`)** — FALSIFIED. The first `0x40` temporary transpose/restore is separately PROVEN.
+- **Earlier auto-generated FALSIFIED verdict for the first `0x40` transpose** — INVALID/SUPERSEDED parser conclusion. Do not revive it as scientific truth.
+- **OriginX/yaw mutation runs as causal camera ownership proof** — rejected. They passed byte-integrity but their wrappers classify them as INFRASTRUCTURE only.
+- **Late `DoRenderView` eye-origin nudge as authoritative final eye translation point** — not supported by the tested result; the nudge did not survive to the final captured raster. This does NOT falsify eye translation generally, only that tested late intervention point.
+- **Assuming symmetric eye projection is sufficient for Quest 3** — falsified by measured asymmetric eye FOV.
+- **Repeating broad OpenXR discovery** — closed while the proven XR baseline remains valid.
+- **Sequential screenshots as quantitative disparity/culling evidence** — closed for measurement because temporal drift is significant; use same-frame capture.
+- **Cross-project contaminated FULL_EXPERIMENTAL failure as renderer evidence** — INVALID. Build/root contamination proves nothing about CSGOVR rendering behavior.
+
+Tool/debugger/build failures are not architectural falsifications unless the scientific prediction itself was exercised.
