@@ -64,4 +64,19 @@ Resume from existing evidence only:
 - CSimpleWorldView lineage
 
 ## Source recovery status
-The canonical evidence proves the v0.5.5 GOLDEN and its layout and now provides exact package identity. The standalone package/source has not yet been materialized into GitHub source form; older v0.5.3/v0.5.4 package identities are historical only.
+**ORIGINAL PACKAGE RECOVERED.**
+
+Library artifact:
+`CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX.zip`
+
+Materialized size: `17,726` bytes.
+Recomputed SHA256: `20D382A537CF97AA432CA0BA94DE279EB12764B4724793C217722538BCB78A6D`.
+
+Runtime-critical original source is now imported under:
+`runtime/golden_v0.5.5/src/`
+
+Byte-identical post-import verification:
+- `eye_patch.c` original SHA256 `3844B2C323F1077A901581A0A82908A174F9D1DF3F4213C5EB68980B7E7D148F`, Git blob `54a78d9ad16511b5e4d1d643db85ee9d2ad15179`
+- `injector.c` original SHA256 `E6133CEFC23460BA3AD82350803251C604AA24425474B224BEF7FEE01EA5183D`, Git blob `f46bd680f8dfbf48fb96585c51954ae79a93f99e`
+
+The original package member manifest and build reproduction contract are recorded beside the source. v0.5.3/v0.5.4 remain historical only.
