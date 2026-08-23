@@ -1,78 +1,97 @@
-# CSGOVR — STATE SYNC
+# CSGOVR — CROSS-BRANCH STATE SYNC
 
-Snapshot imported from canonical ledger: 2026-08-23
+Sync time: **2026-08-24**  
+Remote base inspected before mutation: `main@20f76e6bbd849b5aff5f25d00ae63505ef1b96c0`
 
-## AUTHORITY
-Canonical source: `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`.
-If an older chat/state conflicts with that ledger, the canonical ledger wins.
+## CROSS-BRANCH CONFLICT CHECK
+Remote-main had already prepared a narrow Quest projection child and marked projection integration as current. Its own `research/RESULT_INDEX.md`, however, did **not** contain an exact completed XR transport/headset PASS.
 
-## LATEST RESULT / CURRENT TRUTH
-- GOLDEN: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
-- Stereo: two real world streams are PROVEN; pass1 LEFT, pass2 RIGHT, pass3 monitor; full `CViewSetup` copy size is `0x198`.
-- Projection: custom projection enable at `+0x68` and matrix `+0x6C..+0xAB` are PROVEN; M00/M02/M11/M12 semantics were causally measured.
-- Quest 3 FOV/derived coefficients are PROVEN; recommended eye target 1504x1616; `viewStateFlags=0xF`; passive eye separation about 64.780 mm.
-- Camera origin is real and reaches GPU c2, but the tested late `DoRenderView` eye-origin nudge did not survive to final captured raster.
-- Culling: `client.dll+0x0525BA60` shared-inside-both-eyes cache hypothesis is FALSIFIED; `client.dll+0x003A16A6` is a concrete pre-eye reader/dataflow site with a complete recovered evidence packet; exact semantic destination remains unclassified.
+Current transport branch produced a stronger prepared transport candidate but no LIVE result yet: `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`.
+
+These are not contradictory scientific results:
+- remote projection branch says projection inputs/implementation are ready;
+- transport branch says final two-eye HLAE -> Quest submission remains unproven.
+
+**Resolved common state: XR TRANSPORT first. Projection child remains queued and is not discarded.**
+
+No other GitHub branch existed at sync time besides `main`; reconciliation uses accumulated main history plus retained CSGOVR evidence state.
+
+## LATEST RESULT
+No new completed LIVE after the canonical 2026-08-23 result family.
+
+Newest prepared candidate:
+- `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
+- artifact SHA256 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
+- PREPARED / STATIC-AUDITED / NOT YET LIVE-PROVEN
+- supersedes prepared v0.7.0 before LIVE
 
 ## PROVEN
-- Full `CViewSetup` size: `0x198`; old `0x14C` full-size claim is SUPERSEDED.
-- HLAE two-world-stream stereo baseline is real and known-good.
-- Custom projection path: bool `+0x68`, matrix `+0x6C..+0xAB`.
-- Quest 3 asymmetric FOV and projection coefficients.
-- Off-center projection fields from the controlled HLAE path: top `+0x138`, bottom `+0x13C`, left `+0x140`, right `+0x144`, `m_bOffCenter` at flags `+0x148` bit0.
-- `client.dll+0x003A16A6..+0x003A16DC` is a concrete pre-eye frustum/cache reader; call stack and bounded dataflow were recovered.
-- First `0x40` bytes of helper arg2 undergo a temporary in-place transpose and are restored.
-- CSimpleWorldView lineage is proven; final visibility ownership is still OPEN.
+- frozen target identity and client hash
+- v0.5.5 HLAE stereo GOLDEN
+- pass1 LEFT / pass2 RIGHT / pass3 monitor
+- full `CViewSetup=0x198`
+- HLAE DoRenderView `+0x22340`, copy ctor `+0x14BA0`
+- custom projection `+0x68/+0x6C..+0xAB`
+- off-center `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148.bit0`
+- Quest 3 FOV/coefficients and recommended eye size
+- D3D9 Present device-latch and CPU readback primitive
+- `GeneratePerspectiveFrustum +0x86E9C0`
+- pre-eye reader `+0x3A16A6`
+- temporary arg2 `0x40` transpose/restore
+- CSimpleWorldView lineage and lazy-hydration machinery
 
-## SUPPORTED / RETAINED CANDIDATES
-- `client.dll+0x0038D123`: origin.x writer/mutation seam candidate.
-- `CViewSetup.origin.x @ +0xB8`.
-- next true `RenderView`: `client.dll+0x003A5280`.
-- persistent/global CView candidate: `client.dll+0x052632CC`.
-- origin-global candidate: `client.dll+0x05263384`.
-- yaw mutation seam `client.dll+0x0038D15B`; global commit `+0x0038D1DE`; `g_vecRenderAngles.y` candidate `+0x05245AB8`.
-These origin/yaw control runs are **INFRASTRUCTURE**, not causal camera ownership proof.
-
-## FALSIFIED / CLOSED
-- `client.dll+0x0525BA60` as a cache reused inside BOTH LEFT and RIGHT eye marker regions.
-- Persistent helper arg2 output outside the first `0x40` bytes (`+0x40..+0x1FF`).
-- Treating originX/yaw byte-integrity mutation runs as camera/control proof.
-- Broad OpenXR rediscovery: XR input is already proven.
-- Sequential screenshot comparisons as quantitative culling/disparity proof; temporal drift requires same-frame capture.
+## FALSIFIED / STOPPED
+- `0x14C` full CViewSetup
+- `+0x0525BA60` shared-inside-eyes reuse
+- persistent arg2 output outside `0x40`
+- old post-SetUpView consumer candidates
+- sequential screenshots as quantitative same-frame oracle
+- origin/yaw infrastructure windows promoted as ownership
+- broad OpenXR rediscovery
+- Present as eye oracle
+- forced D3D9Ex first
+- HLAE preview scheduler replacement before P0 transport verdict
+- v0.7.0 prepared build, superseded by v0.7.1 before LIVE
 
 ## CURRENT FINALISTS
-1. Integration: known Quest asymmetric projection -> known-good HLAE eye path.
-2. If a visible culling blocker remains after projection integration: pre-eye reader `client.dll+0x003A16A6` + CSimpleWorldView lineage.
+1. HLAE eye pass -> CPU readback -> atomic shared pair -> x64 D3D11/OpenXR.
+2. After transport PASS: exact v0.5.5 + known Quest asymmetric custom matrix only.
+3. If culling still visibly fails: `+0x3A16A6` + CSimpleWorldView lineage.
 
 ## CONCRETE TARGETS
-- GOLDEN eye path: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
-- HLAE `CAfxStreams::DoRenderView` RVA `0x00022340`.
-- HLAE `CViewSetup_csgo` copy constructor `+0x00014BA0`, exact object size `0x198`.
-- Custom projection: `+0x68` enable, `+0x6C..+0xAB` matrix.
-- Off-center projection: `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148` bit0.
-- Pre-eye frustum/cache reader: `client.dll+0x003A16A6`.
-- GeneratePerspectiveFrustum family: `client.dll+0x0086E9C0`, lane writes starting `+0x0086EB3C`.
+Critical current ones:
+- `client.dll+0x003A5280`
+- `AfxHookSource.dll+0x00022340`
+- `AfxHookSource.dll+0x00014BA0`
+- `CViewSetup+0x68/+0x6C..+0xAB`
+- `client.dll+0x0086E9C0`
+- `client.dll+0x003A16A6`
+- `client.dll+0x003A01E4`
+- `client.dll+0x003B0870`
+- `client.dll+0x0524A2F4/+0x0524A2F8/+0x0524A2FC`, stride `0x13F0`
 
 ## CURRENT GATE
-Integrate the already-PROVEN Quest asymmetric projection into the known-good eye path and test it in-headset. Reverse further only against a concrete visible blocker that survives this integration.
+**XR TRANSPORT**
 
 ## NEXT
-1. Preserve v0.5.5 GOLDEN exactly.
-2. Feed known Quest 3 asymmetric coefficients through the proven custom/off-center projection path for LEFT/RIGHT.
-3. Validate same-frame stereo in headset, not by temporally separated screenshot comparison.
-4. If geometry/culling still fails, continue from `+0x003A16A6` / CSimpleWorldView, not from the falsified shared-cache theory.
-5. Keep origin/yaw seams as infrastructure candidates only until a new causal experiment proves authority.
+Run `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF` exactly once under the frozen lab contract and return its RESULT ZIP plus headset observation.
+
+PASS -> freeze transport -> projection integration.  
+FAIL -> adapt the exact failed transport stage only.
 
 ## METHOD ALREADY USED
-- OpenXR FOV/view acquisition and independent projection derivation.
-- HLAE source/static seam archaeology.
-- v0.5.5 HLAE multipass stereo GOLDEN.
-- Custom projection and off-center canary causal tests.
-- TTD frustum/cache replay and recovered pre-eye reader dataflow.
-- Origin/yaw infrastructure mutation windows with byte-integrity checks.
+- source/PDB/SDK/donor harvest
+- exact static mapping
+- HLAE source/binary seam mapping
+- HLAE multipass runtime proof
+- D3D9 device latch/readback/MSAA resolve
+- projection/off-center causal canaries
+- Quest OpenXR diagnostic
+- TTD frustum/cache replay and reader recovery
+- origin/yaw byte-integrity controls
+- CSimpleWorldView class/lazy-hydration mapping
+- public transport donor comparison
+- exact AdvancedFX D3D9Ex historical review
 
-## HARD CONSTRAINTS
-- Evidence labels must follow the canonical ledger: PROVEN / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED.
-- Do not upgrade infrastructure to ownership proof.
-- Do not retest `+0x0525BA60` both-eye reuse without contradictory evidence.
-- Preserve known-good stereo GOLDEN while integrating projection.
+## IMPORTANT STATE-ORDER NOTE
+The existing repository projection child, verifier, CI and Issue #1 are retained. They are **queued work**, not deleted. The only correction is gate ordering: they begin after XR TRANSPORT PASS unless a new exact result proves transport already closed.
