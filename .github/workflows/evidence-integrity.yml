@@ -1,0 +1,17 @@
+name: Evidence Integrity
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  projection-child-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify exact GOLDEN and projection child
+        run: python3 tools/verify_quest_projection_child.py
