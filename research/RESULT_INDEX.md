@@ -22,7 +22,8 @@ Class: PROVEN causal retail evidence.
 
 - CViewSetup origin -> GPU VS `c2 / CAMERA_POS`
 - WORLD_X_PAIR small translation changes pixels and draw membership
-- projection-family constants include c4/c8 families
+- projection-family constants include `c4..c7` / `c8..c11`
+- retained `c17`; bounded `c58..c60` model-candidate family
 - important counter-evidence against treating one late DUAL_ORIGIN capture as a general eye-translation falsification
 
 ## `CSGOVR_PROJECTION_TRUTH_RESULT_20260821_035411.zip`
@@ -35,7 +36,7 @@ Class: PROVEN projection/off-center semantics.
 - flag `+0x148 bit0`
 
 ## `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip`
-Class: PROVEN custom projection path / current-gate parent evidence.
+Class: PROVEN custom projection path / queued G3 parent evidence.
 
 - custom projection enable `+0x68`
 - matrix `+0x6C..+0xAB`
@@ -49,11 +50,12 @@ Verified source donor: `runtime/children/v0.6.1_projection_oracle/`.
 ## `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip`
 Class: PROVEN XR INPUT.
 
-- Oculus OpenXR 1.205.0 + Quest 3
+- Oculus OpenXR 1.205.0 + Quest 3 in recorded diagnostic
 - `xrLocateViews=XR_SUCCESS`, 2 views, flags `0xF`
 - LEFT L=-54 R=+40 U=+44 D=-55
 - RIGHT L=-40 R=+54 U=+44 D=-55
 - recommended eye size 1504x1616
+- adapter LUID `00000000:000118D1`
 - passive eye separation ~64.780 mm
 - derived matrix coefficients preserved in docs/STATE.md and docs/PROVEN.md
 
@@ -64,7 +66,7 @@ Class: PROVEN/SUPPORTED split.
 - late projection/off-center changes can survive
 - one tested late DUAL_ORIGIN intervention did not authoritatively alter its final captured raster
 
-Scope correction 2026-08-24:
+Scope correction:
 This is a negative result for that exact late intervention/capture only. It does not cancel v0.5.5 GOLDEN parallax or WORLD_X_PAIR causal evidence.
 
 ## `CSGOVR_TTD_FRUSTUM_CACHE_REPLAY_RESULT_20260822_012630.zip`
@@ -85,7 +87,7 @@ Class: PROVEN evidence packet / destination semantics PENDING.
 - call stack captured
 - bounded 24-step dataflow
 - 3 store candidates
-- resume only if G4 culling opens
+- resume only if post-G3 culling opens
 
 ## `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip`
 Class: PROVEN + FALSIFIED split.
@@ -93,6 +95,13 @@ Class: PROVEN + FALSIFIED split.
 - first helper arg2 0x40 bytes temporary in-place transpose/restore: PROVEN
 - persistent output in `+0x40..+0x1FF`: FALSIFIED
 - older parser-generated falsification of first 0x40: INVALID/SUPERSEDED
+
+## `CSGOVR_TTD_SIMPLEWORLD_LIST_OWNERSHIP_RESULT_20260823_142036.zip`
+Class: LINEAGE PROVEN / OWNERSHIP PENDING.
+
+- CSkyboxView `+BF451C/+3AEA90`: main-world role FALSIFIED
+- CShadowDepthView `+BF44F4/+3AEAE0`: main-world role FALSIFIED
+- CSimpleWorldView `+BF4434/+3B0870`: main-world lineage PROVEN/FINALIST
 
 ## `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip`
 Class: INFRASTRUCTURE.
@@ -130,7 +139,45 @@ Class: infrastructure failure / XR subfact PROVEN.
 - end-to-end application failed because x86 path wiring was broken (`g_xrFovPath` empty/uninitialized; stale control path vs PowerShell INI)
 - did not falsify OpenXR, stereo or projection math
 
-## CURRENT REPO G3 CANDIDATE — UNRUN
+## T0 FINALIST A — exact pinned HLAE GPU interop
+Class: COLD exact-source PROOF / runtime UNRESOLVED.
+
+Exact pinned AdvancedFX/HLAE source contains:
+- `AfxInterop::OnRenderView` / `OnRenderViewEnd`
+- `AfxD3d9PushRenderTargetEx` replacement RT path
+- `PrepareDrawReply_Skip/Retry/Continue`
+- `WaitForGpu -> AfxD3D_WaitForGPU()`
+
+This is the current PRIMARY transport finalist. Capability is proven; end-to-end CSGOVR runtime transport is not.
+
+## T0 FINALIST B — `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
+Class: PREPARED / STATIC-AUDITED / UNRUN / FALLBACK.
+
+Artifact SHA256:
+`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
+
+Manifest:
+`runtime/children/v0.7.1_xr_transport/README.md`
+
+Supersedes prepared v0.7.0 inside the CPU fallback lineage.
+
+Architecture:
+`completed HLAE D3D9 eye pass -> MSAA-safe CPU readback -> packed 2-slot atomic shared pair -> x64 D3D11/OpenXR`.
+
+Same-pair proof requirements:
+- same `CAfxStreams*`
+- LEFT HLAE count `0->1`
+- RIGHT `1->2`
+- same control mode
+- complete pair only READY
+- producer one-shot `DISTINCT PAIR PROOF`
+- host one-shot `PAIR PROOF PASS`
+
+Other hardening retained in manifest: Reset generation invalidation, `pack(4)` ABI, RGB-only hash, stale-control cleanup, no inherited camera freeze, exact same-pair BMP harvest.
+
+Do not promote to PROVEN until a returned LIVE RESULT closes its PASS contract. Do not run as default while FINALIST A remains unblocked.
+
+## QUEUED G3/T1 REPO CANDIDATE — UNRUN
 Files:
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
 - `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
@@ -146,7 +193,7 @@ Design:
 - pass3 untouched
 - no culling/head/weapon mutation
 
-This is CURRENT FINALIST #1.
+Queue immediately after T0 PASS.
 
 ## BRANCH-LOCAL G3 DIAGNOSTIC — UNRUN
 `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`
@@ -154,11 +201,9 @@ SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`
 Class: UNRUN diagnostic support, not baseline.
 
 Primary-useful phase: Quest matrix only.
-Secondary phases: FOV/aspect/150 controls for possible later G4 culling harvest.
-
-Cross-branch decision: do not let secondary culling phases redefine G3 PASS/FAIL.
+Secondary phases: FOV/aspect/150 controls for possible later clipping/culling harvest.
 
 ## Current engineering handoff
-**CURRENT GATE: G3 Quest asymmetric projection integration.**
+**CURRENT GATE: T0 / G2.5 XR TRANSPORT CERTIFICATION.**
 
-**NEXT:** run the repo byte-locked minimal child after integrity verification; obtain in-headset/same-frame verdict; freeze projection on PASS. Only then open transport/culling/origin work if a concrete visible blocker remains.
+**NEXT:** use exact pinned HLAE GPU interop FINALIST A with BASE geometry and coherent pairSeq. If A hits a concrete interop blocker, activate prepared v0.7.1 FINALIST B without repeating its research. T0 PASS -> freeze transport -> queued G3/T1 projection child.
