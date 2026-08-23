@@ -2,12 +2,31 @@
 
 Purpose: let a fresh branch see what has already been tried, what is accepted, and what must not be repeated.
 
-## Accepted / high-value experiments
+## CURRENT T0 transport work
+### Exact pinned HLAE `afx_interop` capability
+Class: **COLD exact-source PROOF / runtime OPEN**.
 
+At AdvancedFX commit `b97636852b8eecae09285b5a386192bb285638eb`, the frozen HLAE lineage already contains:
+- `AfxInterop::OnRenderView` / `OnRenderViewEnd`
+- replacement render target path via `AfxD3d9PushRenderTargetEx`
+- `PrepareDrawReply_Skip/Retry/Continue`
+- `WaitForGpu -> AfxD3D_WaitForGPU()`
+
+Purpose: current T0 finalist. Use BASE v0.5.5 geometry and prove same-cycle LEFT/RIGHT GPU transport to the external x64 Meta OpenXR host. Source capability is not an end-to-end runtime PASS.
+
+### `CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip`
+Class: **PREPARED/UNRUN / COLD-SUPERSEDED AS PRIMARY**.
+
+Reviewed architecture:
+`D3D9 GetRenderTargetData -> SYSTEMMEM -> CPU copy/shared memory -> x64 D3D11/OpenXR`.
+
+Do not run as the default architecture while pinned HLAE GPU interop is available. It is not runtime-falsified; keep it as fallback/reference only if the GPU shared-resource path is concretely blocked.
+
+## Accepted / high-value experiments
 ### `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip`
 Class: GOLDEN.
 
-Proved/retained:
+Retained:
 - HLAE pass1 LEFT / pass2 RIGHT / pass3 monitor
 - exact full `CViewSetup=0x198`
 - local per-eye copy strategy
@@ -22,9 +41,10 @@ Repo source:
 Class: PROVEN causal retail renderer evidence.
 
 Retained:
-- CPU `CViewSetup.origin` -> GPU VS `c2/CAMERA_POS`
+- CPU `CViewSetup.origin -> GPU VS c2/CAMERA_POS`
 - WORLD_X_PAIR small translation changes pixels/draw membership
-- projection-family shader constants around c4/c8
+- projection-family shader constants `c4..c7` / `c8..c11`
+- retained `c17`; bounded `c58..c60` model-candidate family
 
 ### `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip`
 Class: PROVEN projection semantics.
@@ -34,25 +54,25 @@ Retained:
 - `+0x6C..+0xAB` 4x4 matrix
 - `M02 +/-0.10 -> about -/+48 px X` at 960x540
 - `M12 +/-0.10 -> about +/-27 px Y`
-- M00/M11 axis scale semantics
+- M00/M11 axis-scale semantics
 - deterministic measurement with pose freeze / bots kicked
 
 Repo donor/transplant:
 - `runtime/children/v0.6.1_projection_oracle/`
 - `runtime/children/v0.6.1_projection_oracle/PROJECTION_TRANSPLANT.md`
 
-Do NOT copy test-only freeze/INI/canary/FOV-widening behavior into the final architecture.
+Do not copy test-only freeze/INI/canary/FOV-widening behavior into production.
 
 ### `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip`
 Class: PROVEN XR INPUT.
 
 Retained:
-- Quest 3 two views
-- `viewStateFlags=0xF`
+- Quest 3 two views, `viewStateFlags=0xF`
 - LEFT FOV `-54,+40,+44,-55`
 - RIGHT FOV `-40,+54,+44,-55`
-- eye size 1504x1616
-- eye separation ~64.780 mm
+- recommended 1504x1616
+- runtime adapter LUID `00000000:000118D1`
+- passive eye separation ~64.780 mm
 
 Do not repeat broad XR discovery while this baseline remains valid.
 
@@ -64,118 +84,83 @@ Retained:
 - late projection/off-center can affect output
 - one tested late DUAL_ORIGIN intervention did not authoritatively change its final capture
 
-Important: this does not cancel independent v0.5.5 parallax and WORLD_X_PAIR evidence.
+This does not cancel v0.5.5 parallax or WORLD_X_PAIR evidence.
 
 ### `CSGOVR_TTD_FRUSTUM_CACHE_REPLAY_RESULT_20260822_012630.zip`
 Class: FALSIFIED + harvest.
 
-FALSIFIED:
-- `client+0x0525BA60` reused inside both eye marker regions.
-
-Harvest:
-- `GeneratePerspectiveFrustum client+0x0086E9C0`
-- writers around `+0x0086EB3C`
-- readers `+0x003A16A6`, `+0x003A01E4`
+FALSIFIED: `client+0x0525BA60` reused inside both eye marker regions.
+Harvest: GeneratePerspectiveFrustum `+0x0086E9C0`, writers `+0x0086EB3C`, readers `+0x003A16A6`, `+0x003A01E4`.
 
 ### `CSGOVR_TTD_REPLAY_FRUSTUM_READER_OWNER_3A16A6_RECOVERED_RESULT_20260823_160154.zip`
 Class: PROVEN evidence packet / semantics PENDING.
 
-Retained:
-- target hit `client+0x003A16A6..+0x003A16DC`
+- exact reader hit `+0x3A16A6..+0x3A16DC`
 - call stack captured
 - bounded 24-step dataflow
 - 3 store candidates
 
-Do not build another broad frustum analyzer; resume here only if G4 opens.
+Do not build another broad frustum analyzer; resume here only if post-G3 culling opens.
 
 ### `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip`
-Class: PROVEN + FALSIFIED split.
+Class: PROVEN + FALSIFIED split; latest accepted forensic RESULT.
 
 - first arg2 0x40 bytes transpose/restore: PROVEN
 - persistent tail `+0x40..+0x1FF`: FALSIFIED
 
+### `CSGOVR_TTD_SIMPLEWORLD_LIST_OWNERSHIP_RESULT_20260823_142036.zip`
+Class: LINEAGE PROVEN / OWNERSHIP PENDING.
+
+- CSkyboxView `+BF451C/+3AEA90`: main-world FALSIFIED
+- CShadowDepthView `+BF44F4/+3AEAE0`: main-world FALSIFIED
+- CSimpleWorldView `+BF4434/+3B0870`: main-world lineage PROVEN/FINALIST
+
 ### `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip`
 Class: INFRASTRUCTURE.
-
-Retained anchors only:
-- `client+0x0038D123`
-- `CViewSetup.origin +0xB8`
-- next RenderView `+0x003A5280`
-- global candidates `+0x052632CC`, `+0x05263384`
-
-Not camera ownership proof.
+Retains `+0x38D123`, origin `+0xB8`, next RenderView `+0x3A5280`, globals `+0x52632CC/+0x5263384`; not ownership proof.
 
 ### `CSGOVR_CAUSAL_YAW_FINAL_POSE_CONTROL_RESULT_20260823_071600.zip`
 Class: INFRASTRUCTURE.
+Retains yaw `+0x38D15B`, `CViewSetup+0xC8`, commit `+0x38D1DE`, `+0x5245AB8`; not final-pose proof.
 
-Retained:
-- `client+0x0038D15B`
-- yaw `CViewSetup+0xC8`
-- global commit `+0x0038D1DE`
-- `+0x05245AB8` candidate
-
-Not final-pose proof.
-
-## Current prepared G3 experiment
+## Queued G3/T1 projection work
 Repo canonical candidate:
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
 - `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
-- `experiments/NEXT_EXPERIMENT.md`
 - verifier `tools/verify_quest_projection_child.py`
 - CI `.github/workflows/evidence-integrity.yml`
 
-This is the preferred current finalist because it is byte-locked to exact v0.5.5 and adds only the Quest asymmetric custom matrix.
+Status: PREPARED/UNRUN runtime. Queue immediately after T0 PASS.
 
-## Branch-local diagnostic package
+Branch diagnostic package:
 `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`
 SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`
 
-Contained:
-- `00_RUN_EVERYTHING.bat`
-- `ONE_CLICK.ps1`
-- `src/eye_patch.c`
-- `src/injector.c`
-- `analysis/analyze_result.py`
-- `analysis/static_verify.py`
-- evidence/prediction/preflight/path-contract files
+Status: UNRUN / NOT BASELINE.
+- Quest matrix-only phase = primary-useful G3 measurement
+- FOV110 + old aspect / projection-derived aspect / FOV150 = secondary clipping/culling diagnostics only
+- aspect `0.9254939479` is not a production fix
 
-Status: UNRUN, not baseline, not a replacement for the repo minimal child.
-
-Its phases were designed as:
-1. BASE
-2. Quest matrix only — primary-useful G3 measurement
-3. Quest matrix + FOV110 + old aspect — secondary
-4. Quest matrix + FOV110 + projection-derived aspect — secondary
-5. old FOV150 control — secondary
-
-Cross-branch sync decision: only phase 2 belongs to G3 PRIMARY. The later scalar FOV/aspect phases are G4/culling harvest and must not be mixed into G3 verdict.
-
-## Failed / invalid approaches to remember
+## Failed / invalid / stopped approaches
 - full-size `0x14C`
-- `mirv_cam attachCommands` as current-stream CView mutation; too late for already-created stream view
+- raw Khronos column-major memcpy into Source VMatrix
+- `mirv_cam attachCommands` as current-stream CView mutation when view already exists
 - v0.6.5 broken XRFOV path wiring
-- stale PID/gameplay countdown orchestration runs
+- stale PID/gameplay countdown orchestration
 - cross-project source-root contamination
-- repeated projection sign/transpose roulette after v0.6.1
-- shared `+0x0525BA60` both-eye cache theory
+- repeated projection sign/transpose roulette after causal closure
+- `+0x0525BA60` both-eye cache theory
 - persistent arg2 tail theory
+- post-SetUpView static candidates `+38E5D7/+38EC08/+3A0381`
 - treating origin/yaw byte integrity as ownership
 - old broad origin-point batch without a post-G3 visible blocker
+- CPU-readback transport as primary unless GPU interop is concretely blocked
 
-## Useful source/donor architecture already consumed
-- AdvancedFX/HLAE exact seam
-- Valve Source SDK VR architecture
-- L4D2VR / Portal2VR local per-eye CViewSetup copies
-- d3d9-vr projection path
-- OpenXR SDK/reference timing and FOV conventions
-
-Donor addresses/vtables/ABI are never retail proof.
-
-## Tooling
-- `tools/verify_quest_projection_child.py` — byte/source integrity for GOLDEN -> Quest child
-- `.github/workflows/evidence-integrity.yml` — runs verifier on push/PR
-- shared local root: `C:\GOG Games\VR Research Tools`
-- previously used targeted tools: Ghidra, TTD/WinDbg, x32dbg/x64dbg, D3D9 hooks/capture, MinHook, OpenXR diagnostics
+## Tooling / paths
+- `tools/verify_quest_projection_child.py` — GOLDEN -> projection-child source integrity
+- `.github/workflows/evidence-integrity.yml` — verifier on push/PR
+- shared local root `C:\GOG Games\VR Research Tools`
+- targeted tools already used: Ghidra, TTD/WinDbg, x32dbg/x64dbg, D3D9 hooks/capture, MinHook, OpenXR diagnostics
 
 ## Do not repeat rule
-Before any new LIVE/TTD/build, search `research/RESULT_INDEX.md`, `docs/PROVEN.md`, `docs/FALSIFIED.md`, and this file. If the question is already closed or another experiment has a concrete target, use that target instead of building a new broad analyzer.
+Before any new LIVE/TTD/build, read `research/RESULT_INDEX.md`, `research/BRANCH_SYNC_20260824.md`, `docs/PROVEN.md`, `docs/FALSIFIED.md`, and this file. If another result already closed the question or yielded a concrete target, use it instead of building a new broad analyzer.

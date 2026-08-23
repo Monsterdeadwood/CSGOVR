@@ -1,61 +1,66 @@
 # CSGOVR — GATES
 
+Snapshot: 2026-08-24 final cross-branch reconciliation.
+
 ## G0 — OpenXR / Quest input
-**PASS.** Two valid Quest 3 views, asymmetric FOV and projection coefficients are established.
+**PASS.** Quest 3 two views, asymmetric FOV, projection coefficients and D3D11 adapter requirements are established.
 
 ## G1 — HLAE stereo GOLDEN
-**PASS.** `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX` provides two real world streams: pass1 LEFT, pass2 RIGHT, pass3 monitor; full `CViewSetup=0x198`.
-
-Original v0.5.5 image re-analysis also supports real depth-dependent horizontal stereo disparity. Do not reopen the old broad eye-origin batch without a new visible blocker.
+**PASS.** `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`: pass1 LEFT, pass2 RIGHT, pass3 monitor, full `CViewSetup=0x198`. Original GOLDEN BMPs support real depth-dependent horizontal stereo parallax.
 
 ## G2 — Projection-control semantics
-**PASS.** Custom projection bool `+0x68`, matrix `+0x6C..+0xAB`, off-center fields `+0x138/+0x13C/+0x140/+0x144` and flag `+0x148 bit0` are established. M00/M02/M11/M12 semantics were causally measured with deterministic frozen captures.
+**PASS.** Custom projection `+0x68/+0x6C..+0xAB`, off-center tail and M00/M02/M11/M12 causal semantics are established.
 
-## G3 — Quest asymmetric projection integration
+## T0 / G2.5 — GPU XR transport certification
 **CURRENT GATE — OPEN.**
 
-Primary candidate already exists in the repo:
+Inserted by late branch reconciliation because final two-eye CSGOVR OpenXR transport/submission is still unproven and can be isolated without changing geometry.
+
+Preferred path is exact pinned HLAE GPU interop, not CPU readback:
+- replacement eye render targets through HLAE interop
+- pass1 LEFT + pass2 RIGHT from same HLAE cycle -> one `pairSeq`
+- GPU completion before publish
+- external x64 D3D11 device on OpenXR adapter LUID `00000000:000118D1`
+- acquire/wait/copy/release both eye swapchains
+- one `xrEndFrame` per coherent pair
+
+PASS requires no mixed L/R sequence, no black/freeze, and no v0.5.5 geometry/monitor regression.
+
+## G3 / T1 — Quest asymmetric projection integration
+**QUEUED AFTER T0 PASS; NOT FALSIFIED.**
+
+Repository candidate already exists:
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
-- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
-- `tools/verify_quest_projection_child.py`
-- Evidence Integrity CI
+- `QUEST_PROJECTION_MINIMAL.patch`
+- verifier / CI
 
-Required mutation:
-- exact v0.5.5 parent
-- preserve LEFT/RIGHT origin behavior
-- apply known Quest LEFT/RIGHT custom matrix only to the corresponding local eye copy
-- pass3 monitor untouched
-- no culling/origin/head/weapon mutation in the same PRIMARY
+Apply exact P00 to correct local eye copy, preserve engine zNear/zFar, use Source-native scalar FOV `110°` for conservative culling envelope, preserve v0.5.5 origin behavior and pass3 monitor.
 
-PASS:
-- correct eye receives correct Quest asymmetric matrix
-- two-world-stream GOLDEN remains intact
-- monitor pass remains intact
-- no new eye corruption
-- headset/same-frame verdict recorded
-
-No accepted RESULT has yet closed G3.
+G3 diagnostic batch v1.0.1 is UNRUN; matrix-only phase is primary-useful. Aspect `0.9254939479` and FOV150 are secondary clipping diagnostics only.
 
 ## G4 — Concrete culling / visibility blocker, if any
-**CLOSED UNTIL G3 VERDICT.** Opens only if a visible culling blocker survives G3.
+**CLOSED UNTIL G3 VERDICT.**
 
 Retained targets:
 - `client+0x003A16A6`
 - `client+0x003A01E4`
-- `GeneratePerspectiveFrustum client+0x0086E9C0`
-- writers around `+0x0086EB3C`
+- `client+0x0086E9C0`
+- writers `+0x0086EB3C`
 - CSimpleWorldView vtable `+0x00BF4434`, Draw `+0x003B0870`, fields `+0x168/+0x16C/+0x170`
 
-Do not reopen `client+0x0525BA60` both-eye reuse; FALSIFIED.
+Do not reopen `client+0x0525BA60` both-eye reuse.
 
-## G5 — Head pose / authoritative final eye integration
-Only open if a concrete visible pose/origin blocker remains after G3/G4. The old late DUAL_ORIGIN negative result applies only to that exact intervention point; the GOLDEN itself has independent parallax evidence.
+## G5 — Authoritative eye origin / parallax
+Only if T1 visibly lacks correct depth/parallax. Late DUAL_ORIGIN negative result applies only to that exact intervention point; GOLDEN + WORLD_X_PAIR provide independent positive origin/parallax evidence.
 
-## G6 — Final OpenXR transport / submission certification
-Current accepted CSGOVR result set does **not** prove final two-eye swapchain submission to Quest. If G3 child renders correctly to HLAE captures but headset transport is absent/black, promote transport itself to the concrete blocker and solve swapchain/copy/submission without reopening projection math.
+## G6 — Quantitative capture truth
+Require same-cycle L/R and repeated same-eye stability before pixel-difference culling/disparity claims.
 
-## G7 — Weapon / controller separation
-Proceed only after stereo/projection/culling/head/transport are regression-green.
+## G7 — Head pose
+Only after transport/projection/origin gates are coherent.
 
-## G8 — HUD / comfort / regression / release candidate
-Last-stage work only.
+## G8 — Weapon / controller / HUD
+After world camera is regression-green. Keep world and weapon ownership separate.
+
+## G9 — Regression / release
+Frozen hashes, `-insecure`, monitor pass, coherent pairSeq, XR copy/submit stability, no eye-specific corruption, menu/gameplay transitions, reversible one-click restore.

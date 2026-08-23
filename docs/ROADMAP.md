@@ -1,58 +1,77 @@
 # CSGOVR — ROADMAP
 
-The project starts from an existing stereo GOLDEN and proven projection semantics. Do not restart camera/OpenXR discovery from zero.
+Snapshot: 2026-08-24 final cross-branch reconciliation.
 
-## 1. Quest asymmetric projection integration — CURRENT
-Baseline:
-`CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
+## 1. T0 / G2.5 GPU XR transport certification — CURRENT
+Protected baseline: exact v0.5.5 GOLDEN, BASE projection/origin/camera.
 
-Already known:
-- LEFT/RIGHT real world streams
-- full `CViewSetup` size `0x198`
-- custom projection bool `+0x68`
-- custom projection matrix `+0x6C..+0xAB`
-- off-center fields `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148 bit0`
-- Quest 3 asymmetric FOV/coefficients
+Goal:
+- use exact pinned HLAE `afx_interop` replacement eye render targets;
+- pass1 LEFT + pass2 RIGHT from one HLAE cycle share one `pairSeq`;
+- wait for GPU completion before publication;
+- external x64 Meta OpenXR host creates D3D11 on runtime adapter LUID `00000000:000118D1`;
+- import/open GPU eye resources, acquire/wait/copy/release both XR swapchains, one `xrEndFrame` per coherent pair;
+- no CPU readback production path unless GPU interop is concretely blocked.
 
-Integration gate:
-1. feed exact LEFT/RIGHT Quest projection through the known-good eye path;
-2. keep monitor pass intact;
-3. validate in headset and same-frame;
-4. record explicit regression state;
-5. freeze if green.
+Success freezes transport and moves immediately to G3/T1.
 
-## 2. Concrete culling blocker, only if still visible
-Do not reverse culling preemptively after projection integration.
+## 2. G3 / T1 Quest asymmetric projection
+Queued, not falsified.
 
-If geometry still disappears incorrectly, continue from existing evidence:
-- `client.dll+0x003A16A6` concrete pre-eye reader
-- `client.dll+0x003A01E4` second reader
-- `client.dll+0x0086E9C0` GeneratePerspectiveFrustum
-- lane writes starting `client.dll+0x0086EB3C`
-- CSimpleWorldView lineage
+Use repository byte-locked projection child and exact retained P00:
+- custom projection `+0x68/+0x6C`
+- correct LEFT/RIGHT M02 sign
+- engine zNear/zFar retained
+- Source-native scalar FOV `110°`
+- preserve v0.5.5 eye-origin behavior and pass3 monitor
 
-Do not reopen the FALSIFIED `client.dll+0x0525BA60` both-eye cache-reuse hypothesis.
+Do not add head pose, new origin ownership or culling surgery in the same first T1 build.
 
-## 3. Authoritative eye translation / camera, only if visible blocker remains
-The tested late HLAE `DoRenderView` origin nudge did not move final captured raster.
+## 3. Conditional clipping/culling classification
+Only if exact P00 is applied and peripheral geometry still clips:
+- aspect `0.9254939479` and FOV150 remain diagnostic controls only
+- if a real culling ownership blocker survives, continue from existing concrete evidence:
+  - `client+0x003A16A6`
+  - `client+0x003A01E4`
+  - `client+0x0086E9C0`
+  - CSimpleWorldView `+0x00BF4434/+0x003B0870`
 
-Retained seams `+0x0038D123`, `origin.x +0xB8`, `+0x052632CC` are INFRASTRUCTURE/candidates, not camera ownership proof. Reopen only if actual headset behavior requires it.
+Do not reopen `client+0x0525BA60` both-eye reuse.
 
-## 4. Weapon / controller separation
-After projection/culling/camera are regression-green:
-- preserve world camera
+## 4. True eye origin / parallax, only if visible after T1
+Late DoRenderView origin shift is already a failed authority point. GOLDEN + WORLD_X_PAIR independently prove origin/parallax behavior exists. If T1 still lacks correct depth, target the concrete earlier lifetime/overwrite boundary rather than restarting broad ownership search.
+
+## 5. Quantitative capture truth
+Before pixel-difference conclusions:
+- same-cycle L/R
+- repeated same-eye stability
+- deterministic/frozen scene
+
+Sequential captures are not a general quantitative oracle because prior temporal drift can dominate.
+
+## 6. Head pose
+Integrate HMD rotation/translation only after transport + projection + eye-origin behavior are coherent.
+
+## 7. Weapon/controller separation
+After world camera is stable:
+- preserve world view
 - independently drive viewmodel/controller pose
-- prove visible root ownership before ballistics
+- prove visible root ownership before ballistics/muzzle policy
 
-## 5. Regression / packaging
-- same-frame L/R
-- monitor pass intact
-- Quest asymmetric projection matches numerical oracle
+## 8. HUD / comfort
+Treat HUD and viewmodel near/far separately from world projection. Native Valve `vr_projection_znear_multiplier=0.3` is a later comfort/reference policy, not the first projection proof.
+
+## 9. Regression / release
+- frozen client/HLAE hashes
+- `-insecure`
+- pass3 monitor intact
+- coherent pairSeq, mixedPairCount=0
+- XR acquire/wait/copy/release stable
+- no black/freeze
+- exact Quest P00 retained
 - no eye-specific geometry loss
-- HUD/overlays/post stable
 - menu/gameplay transitions stable
-- exact frozen binary checks
-- one-click restore
+- reversible one-click restore
 
-## Measurement rule
-Sequential screenshots are not acceptable for quantitative disparity/culling decisions because temporal drift is material. Prefer same-frame capture or headset acceptance against deterministic controls.
+## Decision rule
+After each RESULT: KEEP if distance to a playable VR build shrinks; ADAPT if stronger evidence gives a shorter route; STOP a line when falsified or when another branch closes it.

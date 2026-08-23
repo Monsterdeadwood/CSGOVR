@@ -1,72 +1,73 @@
 # CSGOVR — NEXT
 
+Snapshot: 2026-08-24 final cross-branch reconciliation.
+
 ## CURRENT GATE
-**G3 — Quest asymmetric projection integration.**
+**T0 / G2.5 — GPU XR TRANSPORT CERTIFICATION.**
+
+The previous remote G3 projection gate remains queued and valid. It was not falsified. T0 is inserted first because no accepted result yet proves final coherent two-eye CSGOVR -> Meta OpenXR submission and the exact pinned HLAE already contains a cleaner GPU interop route that can be tested with BASE geometry.
 
 ## NEXT ONE STEP
-Run the already-committed byte-locked minimal Quest projection child and obtain a runtime/headset verdict.
+Build/run a **transport-only** child from exact v0.5.5:
+- preserve pass1 LEFT / pass2 RIGHT / pass3 monitor
+- preserve BASE projection, origin and camera
+- use pinned HLAE `afx_interop` replacement eye targets
+- one HLAE cycle -> one `pairSeq`
+- GPU-complete before pair publication
+- external x64 host uses D3D11 on OpenXR adapter LUID `00000000:000118D1`
+- acquire/wait/copy/release both XR eye swapchains
+- one `xrEndFrame` per coherent pair
+- mixedPairCount must remain 0
 
-Primary files:
+## PREFLIGHT — exactly 5 lines
+**MISSING FACT:** whether exact v0.5.5 pass1/pass2 can reach Meta OpenXR as one coherent GPU-shared pair without CPU readback.
+**WHY NOT COLD:** exact HLAE source proves replacement-target and GPU-wait primitives exist, but only runtime proves resource sharing, synchronization, pair sequencing and XR submit.
+**PASS:** one pairSeq contains same-cycle LEFT/RIGHT, GPU completion precedes publish, both XR copies/submits succeed, headset is non-black/coherent, and v0.5.5 geometry plus monitor remain unchanged.
+**FAIL:** shared-resource/import failure, L/R sequence mixing, GPU synchronization failure, XR acquire/wait/copy/release failure, black/freeze, or GOLDEN regression.
+**BASELINE MUST HOLD:** frozen client hash, `-insecure`, HLAE 2.191.1/b976, full `0x198` eye copies, pass1 LEFT/pass2 RIGHT/pass3 monitor, BASE projection/origin/camera, reversible restore.
+
+## Mandatory T0 result fields
+- exact game/HLAE/source hashes
+- interop active state
+- eye RT size/format/shared-handle state
+- pairSeq timeline and pass->eye mapping
+- GPU wait/completion status
+- x64 D3D11 adapter LUID / feature level
+- OpenSharedResource/import result
+- per-eye acquire/wait/copy/release counts/errors
+- xrEndFrame count
+- mixedPairCount / droppedPairCount
+- pass3 monitor regression status
+- headset verdict
+- same-cycle L/R capture/reference if available
+- restore/baseline recovery result
+
+## Explicit exclusions in T0
+- no Quest P00 mutation
+- no new eye origin
+- no HMD rotation/translation
+- no culling mutation
+- no viewmodel/weapon/HUD mutation
+- no FOV/aspect diagnostic phases
+- do not use CPU `GetRenderTargetData -> SYSTEMMEM -> memcpy` as the default transport architecture
+
+## After T0 PASS
+Freeze transport, then immediately run **G3/T1**:
+- repository byte-locked minimal Quest projection child
+- exact P00 LEFT/RIGHT matrix
+- engine zNear/zFar retained
+- Source-native scalar FOV `110°`
+- same coherent pair machinery
+
+## Conditional only after G3
+If exact P00 is applied and peripheral clipping remains visible:
+- aspect `0.9254939479` and/or FOV150 may be used as diagnostic controls
+- if a real culling blocker remains, continue from `+0x3A16A6` / CSimpleWorldView lineage
+- do not reopen broad archaeology
+
+## Prepared G3 assets
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
 - `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
-- `experiments/NEXT_EXPERIMENT.md`
 - `tools/verify_quest_projection_child.py`
-
-## Before LIVE
-Run the integrity verifier / CI-equivalent checks and preserve:
-- frozen `client.dll` SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
-- exact HLAE 2.191.1 / `AfxHookSource.dll` lineage
-- exact `-insecure`
-- v0.5.5 pass scheduling
-- full local `0x198` eye copies
-- pass3 monitor untouched
-
-## PRIMARY mutation
-Only the already-proven Quest custom projection matrix is added to the existing local LEFT/RIGHT eye copies.
-
-Do not add in the same PRIMARY:
-- new origin write point
-- culling mutation
-- head pose
-- weapon/hands
-- HUD
-- new OpenXR FOV discovery
-
-## PASS
-- pass1 gets LEFT Quest matrix (`M02<0`)
-- pass2 gets RIGHT Quest matrix (`M02>0`)
-- M00/M11/M12 match the proven Quest coefficients
-- LEFT/RIGHT world streams remain healthy
-- pass3 monitor remains healthy
-- headset/same-frame visual verdict is coherent enough to close projection integration
-- regression: NONE or only explicitly expected projection change
-
-## FAIL handling
-If matrix logging/write timing fails, fix only that integration defect.
-
-If matrix application is proven but headset is black/absent, promote **XR transport/submission** as the concrete blocker; do not reopen projection math.
-
-If matrix application is proven and a peripheral geometry/culling defect remains, open G4 using existing targets:
-- `client+0x003A16A6`
-- `client+0x003A01E4`
-- `client+0x0086E9C0`
-- CSimpleWorldView lineage
-
-If eye-origin/parallax is visibly wrong after G3, reconcile against the existing v0.5.5 parallax evidence before any new origin-owner reverse.
-
-## Prepared diagnostic batch
-`CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`
-SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`
-
-Status: **UNRUN / NOT BASELINE**.
-Use matrix-only as the PRIMARY-useful phase. Its FOV/aspect/150 phases are secondary harvest for a future G4 culling question and must not be allowed to redefine G3 PASS/FAIL.
-
-## After RESULT
-Record exactly:
-- PRIMARY FACT: RESOLVED / NOT RESOLVED
-- REGRESSION: NONE / EXPECTED / UNEXPECTED
-- KEEP: exact source/build/matrix/path retained
-- headset-visible blocker, if any
-- NEXT ONE STEP
-
-Then sync GitHub before opening a new expensive branch.
+- `.github/workflows/evidence-integrity.yml`
+- branch-local `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip` SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`, UNRUN/NOT BASELINE

@@ -1,60 +1,58 @@
 # CSGOVR — NEXT EXPERIMENT
 
+Snapshot: 2026-08-24 final cross-branch reconciliation.
+
 ## Decision
-**KEEP GOLDEN, integrate known projection.** Do not reopen broad OpenXR/camera/culling archaeology before this integration is tested.
+**ADAPT SCHEDULING: T0 GPU TRANSPORT FIRST, G3 PROJECTION QUEUED.**
+
+The byte-locked Quest projection child remains valid and must not be discarded. T0 is inserted first only to isolate the still-unproven final XR transport from the projection mutation.
 
 ## Primary question
-Can the proven Quest 3 asymmetric LEFT/RIGHT projection be applied through the known-good v0.5.5 HLAE projection path while preserving the existing two-world-stream stereo GOLDEN and monitor pass?
+Can exact v0.5.5 pass1 LEFT and pass2 RIGHT be delivered as one coherent GPU-shared pair to a separate x64 Meta OpenXR host while projection, origin, camera and pass3 monitor remain BASE?
 
 ## PREFLIGHT — exactly 5 lines
-**MISSING FACT:** whether the already-proven Quest asymmetric projection coefficients, when fed through the proven `CViewSetup` custom/off-center path, produce correct in-headset eye geometry without destabilizing the v0.5.5 stereo schedule.
-**WHY NOT COLD:** field layout, eye FOV and projection semantics are already proven COLD/causally; only headset/same-frame LIVE can establish visual correctness and regression of the integrated eye path.
-**PASS:** LEFT/RIGHT retain real distinct world streams, Quest asymmetry is applied to the correct eye, monitor pass remains intact, geometry/depth is comfortable and coherent in-headset, and no new eye-specific corruption appears.
-**FAIL:** symmetric/incorrect frustum remains, eye asymmetry is swapped/wrong, one stream regresses, monitor pass breaks, final raster ignores the matrix/off-center change, or a new visible culling/camera defect appears.
-**BASELINE MUST HOLD:** `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`, full `CViewSetup=0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, custom projection path `+0x68/+0x6C..+0xAB`, exact restore of the untouched baseline path.
-
-## Inputs already proven
-Quest FOV:
-- LEFT L=-54°, R=+40°, U=+44°, D=-55°
-- RIGHT L=-40°, R=+54°, U=+44°, D=-55°
-
-Known projection controls:
-- custom projection enable `+0x68`
-- matrix `+0x6C..+0xAB`
-- off-center top `+0x138`
-- bottom `+0x13C`
-- left `+0x140`
-- right `+0x144`
-- `m_bOffCenter` flags `+0x148 bit0`
+**MISSING FACT:** whether exact v0.5.5 LEFT/RIGHT can reach Quest as one same-cycle GPU pair with no CPU readback or eye-sequence mixing.
+**WHY NOT COLD:** pinned HLAE source proves replacement-target and GPU-wait primitives exist, but runtime is required to prove shared-resource compatibility, synchronization, pair ordering and XR submission.
+**PASS:** one pairSeq contains pass1 LEFT + pass2 RIGHT from the same HLAE cycle, GPU completion precedes publish, both XR eye copies and one xrEndFrame succeed, headset is non-black/coherent, and v0.5.5 geometry/monitor behavior is unchanged.
+**FAIL:** D3D9/D3D11 shared-resource failure, mixed L/R sequence, insufficient GPU synchronization, XR acquire/wait/copy/release failure, black/freeze, or GOLDEN regression.
+**BASELINE MUST HOLD:** frozen client SHA256, `-insecure`, HLAE 2.191.1/b976, full CViewSetup `0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, BASE projection/origin/camera, reversible restore.
 
 ## Mutation scope
-One integration only:
-1. preserve v0.5.5 pass scheduling and full-object copying;
-2. assign the proven LEFT Quest projection only to LEFT pass;
-3. assign the proven RIGHT Quest projection only to RIGHT pass;
-4. preserve pass3 monitor behavior;
-5. do not add origin/yaw/culling mutations in the same build;
-6. restore stock/Golden projection state when experiment is disabled.
+1. Parent from exact v0.5.5.
+2. Use pinned HLAE interop replacement eye targets.
+3. Associate pass1/pass2 with one `pairSeq` per HLAE cycle.
+4. Wait for GPU completion before publishing the pair.
+5. x64 host uses OpenXR-required D3D11 adapter LUID `00000000:000118D1`.
+6. Import eye GPU resource(s), acquire/wait/copy/release both XR swapchains, one `xrEndFrame` per coherent pair.
+7. Do not apply Quest P00/new origin/HMD pose/culling/viewmodel/HUD in T0.
 
-## Same-run evidence
+## Result contract
 Collect:
-- eye/pass id and applied projection coefficients
-- matrix/off-center path selected per pass
-- pass counts LEFT/RIGHT/monitor
-- same-frame screenshot/capture if available
-- headset user verdict for depth/fusion/peripheral geometry
-- baseline restore confirmation
+- exact client/HLAE/source hashes
+- D3D9 eye RT size/format/shared-resource status
+- x64 resource import status
+- pass id / eye / pairSeq timeline
+- GPU wait/completion status
+- OpenXR adapter/feature level
+- per-eye acquire/wait/copy/release counters/errors
+- xrEndFrame count
+- `mixedPairCount` and `droppedPairCount`
+- pass3 monitor count/regression
+- headset verdict
+- same-cycle L/R capture/reference if available
+- restore/baseline recovery result
 
-Sequential screenshots taken at different times are not quantitative disparity/culling proof. Prefer same-frame capture or headset comparison under deterministic controls.
+## Do not use as primary
+`CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip` is PREPARED/UNRUN and uses CPU `GetRenderTargetData -> SYSTEMMEM -> memcpy/shared memory`. Keep it only as fallback/reference if pinned HLAE GPU interop is concretely blocked.
 
-## Prediction
-If the remaining projection mismatch is simply that known Quest asymmetry has not been installed into the already-proven eye path, this mutation should improve the headset geometry while leaving v0.5.5 stereo scheduling untouched.
+## After T0 PASS
+Freeze transport and execute queued G3/T1 using:
+- `experiments/quest_projection_child/eye_patch_quest_projection.c`
+- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
+- `tools/verify_quest_projection_child.py`
+- exact Quest P00 matrix + scalar FOV110, engine zNear/zFar retained
 
-## Conditional next step
-Only if a concrete geometry/culling blocker remains after this PASS/FAIL:
-- use `client.dll+0x003A16A6` / `+0x003A01E4` / CSimpleWorldView lineage;
-- do not reopen `client.dll+0x0525BA60` both-eye cache reuse;
-- do not promote `+0x0038D123/+0x052632CC` infrastructure seams to camera ownership without new causal proof.
+The branch-local `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip` (SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`) remains UNRUN/NOT BASELINE. Matrix-only is primary-useful; aspect/FOV phases are secondary diagnostics.
 
-## After PASS
-Freeze projection integration. Define the next gate from the actual remaining headset-visible blocker, not from historical speculation.
+## FAIL handling
+Fix only the concrete transport defect. Do not widen into projection/camera/culling archaeology.
