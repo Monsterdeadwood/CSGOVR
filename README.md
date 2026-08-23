@@ -5,63 +5,79 @@ Native VR research for **frozen legacy CS:GO x86** using HLAE/OpenXR and exact r
 ## Current status
 **ACTIVE — T0 / G2.5 GPU XR TRANSPORT CERTIFICATION.**
 
-Protected GOLDEN:
-`CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
+Protected GOLDEN: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
 
-The previous G3 Quest projection gate remains valid and is **queued immediately after T0**. It is not falsified or discarded.
+G3 Quest projection remains valid and is queued immediately after T0 PASS.
 
 ## CURRENT GATE
-Prove that exact v0.5.5 pass1 LEFT + pass2 RIGHT can be transported as **one coherent GPU pair** through the pinned HLAE GPU interop path to a separate x64 Meta OpenXR host, while BASE projection/origin/camera and pass3 monitor remain unchanged.
+Prove exact v0.5.5 pass1 LEFT + pass2 RIGHT can reach a separate x64 Meta OpenXR host as **one coherent GPU pair**, while BASE projection/origin/camera and pass3 monitor remain unchanged.
 
-Why T0 was inserted before G3:
-- no accepted CSGOVR result yet proves final two-eye OpenXR transport/submission;
-- exact pinned AdvancedFX `b97636852b8eecae09285b5a386192bb285638eb` already contains GPU replacement-target interop and GPU-wait primitives;
-- the prepared CPU-readback transport package is therefore not the preferred first architecture;
-- transport and projection should be serialized into separate mutations.
+## T0 FINALISTS
+**A / PRIMARY:** pinned HLAE GPU shared-target path -> GPU completion -> x64 D3D11/Meta OpenXR.
+
+**A' / implementation fallback:** minimal transplant of the same source-proven shared-target + EVENT-fence primitives into the v0.5.5 pass discriminator if direct AfxInterop protocol mode is incompatible.
+
+**B / PREPARED FALLBACK:** `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`, SHA256 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`, STATIC-AUDITED / UNRUN. Activate only on a concrete A blocker or bounded compatibility control. Manifest: `runtime/children/v0.7.1_xr_transport/README.md`.
+
+## CRITICAL INTEROP GUARD
+Exact AdvancedFX `b97636852b8eecae09285b5a386192bb285638eb` proves D3D9 replacement-target and GPU-wait primitives exist. It also proves protocol generations differ:
+- older `PrepareDrawReply_*` path receives replacement shared handles;
+- server major **v6/v7 bypasses that older exchange** and uses newer `HandleDrawingMessage` flow.
+
+Therefore do not assume a modern v6/v7 companion automatically exercises the old shared-target handshake. T0 must log/use an actually compatible protocol mode or use minimal transplant A'.
+
+Full provenance: `research/HLAE_INTEROP_FINDINGS.md`.
 
 ## NEXT
-1. Keep exact v0.5.5 eye generation and BASE geometry.
-2. Use pinned HLAE `afx_interop` replacement eye targets.
-3. Bind pass1 LEFT + pass2 RIGHT from one HLAE cycle to one `pairSeq`.
-4. Wait for GPU completion before publishing the pair.
-5. In external x64 host, use D3D11 on OpenXR-required adapter LUID `00000000:000118D1`, acquire/wait/copy/release both XR swapchains, and issue one `xrEndFrame` for the coherent pair.
-6. On T0 PASS, freeze transport and run the already-prepared G3/T1 Quest P00 projection child with Source-native scalar FOV `110°`.
+1. Keep exact v0.5.5 BASE geometry and pass3 monitor.
+2. Select/log compatible HLAE GPU-sharing protocol path or minimal transplant.
+3. Bind same-cycle pass1 LEFT + pass2 RIGHT to one `pairSeq`.
+4. GPU-complete before publishing each pair.
+5. x64 D3D11 host on OpenXR adapter LUID `00000000:000118D1`: import eye resource(s), acquire/wait/copy/release both swapchains, one `xrEndFrame` per coherent pair.
+6. Require `mixedPairCount=0`.
+7. If A is concretely blocked, activate prepared v0.7.1 B without rediscovery.
+8. T0 PASS -> freeze transport -> G3/T1 exact Quest P00 + Source-native scalar FOV `110°`.
 
 ## LATEST RESULT / branch status
-- Latest accepted projection result: `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip` — custom matrix semantics PROVEN.
-- XR input: `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip` — Quest FOV/two valid views PROVEN.
-- Latest forensic result overall: `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip` — first 0x40-byte transpose/restore PROVEN; persistent output beyond 0x40 FALSIFIED.
-- No accepted end-to-end CSGOVR GPU/XR transport RESULT yet.
-- `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`, SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`, is PREPARED/UNRUN and not a baseline.
-- `CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip` is PREPARED/UNRUN; its CPU-readback architecture is COLD-SUPERSEDED AS PRIMARY by pinned HLAE GPU interop, not runtime-falsified.
+- latest accepted forensic result `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip`
+- accepted projection parent `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip`
+- accepted XR input `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip`
+- no accepted end-to-end CSGOVR GPU/XR transport RESULT yet
+- v0.7.1 CPU fallback is prepared, not a RESULT; v0.7.0 is superseded before LIVE
+- queued G3 assets remain under `experiments/quest_projection_child/`
 
 ## Core proven facts
-- frozen legacy CS:GO x86 AppID `4465480`, BuildID `22100934`
+- AppID `4465480`, BuildID `22100934`, frozen x86 client
 - `client.dll` SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
 - `-insecure` mandatory
-- HLAE 2.191.1; exact AfxHookSource lineage pinned to AdvancedFX `b976368...`
+- HLAE 2.191.1 / AdvancedFX `b976368...`
 - pass1 LEFT, pass2 RIGHT, pass3 monitor
 - full `CViewSetup=0x198`
 - custom projection `+0x68`, matrix `+0x6C..+0xAB`
-- Quest asymmetric P00 coefficients and 1504x1616 recommended eye size
+- Quest P00 coefficients / 1504x1616 recommended eye size
 - CPU `CViewSetup.origin -> VS c2/CAMERA_POS`
-- v0.5.5 BMPs contain real depth-dependent L/R parallax
-- concrete pre-eye reader `client+0x003A16A6`
-- CSimpleWorldView main-world lineage
+- GOLDEN BMPs contain depth-dependent L/R parallax
+- pre-eye reader `client+0x003A16A6`, CSimpleWorldView lineage
+- native SourceVR OpenVR conversion uses `39.3700787 inches/meter`; Quest half-IPD ≈ `1.27520 Source units`
+- v0.6.1 deterministic capture achieved within-phase MAE about `0.0000..0.0026 / 255`
 
-## Important conflict kept explicit
-One tested **late** DUAL_ORIGIN intervention did not authoritatively change its final capture. Independently, the actual v0.5.5 GOLDEN shows depth-dependent stereo parallax and WORLD_X_PAIR proves RenderView-origin changes can reach GPU/raster. Therefore only that exact late intervention point is negative; eye translation in general is not falsified.
+## Important evidence conflict
+One tested late DUAL_ORIGIN intervention failed to authoritatively change its final capture. Independently, actual GOLDEN shows depth-dependent parallax and WORLD_X_PAIR proves RenderView-origin changes can reach GPU/raster. Only that late point is negative; eye translation generally is not falsified.
 
 ## Start here
-1. `research/BRANCH_SYNC_20260824.md` — remote-race provenance and final reconciliation
-2. `docs/STATE.md` — full working state
-3. `docs/NEXT.md` — one-step continuation
-4. `docs/SYNC.md` — cross-branch snapshot
-5. `docs/GATES.md` — gate ladder
-6. `docs/PROVEN.md` / `docs/FALSIFIED.md`
-7. `docs/EXPERIMENTS.md`
-8. `research/RESULT_INDEX.md`
-9. `runtime/golden_v0.5.5/` — protected source baseline
-10. `experiments/quest_projection_child/` — queued G3/T1 projection child
+1. `docs/STATE.md`
+2. `docs/NEXT.md`
+3. `docs/SYNC.md`
+4. `research/TRANSPORT_RECONCILIATION_20260824.md`
+5. `research/TRANSPORT_SYNC_20260824.md`
+6. `research/HLAE_INTEROP_FINDINGS.md`
+7. `docs/GATES.md`
+8. `docs/PROVEN.md` / `docs/FALSIFIED.md`
+9. `docs/EXPERIMENTS.md`
+10. `research/RESULT_INDEX.md`
+11. `research/BRANCH_SYNC_20260824.md`
+12. `runtime/golden_v0.5.5/`
+13. `runtime/children/v0.7.1_xr_transport/`
+14. `experiments/quest_projection_child/`
 
 **PARALLELIZE EVIDENCE — SERIALIZE MUTATION.**

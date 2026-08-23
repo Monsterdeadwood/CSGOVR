@@ -1,209 +1,150 @@
 # CSGOVR — RESULT INDEX
 
-Authority: canonical KB + 2026-08-24 cross-branch sync.
-Evidence labels: GOLDEN / PROVEN / USER-CONFIRMED / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED / UNRUN.
+Authority: canonical KB + 2026-08-24 cross-branch reconciliation.
+Evidence: GOLDEN / PROVEN / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED / UNRUN.
 
 ## GOLDEN — `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip`
-Build: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
-Class: GOLDEN.
-
-Proves/retains:
-- pass1 LEFT world, pass2 RIGHT world, pass3 monitor
-- full local CViewSetup copies `0x198`
-- HLAE DoRenderView seam `+0x22340`
-- copy ctor `+0x14BA0`
+Build `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
+- pass1 LEFT, pass2 RIGHT, pass3 monitor
+- full local CViewSetup `0x198`
+- HLAE DoRenderView `+0x22340`, copy ctor `+0x14BA0`
 - nominal half-eye `1.2598425 Source units`
-- original BMP re-analysis supports stable depth-dependent horizontal L/R parallax with negligible vertical disparity
-
-Exact runtime source is committed under `runtime/golden_v0.5.5/src/`.
+- original BMPs show stable depth-dependent horizontal L/R parallax
+- source `runtime/golden_v0.5.5/src/`
 
 ## `CSGOVR_CORRECTNESS_RESULT_20260821_011601.zip`
-Class: PROVEN causal retail evidence.
-
-- CViewSetup origin -> GPU VS `c2 / CAMERA_POS`
-- WORLD_X_PAIR small translation changes pixels and draw membership
-- projection-family constants include `c4..c7` / `c8..c11`
-- retained `c17`; bounded `c58..c60` model-candidate family
-- important counter-evidence against treating one late DUAL_ORIGIN capture as a general eye-translation falsification
+Class: PROVEN causal retail.
+- CViewSetup origin -> VS `c2/CAMERA_POS`
+- WORLD_X_PAIR translation changes pixels/draw membership
+- projection families c4..c7 / c8..c11
 
 ## `CSGOVR_PROJECTION_TRUTH_RESULT_20260821_035411.zip`
-Class: PROVEN projection/off-center semantics.
-
-- off-center top `+0x138`
-- bottom `+0x13C`
-- left `+0x140`
-- right `+0x144`
-- flag `+0x148 bit0`
+Class: PROVEN off-center semantics.
+- `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148 bit0`
 
 ## `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip`
-Class: PROVEN custom projection path / queued G3 parent evidence.
+Class: PROVEN custom projection.
+- enable `+0x68`, matrix `+0x6C..+0xAB`
+- M00/M02/M11/M12 causal semantics
+- M02 +/-0.10 ≈ -/+48 px X at 960x540
+- M12 +/-0.10 ≈ +/-27 px Y
+- M00/M11 0.80 axis-scale controls
+- donor `runtime/children/v0.6.1_projection_oracle/`
 
-- custom projection enable `+0x68`
-- matrix `+0x6C..+0xAB`
-- deterministic frozen camera/bots-kicked measurement
-- M00/M02/M11/M12 causally measured
-- at 960x540: M02 +/-0.10 produced approximately -/+48 px X; M12 +/-0.10 produced approximately +/-27 px Y
-- M00/M11 0.80 scale canaries matched expected axis scaling
-
-Verified source donor: `runtime/children/v0.6.1_projection_oracle/`.
+### v0.6.1 deterministic capture subresult
+Class: PROVEN method.
+- within-phase MAE about `0.0000..0.0026 / 255`
+- old sequential comparator (~62% same-eye temporal vs ~54% L/R) INVALID for quantitative stereo/culling
 
 ## `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip`
-Class: PROVEN XR INPUT.
+Class: PROVEN XR input.
+- Oculus OpenXR 1.205.0 + Quest 3
+- 2 views, `viewStateFlags=0xF`
+- LEFT `-54,+40,+44,-55`; RIGHT `-40,+54,+44,-55`
+- recommended `1504x1616`, max `3008x3232`
+- adapter LUID `00000000:000118D1`, min FL `0xB000`, created `0xB100`
+- passive eye separation ~64.780414 mm
 
-- Oculus OpenXR 1.205.0 + Quest 3 in recorded diagnostic
-- `xrLocateViews=XR_SUCCESS`, 2 views, flags `0xF`
-- LEFT L=-54 R=+40 U=+44 D=-55
-- RIGHT L=-40 R=+54 U=+44 D=-55
-- recommended eye size 1504x1616
-- adapter LUID `00000000:000118D1`
-- passive eye separation ~64.780 mm
-- derived matrix coefficients preserved in docs/STATE.md and docs/PROVEN.md
+## Valve SourceVR native scale cross-check — 2026-08-24
+Class: PROVEN source semantics.
+- `OpenVRToSourceCoordinateSystem()` uses `39.3700787 inches/meter`
+- native HMD/eye path `1 Source unit = 1 inch`
+- 64.780414 mm ≈ 2.55041 units total / 1.27520 half-IPD
+- AdvancedFX Unity 0.01905 m/unit FALSIFIED as native SourceVR eye scale
 
 ## `CSGOVR_NATIVE_STEREO_SEAM_RESULT_20260821_041928`
 Class: PROVEN/SUPPORTED split.
-
-- full 0x198 copies confirmed
-- late projection/off-center changes can survive
-- one tested late DUAL_ORIGIN intervention did not authoritatively alter its final captured raster
-
-Scope correction:
-This is a negative result for that exact late intervention/capture only. It does not cancel v0.5.5 GOLDEN parallax or WORLD_X_PAIR causal evidence.
+- full 0x198 copies
+- late projection/off-center survives
+- one late DUAL_ORIGIN intervention did not authoritatively alter final capture
+Scope: negative only for that intervention, not general eye translation.
 
 ## `CSGOVR_TTD_FRUSTUM_CACHE_REPLAY_RESULT_20260822_012630.zip`
-Class: FALSIFIED + HARVEST.
-
-FALSIFIED:
-- `client+0x0525BA60` shared cache reused inside BOTH eye markers.
-
-Harvest:
-- `GeneratePerspectiveFrustum client+0x0086E9C0`
-- writers around `+0x0086EB3C`
-- readers `+0x003A16A6`, `+0x003A01E4`
+Class: FALSIFIED + harvest.
+- FALSIFIED `client+0x0525BA60` both-eye reuse
+- harvest `+0x0086E9C0`, writers `+0x0086EB3C`, readers `+0x003A16A6/+0x003A01E4`
 
 ## `CSGOVR_TTD_REPLAY_FRUSTUM_READER_OWNER_3A16A6_RECOVERED_RESULT_20260823_160154.zip`
-Class: PROVEN evidence packet / destination semantics PENDING.
-
-- target `client+0x003A16A6..+0x003A16DC` hit
-- call stack captured
-- bounded 24-step dataflow
-- 3 store candidates
-- resume only if post-G3 culling opens
+Class: PROVEN evidence packet / semantics PENDING.
+- `+0x003A16A6..+0x003A16DC` hit
+- call stack, 24-step dataflow, 3 store candidates
 
 ## `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip`
-Class: PROVEN + FALSIFIED split.
+Class: PROVEN + FALSIFIED.
+- first 0x40 temporary transpose/restore PROVEN
+- persistent `+0x40..+0x1FF` FALSIFIED
 
-- first helper arg2 0x40 bytes temporary in-place transpose/restore: PROVEN
-- persistent output in `+0x40..+0x1FF`: FALSIFIED
-- older parser-generated falsification of first 0x40: INVALID/SUPERSEDED
-
-## `CSGOVR_TTD_SIMPLEWORLD_LIST_OWNERSHIP_RESULT_20260823_142036.zip`
-Class: LINEAGE PROVEN / OWNERSHIP PENDING.
-
-- CSkyboxView `+BF451C/+3AEA90`: main-world role FALSIFIED
-- CShadowDepthView `+BF44F4/+3AEAE0`: main-world role FALSIFIED
-- CSimpleWorldView `+BF4434/+3B0870`: main-world lineage PROVEN/FINALIST
-
-## `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip`
-Class: INFRASTRUCTURE.
-
-Retained:
-- `client+0x0038D123`
-- origin `CViewSetup+0xB8`
-- next RenderView `+0x003A5280`
-- candidates `+0x052632CC`, `+0x05263384`
-
-Not camera ownership proof.
-
-## `CSGOVR_CAUSAL_YAW_FINAL_POSE_CONTROL_RESULT_20260823_071600.zip`
-Class: INFRASTRUCTURE.
-
-Retained:
-- `client+0x0038D15B`
-- yaw `CViewSetup+0xC8`
-- `+0x0038D1DE`
-- `+0x05245AB8`
-
-Not final-pose proof.
+## Origin/yaw control results
+- `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip` — INFRASTRUCTURE; anchors `+0x0038D123`, `+0xB8`, `+0x003A5280`, `+0x052632CC/+0x05263384`
+- `CSGOVR_CAUSAL_YAW_FINAL_POSE_CONTROL_RESULT_20260823_071600.zip` — INFRASTRUCTURE; anchors `+0x0038D15B`, `+0xC8`, `+0x0038D1DE`, `+0x05245AB8`
+Not ownership proof.
 
 ## `CSGOVR_FULL_EXPERIMENTAL_FAILURE_20260821_022832.zip`
-Class: INVALID RUN / build-workflow failure.
+Class: INVALID build/workflow failure. Cross-project contamination; no renderer/XR conclusion.
 
-- Crysis2VR source/root contamination
-- Zig/build precheck failure
-- proves nothing about CSGOVR camera/projection/culling/XR/viewmodel
-
-## v0.6.5 XRFOV end-to-end attempt
+## v0.6.5 XRFOV attempt
 Class: infrastructure failure / XR subfact PROVEN.
+XR acquisition succeeded; x86 path wiring failed. Did not falsify XR/stereo/projection math.
 
-- XR view/FOV acquisition succeeded
-- end-to-end application failed because x86 path wiring was broken (`g_xrFovPath` empty/uninitialized; stale control path vs PowerShell INI)
-- did not falsify OpenXR, stereo or projection math
+## Exact HLAE / AdvancedFX interop source review — 2026-08-24
+Class: PROVEN source/build capability; runtime transport PENDING.
+Source `advancedfx/advancedfx@b97636852b8eecae09285b5a386192bb285638eb`.
+- Win32 includes AfxInterop
+- older shared-handle D3D9 replacement RT path exists
+- `D3DQUERYTYPE_EVENT` GPU completion wait exists
+- NORMAL GetMatricesForView precedes DoRenderView; shared view persists
 
-## T0 FINALIST A — exact pinned HLAE GPU interop
-Class: COLD exact-source PROOF / runtime UNRESOLVED.
+Protocol guard:
+- v6/v7 bypass older `PrepareDrawReply` replacement-target exchange and use `HandleDrawingMessage`
+- modern companion old-handshake use NOT PROVEN
+- T0 requires verified-compatible mode or minimal shared-target/fence transplant
 
-Exact pinned AdvancedFX/HLAE source contains:
-- `AfxInterop::OnRenderView` / `OnRenderViewEnd`
-- `AfxD3d9PushRenderTargetEx` replacement RT path
-- `PrepareDrawReply_Skip/Retry/Continue`
-- `WaitForGpu -> AfxD3D_WaitForGPU()`
+See `research/HLAE_INTEROP_FINDINGS.md`.
 
-This is the current PRIMARY transport finalist. Capability is proven; end-to-end CSGOVR runtime transport is not.
+## `CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip`
+Class: UNRUN / SUPERSEDED inside CPU prepared lineage.
+CPU readback/shared-memory architecture; not runtime-falsified.
 
-## T0 FINALIST B — `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
-Class: PREPARED / STATIC-AUDITED / UNRUN / FALLBACK.
+## `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
+Class: PREPARED / STATIC-AUDITED / UNRUN T0 FALLBACK.
+SHA256 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`.
+Manifest `runtime/children/v0.7.1_xr_transport/README.md`.
 
-Artifact SHA256:
-`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
-
-Manifest:
-`runtime/children/v0.7.1_xr_transport/README.md`
-
-Supersedes prepared v0.7.0 inside the CPU fallback lineage.
-
-Architecture:
-`completed HLAE D3D9 eye pass -> MSAA-safe CPU readback -> packed 2-slot atomic shared pair -> x64 D3D11/OpenXR`.
-
-Same-pair proof requirements:
-- same `CAfxStreams*`
-- LEFT HLAE count `0->1`
-- RIGHT `1->2`
-- same control mode
+Prepared hardening:
+- same CAfxStreams instance pair proof
+- LEFT count 0->1, RIGHT 1->2
 - complete pair only READY
-- producer one-shot `DISTINCT PAIR PROOF`
-- host one-shot `PAIR PROOF PASS`
+- `DISTINCT PAIR PROOF` / `PAIR PROOF PASS`
+- fixed-width pack(4) ABI
+- Reset generation invalidation
+- RGB-only X8R8G8B8 hashing
+- live v0.5.5 camera input
+- two-slot shared pair ring
 
-Other hardening retained in manifest: Reset generation invalidation, `pack(4)` ABI, RGB-only hash, stale-control cleanup, no inherited camera freeze, exact same-pair BMP harvest.
+End-to-end runtime still UNPROVEN. Finalist B only if GPU finalist A concretely blocks or as bounded compatibility control.
 
-Do not promote to PROVEN until a returned LIVE RESULT closes its PASS contract. Do not run as default while FINALIST A remains unblocked.
+## CURRENT T0 / G2.5 FINALIST A — UNRUN
+Goal:
+- exact v0.5.5 BASE geometry
+- same-cycle pass1 LEFT + pass2 RIGHT -> one `pairSeq`
+- verified-compatible HLAE shared-resource path or minimal transplant
+- GPU complete before publish
+- x64 D3D11 on LUID `00000000:000118D1`
+- acquire/wait/copy/release both XR swapchains
+- one xrEndFrame per coherent pair
+- mixedPairCount=0
+- pass3 monitor unchanged
 
-## QUEUED G3/T1 REPO CANDIDATE — UNRUN
-Files:
+## QUEUED G3/T1 — UNRUN
 - `experiments/quest_projection_child/eye_patch_quest_projection.c`
-- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
+- `QUEST_PROJECTION_MINIMAL.patch`
 - `tools/verify_quest_projection_child.py`
-- `.github/workflows/evidence-integrity.yml`
+- exact Quest P00 + Source-native scalar FOV110 after T0 PASS
 
-Class: UNRUN integration candidate.
+Diagnostic `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`, SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`, UNRUN/NOT BASELINE.
 
-Design:
-- exact v0.5.5 parent
-- preserve existing eye origin/pass schedule
-- add known Quest asymmetric custom matrix only
-- pass3 untouched
-- no culling/head/weapon mutation
+## CURRENT GATE
+**T0 / G2.5 — GPU XR TRANSPORT CERTIFICATION.**
 
-Queue immediately after T0 PASS.
-
-## BRANCH-LOCAL G3 DIAGNOSTIC — UNRUN
-`CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`
-SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`
-Class: UNRUN diagnostic support, not baseline.
-
-Primary-useful phase: Quest matrix only.
-Secondary phases: FOV/aspect/150 controls for possible later clipping/culling harvest.
-
-## Current engineering handoff
-**CURRENT GATE: T0 / G2.5 XR TRANSPORT CERTIFICATION.**
-
-**NEXT:** use exact pinned HLAE GPU interop FINALIST A with BASE geometry and coherent pairSeq. If A hits a concrete interop blocker, activate prepared v0.7.1 FINALIST B without repeating its research. T0 PASS -> freeze transport -> queued G3/T1 projection child.
+## NEXT
+Run Finalist A with BASE geometry using an explicitly verified compatible AfxInterop protocol path or minimal shared-target/fence transplant. Prove same-cycle pairSeq, GPU completion, x64 import/copy into both Meta OpenXR swapchains, one xrEndFrame, mixedPairCount=0 and pass3 intact. If A hits a concrete interop blocker, activate prepared v0.7.1 Finalist B without repeating its research. T0 PASS -> freeze transport -> G3/T1 P00 + FOV110.
