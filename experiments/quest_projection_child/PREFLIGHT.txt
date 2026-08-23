@@ -1,0 +1,5 @@
+MISSING FACT: Does applying the known Quest 3 asymmetric custom projection to the existing v0.5.5 LEFT/RIGHT local CViewSetup copies produce correctly fused in-headset stereo without changing eye ownership or pass scheduling?
+WHY NOT COLD: The CViewSetup layout, custom-matrix semantics, Quest FOV and HLAE eye seam are already proven offline/runtime, but the combined asymmetric matrix can only be accepted by same-frame headset visual truth.
+PASS: pass1 writes LEFT M02<0, pass2 writes RIGHT M02>0 with matching M00/M11/M12 and valid live depth terms, pass3 remains untouched, v0.5.5 scheduling holds, and the headset image is fused/stable without new inversion or warping.
+FAIL: the exact custom matrices reach both eye passes but stereo is cross-eyed/warped/unfused, pass3 changes, eye order changes, or any protected v0.5.5 behavior regresses.
+BASELINE MUST HOLD: exact v0.5.5 HLAE guards, 0x198 local copies, pass1 LEFT/pass2 RIGHT/pass3 monitor, exact -insecure safety gate, existing eye-origin separation, untouched engine-owned view object, and clean rollback to the original GOLDEN.
