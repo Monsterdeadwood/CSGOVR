@@ -1,51 +1,51 @@
 # CSGOVR
 
-Native VR research for **frozen legacy CS:GO x86** using HLAE/OpenXR and exact retail evidence.
+Native VR research for **frozen legacy CS:GO x86** using HLAE + a separate x64 OpenXR host, with exact-retail evidence.
 
-## Current status
-**ACTIVE. Stereo GOLDEN and projection semantics are already proven.**
+## Current state
+**ACTIVE. Current gate: XR TRANSPORT.**
 
-GOLDEN:
+The last remote state had already prepared the next Quest projection child, but it did **not** contain an exact headset/transport PASS. Cross-branch sync on 2026-08-24 therefore keeps projection integration queued behind transport instead of silently treating transport as solved.
+
+### Current integration candidate
+`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
+
+Artifact SHA256:
+`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
+
+Status: **PREPARED / STATIC-AUDITED / NOT YET LIVE-PROVEN**.
+
+Purpose:
+- preserve v0.5.5 HLAE LEFT/RIGHT/monitor scheduling;
+- capture completed pass1/pass2 pixels through the proven D3D9 CPU readback primitive;
+- publish only an atomic same-HLAE pair;
+- submit through an x64 D3D11/OpenXR host;
+- collect one exact same-pair LEFT/RIGHT capture and transport-stage telemetry.
+
+## GOLDEN
 `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
 
-Current engineering gate:
-**integrate the known Quest 3 asymmetric projection into the known-good LEFT/RIGHT eye path and validate it in-headset/same-frame.**
+Do not replace it. The transport child is an integration candidate, not a new GOLDEN.
 
-Do not restart broad camera/OpenXR archaeology unless a concrete visible blocker survives this integration.
+## Gate order
+`XR TRANSPORT -> CORRECT PROJECTION -> TRUE EYE ORIGIN/PARALLAX -> VALID CAPTURE/CULLING TRUTH -> HEAD POSE -> WEAPON/HANDS -> HUD -> REGRESSION -> RELEASE CANDIDATE`
 
-## Already proven
-- two real world streams: LEFT, RIGHT, plus monitor pass
-- full `CViewSetup` size `0x198`
-- custom projection enable `+0x68`
-- custom projection matrix `+0x6C..+0xAB`
-- off-center fields `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148` bit0
-- Quest 3 asymmetric FOV/coefficients and 1504x1616 recommended eye size
-- concrete pre-eye frustum/cache reader `client.dll+0x003A16A6`
-
-## Important evidence correction
-`client.dll+0x0038D123`, `CViewSetup.origin.x +0xB8` and `client.dll+0x052632CC` are retained infrastructure/candidate seams. Their 2026-08-23 control wrappers do **not** prove final camera ownership.
-
-`client.dll+0x0525BA60` is a real cache region, but the theory that it is reused inside BOTH eye marker regions is FALSIFIED.
+The prepared Quest projection child already in this repo is **queued immediately after XR TRANSPORT PASS**.
 
 ## Start here
-1. `docs/SYNC.md` — canonical current truth and evidence grades
-2. `docs/STATE.md` — concise active state
-3. `docs/GATES.md` — current integration ladder
-4. `docs/PROVEN.md` — proven XR/stereo/projection/culling facts
-5. `docs/FALSIFIED.md` — dead/superseded paths
-6. `research/RESULT_INDEX.md` — exact result ledger
-7. GitHub Issue #1 — active projection-integration gate
+1. `docs/SYNC.md` — cross-branch synchronized truth
+2. `docs/STATE.md` — complete active handoff
+3. `docs/PROVEN.md` — directly established facts
+4. `docs/FALSIFIED.md` — dead/superseded paths
+5. `docs/GATES.md` — gate ladder
+6. `experiments/NEXT_EXPERIMENT.md` — exact next LIVE contract
+7. `research/RESULT_INDEX.md` — result/tool provenance ledger
+8. `runtime/children/v0.7.1_xr_transport/` — current transport candidate package/manifest
 
-## Working model
+## Working protocol
 `SYNC -> THINK -> KEEP/ADAPT/STOP -> BATCH HARVEST -> CONVERGE -> PROVEN/FALSIFIED -> NEXT GATE -> SYNC`
 
 **PARALLELIZE EVIDENCE — SERIALIZE MUTATION.**
 
-Evidence grades are strict: GOLDEN / PROVEN / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED.
-
-## Repository map
-- `docs/` — canonical state and policy
-- `research/` — evidence and static/runtime archaeology
-- `experiments/` — reproducible controlled experiments
-- `runtime/` — accepted integration code
-- `tools/` — project tooling
+Evidence grades are strict:
+`GOLDEN / PROVEN / USER-CONFIRMED / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED`.
