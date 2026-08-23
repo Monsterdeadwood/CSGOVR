@@ -1,107 +1,120 @@
 # CSGOVR — PROVEN
 
 ## Evidence authority
-Canonical source: `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`.
-Do not silently promote SUPPORTED/INFRASTRUCTURE candidates into this file.
+Canonical source: `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`, augmented by the 2026-08-24 cross-branch sync. Do not silently promote SUPPORTED/INFRASTRUCTURE candidates.
 
 ## OpenXR / Quest 3 input
 - Meta/Oculus OpenXR 1.205.0 + Quest 3 diagnostic path succeeded.
-- `xrLocateViews` returned two valid views with `viewStateFlags = 0xF` in the recorded idle test.
+- `xrLocateViews` returned two valid views with `viewStateFlags=0xF`.
 - LEFT FOV: L=-54°, R=+40°, U=+44°, D=-55°.
 - RIGHT FOV: L=-40°, R=+54°, U=+44°, D=-55°.
 - Recommended eye size: 1504x1616.
 - Passive eye separation observed: about 64.780 mm.
-- Independent asymmetric projection reference includes approximately M00=0.9027383311, M11=0.8354788620, M12=-0.1931874395 and mirrored horizontal M02 asymmetry.
+- Projection coefficients:
+  - LEFT M00≈0.9027383, M02≈-0.2425126, M11≈0.8354789, M12≈-0.1931875
+  - RIGHT M00≈0.9027383, M02≈+0.2425126, M11≈0.8354789, M12≈-0.1931875
 
-Derived validation coefficients from the recorded FOV angles:
-- LEFT M00≈0.902738278, M02≈-0.242512644, M11≈0.835478849, M12≈-0.193187454
-- RIGHT M00≈0.902738278, M02≈+0.242512644, M11≈0.835478849, M12≈-0.193187454
+Provenance: `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip`.
 
-## Stereo GOLDEN / HLAE path
+## Stereo GOLDEN / HLAE
 - GOLDEN: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
-- Two real world streams are PROVEN: pass1 LEFT, pass2 RIGHT, pass3 monitor.
-- Exact full `CViewSetup` copy size is `0x198`; the former `0x14C` full-size interpretation is superseded.
-- Exact HLAE `CAfxStreams::DoRenderView` seam is RVA `0x00022340` in the preserved HLAE lineage.
-- `CViewSetup_csgo` copy constructor at HLAE `+0x00014BA0` copies through byte `0x197`.
+- Two real world streams: pass1 LEFT, pass2 RIGHT, pass3 monitor.
+- Exact full `CViewSetup` size `0x198`; prior `0x14C` full-size claim superseded.
+- HLAE `CAfxStreams::DoRenderView = +0x00022340`.
+- HLAE `CViewSetup_csgo` copy ctor `+0x00014BA0`, copies through byte `0x197`.
+- HLAE control offsets: `this+0x30 m_ForceCacheFullSceneState`, `this+0x50 m_DoRenderViewCount`.
+- v0.5.5 local eye model uses nominal half-eye `1.2598425 Source units` with LEFT=`-right`, RIGHT=`+right`.
 
-## Original v0.5.5 GOLDEN source recovered
-Physical Library package:
-`CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX.zip`
-
-- bytes `17,726`
-- SHA256 `20D382A537CF97AA432CA0BA94DE279EB12764B4724793C217722538BCB78A6D`
-
-Exact runtime source imported to GitHub and post-write Git blob identity verified:
+Recovered physical source:
 - `runtime/golden_v0.5.5/src/eye_patch.c`
-  - source SHA256 `3844B2C323F1077A901581A0A82908A174F9D1DF3F4213C5EB68980B7E7D148F`
-  - Git blob `54a78d9ad16511b5e4d1d643db85ee9d2ad15179`
 - `runtime/golden_v0.5.5/src/injector.c`
-  - source SHA256 `E6133CEFC23460BA3AD82350803251C604AA24425474B224BEF7FEE01EA5183D`
-  - Git blob `f46bd680f8dfbf48fb96585c51954ae79a93f99e`
 
-Canonical successful runtime binary identities retained by RESULT evidence:
-- patch DLL SHA256 `11F800361DB2416F58A2014D0FE57861C572B30FB72521F2CD41020A477CB578`
-- injector SHA256 `C987F156BDEF706A98282FC8BA0FF943CF019E8E6A7D7AAADD9BFC06B68811F0`
+Provenance: `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip` plus exact source recovery already committed to GitHub.
 
-This source is the parent for projection integration.
+## GOLDEN visual parallax — reconciled evidence
+Re-analysis of original v0.5.5 BMPs from `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip` shows:
+- same-eye consecutive captures are extremely stable relative to L/R difference;
+- LEFT/RIGHT difference is predominantly horizontal and depth-dependent;
+- median horizontal sparse-flow displacement was about `-2.94 px`, with a broad depth-dependent spread (roughly `-6.39..-0.60 px` in the 10th–90th percentiles in the branch analysis);
+- median vertical displacement was approximately zero.
 
-## Projection path
-- Custom projection enable bool at `CViewSetup+0x68` is PROVEN.
-- Custom projection matrix at `CViewSetup+0x6C..+0xAB` is PROVEN.
-- M00/M02/M11/M12 projection semantics were causally measured in controlled projection experiments.
-- Off-center fields are structurally/causally mapped in the HLAE eye path:
-  - top `+0x138`
-  - bottom `+0x13C`
-  - left `+0x140`
-  - right `+0x144`
-  - `m_bOffCenter` at flags `+0x148` bit0.
-- Late HLAE `DoRenderView` projection/off-center changes can survive to the rendered output in the tested lineage.
+This supports genuine geometric stereo in the actual v0.5.5 path. It coexists with the separate negative result from one late DUAL_ORIGIN intervention; see `docs/FALSIFIED.md` and `docs/STATE.md` for reconciliation.
 
-## v0.6.1 projection oracle source — verified child, not GOLDEN
-Physical package:
-`CSGOVR_CUSTOM_PROJECTION_MATRIX_ORACLE_v0.6.1_ONE_CLICK.zip`
+## Retail CViewSetup map
+PROVEN retail fields:
+- `+0x68 m_bCustomProjMatrix`
+- `+0x6C..+0xAB m_matCustomProjMatrix`
+- `+0xB0 world FOV`
+- `+0xB4 viewmodel FOV`
+- `+0xB8 origin`
+- `+0xC0 origin.z` subfield
+- `+0xC4 angles`
+- `+0xC8 yaw` subfield
+- `+0xD0/+0xD4 world zNear/zFar`
+- `+0xD8/+0xDC viewmodel zNear/zFar`
+- `+0xE0 aspect`
+- `+0x138/+0x13C/+0x140/+0x144` off-center T/B/L/R
+- `+0x148 bit0 m_bOffCenter`
 
-- bytes `21,733`
-- SHA256 `DB155F87F4BFF15611B1B5A6EFBAFAE756D789165BF6D1C52B632BE68E95CEC3`
-- `src/injector.c` is byte-identical to v0.5.5: `E6133CEFC23460BA3AD82350803251C604AA24425474B224BEF7FEE01EA5183D`
-- v0.6.1 `src/eye_patch.c` SHA256 `2CD99D89034DCD16A26A048376F193701A43CCF3C6A805090735545938CE2201`
+Strong source-layout candidates, not retail proof:
+- `+0x34 m_bCustomViewMatrix`
+- `+0x38..+0x67 m_matCustomViewMatrix`
+- `+0xAC m_pCSMVolumeCuller`
 
-Useful donor implementation:
-- custom projection bool `+0x68`
-- matrix `+0x6C`
-- verified matrix slot convention for M00/M02/M11/M12/M22/M23/M32/M33
-- mutation is applied to the local `0x198` eye copy before the proven HLAE call
+## CPU -> GPU / shader provenance
+Provenance: `CSGOVR_CORRECTNESS_RESULT_20260821_011601.zip` and projection provenance family.
 
-Test-only v0.6.1 behavior is NOT the next architecture:
-- frozen center camera
-- INI phase controller
-- synthetic ±0.10 projection shifts
-- synthetic 0.80 wide scales
-- forced 140-degree legacy FOV
+- `CViewSetup.origin` maps exactly to VS `c2 / CAMERA_POS` across the causal corpus.
+- `c4..c7` = MODELVIEWPROJ family.
+- `c8..c11` = VIEWPROJ family.
+- `c17` retained branch constant.
+- `c58..c60` bounded model candidate family.
+- `WORLD_X_PAIR` proved a small RenderView origin translation can change GPU camera state, pixels and draw membership.
 
-Current surgical map:
-`runtime/children/v0.6.1_projection_oracle/PROJECTION_TRANSPLANT.md`
+## Custom projection
+Provenance: `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip` / v0.6.1.
+
+- custom projection bool `+0x68` and matrix `+0x6C..+0xAB` are PROVEN.
+- M00/M02/M11/M12 semantics were causally measured.
+- v0.6.1 used `PoseFreeze=TRUE`, `BotsKicked=TRUE`.
+- same-eye temporal drift in frozen phases was effectively negligible for the intended measurement.
+- at 960x540:
+  - `M02 +0.10 -> about -48 px X`
+  - `M02 -0.10 -> about +48 px X`
+  - `M12 +0.10 -> about +27 px Y`
+  - `M12 -0.10 -> about -27 px Y`
+  - M00/M11 0.80 canaries produced the expected single-axis scale changes.
+- Source/D3D Z convention retained: `M22=zFar/(zNear-zFar)`, `M23=zNear*zFar/(zNear-zFar)`, `M32=-1`, `M33=0`.
+
+Verified child donor source is preserved under `runtime/children/v0.6.1_projection_oracle/`; test-only freeze/INI/canary/FOV-widening behavior is not the production architecture.
+
+## Current byte-locked G3 implementation candidate
+Remote cross-branch work already produced:
+- `experiments/quest_projection_child/eye_patch_quest_projection.c`
+- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
+- `tools/verify_quest_projection_child.py`
+- `.github/workflows/evidence-integrity.yml`
+
+This is a prepared implementation candidate, **not a PROVEN runtime RESULT**. Its design preserves v0.5.5 origin behavior and adds only the known Quest asymmetric custom matrix to the local eye copy.
 
 ## Culling / pre-eye dataflow
-- `client.dll+0x003A16A6..+0x003A16DC` is a concrete pre-eye frustum/cache reader/dataflow site.
-- Recovered result `CSGOVR_TTD_REPLAY_FRUSTUM_READER_OWNER_3A16A6_RECOVERED_RESULT_20260823_160154.zip` hit the target, captured a call stack, and recovered bounded dataflow with store candidates.
-- The first `0x40` bytes of helper arg2 undergo a temporary in-place transpose and are restored. That operation is PROVEN; an older auto-generated FALSIFIED parser verdict is invalid/superseded.
-- CSimpleWorldView lineage is PROVEN, while final visibility ownership remains OPEN.
-
-## Current integration equation
-
-```text
-exact v0.5.5 GOLDEN eye path
-+ Quest asymmetric custom matrix only
-= next projection child
-```
-
-Do not reopen RenderView ownership or add a culling mutation until this projection child receives an in-headset verdict.
+- `client+0x003A16A6..+0x003A16DC` is a concrete pre-eye reader/dataflow site with recovered call stack and bounded dataflow. Destination semantics remain PENDING.
+- second retained reader: `client+0x003A01E4..+0x003A021A`.
+- `GeneratePerspectiveFrustum = client+0x0086E9C0`, lane writers around `+0x0086EB3C`.
+- first helper arg2 `0x40` bytes undergo temporary in-place transpose and restore.
+- CSimpleWorldView main-world lineage PROVEN:
+  - vtable `client+0x00BF4434`
+  - Draw `client+0x003B0870`
+  - retained `+0x168 IWorldRenderList*`, `+0x16C CClientRenderablesList*`, `+0x170 ClientWorldListInfo_t*`
+  - lazy hydration `+0x003B0067` / `+0x003B0083`
 
 ## Important non-PROVEN retained seams
-The following are intentionally NOT promoted to causal camera ownership:
-- `client.dll+0x0038D123` origin.x writer/mutation seam
-- `CViewSetup.origin.x +0xB8`
-- `client.dll+0x052632CC` persistent/global CView candidate
-- `client.dll+0x0038D15B` yaw mutation seam
-Their 2026-08-23 wrappers classify the mutation windows as INFRASTRUCTURE/byte-integrity evidence, not camera-control proof.
+INFRASTRUCTURE/candidates only:
+- `client+0x0038D123` origin.x writer seam
+- `client+0x052632CC` persistent/global CView candidate
+- `client+0x05263384` origin-global candidate
+- `client+0x0038D15B` yaw seam
+- `client+0x0038D1DE` global commit candidate
+- `client+0x05245AB8` g_vecRenderAngles.y candidate
+
+Do not upgrade these without a new causal experiment.
