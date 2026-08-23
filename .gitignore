@@ -1,0 +1,43 @@
+# Build output
+build/
+out/
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Binaries / symbols
+*.exe
+*.dll
+*.pdb
+*.lib
+*.exp
+*.ilk
+
+# Dumps / captures / traces
+*.dmp
+*.mdmp
+*.rdc
+*.trace
+*.cap
+*.apitrace
+
+# Archives / result bundles
+*.zip
+*.7z
+*.rar
+
+# Local logs / transient results
+logs/
+results/raw/
+_tmp/
+.cache/
+
+# Local machine / secrets
+.env
+.env.*
+secrets/
+local/
+*.key
+*.pem
