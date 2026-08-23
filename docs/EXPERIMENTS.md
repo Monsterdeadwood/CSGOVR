@@ -12,15 +12,43 @@ At AdvancedFX commit `b97636852b8eecae09285b5a386192bb285638eb`, the frozen HLAE
 - `PrepareDrawReply_Skip/Retry/Continue`
 - `WaitForGpu -> AfxD3D_WaitForGPU()`
 
-Purpose: current T0 finalist. Use BASE v0.5.5 geometry and prove same-cycle LEFT/RIGHT GPU transport to the external x64 Meta OpenXR host. Source capability is not an end-to-end runtime PASS.
+Purpose: current T0 finalist A / PRIMARY. Use BASE v0.5.5 geometry and prove same-cycle LEFT/RIGHT GPU transport to the external x64 Meta OpenXR host. Source capability is not an end-to-end runtime PASS.
 
 ### `CSGOVR_XR_TRANSPORT_v0.7.0_BUILD_FIRST_ONECLICK.zip`
-Class: **PREPARED/UNRUN / COLD-SUPERSEDED AS PRIMARY**.
+Class: **SUPERSEDED PREPARED BUILD**.
 
-Reviewed architecture:
+Historical architecture:
 `D3D9 GetRenderTargetData -> SYSTEMMEM -> CPU copy/shared memory -> x64 D3D11/OpenXR`.
 
-Do not run as the default architecture while pinned HLAE GPU interop is available. It is not runtime-falsified; keep it as fallback/reference only if the GPU shared-resource path is concretely blocked.
+It was never run. It is superseded inside the CPU fallback lineage by v0.7.1 below.
+
+### `CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
+Class: **PREPARED / STATIC-AUDITED / UNRUN / FINALIST B FALLBACK**.
+
+Artifact SHA256:
+`DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
+
+Manifest:
+`runtime/children/v0.7.1_xr_transport/README.md`
+
+Architecture:
+`HLAE completed pass -> MSAA-safe CPU D3D9 readback -> atomic 2-slot shared pair -> x64 D3D11/OpenXR`.
+
+Important hardening:
+- Present is device latch only, not eye oracle
+- Reset generation invalidates pooled fallback resources
+- fixed-width `pack(4)` x86/x64 ABI
+- same `CAfxStreams*` for LEFT/RIGHT
+- LEFT HLAE count `0->1`, RIGHT `1->2`
+- complete pair only becomes READY
+- one-shot producer `DISTINCT PAIR PROOF`
+- one-shot host `PAIR PROOF PASS`
+- RGB-only hashes for `X8R8G8B8`
+- no inherited projection-oracle camera freeze
+- stale-control cleanup / PowerShell `$PID` fix
+- one exact same-pair BMP pair harvested
+
+Do not run this merely because it is prepared while pinned HLAE GPU interop remains the stronger current path. Activate if FINALIST A hits a concrete interop/shared-resource blocker or as a bounded compatibility control. It is not runtime-falsified.
 
 ## Accepted / high-value experiments
 ### `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip`
@@ -154,13 +182,15 @@ Status: UNRUN / NOT BASELINE.
 - post-SetUpView static candidates `+38E5D7/+38EC08/+3A0381`
 - treating origin/yaw byte integrity as ownership
 - old broad origin-point batch without a post-G3 visible blocker
-- CPU-readback transport as primary unless GPU interop is concretely blocked
+- v0.7.0 specifically: superseded by v0.7.1
+- CPU-readback architecture as T0 primary unless GPU interop is concretely blocked
 
 ## Tooling / paths
 - `tools/verify_quest_projection_child.py` — GOLDEN -> projection-child source integrity
 - `.github/workflows/evidence-integrity.yml` — verifier on push/PR
 - shared local root `C:\GOG Games\VR Research Tools`
+- transport fallback manifest `runtime/children/v0.7.1_xr_transport/README.md`
 - targeted tools already used: Ghidra, TTD/WinDbg, x32dbg/x64dbg, D3D9 hooks/capture, MinHook, OpenXR diagnostics
 
 ## Do not repeat rule
-Before any new LIVE/TTD/build, read `research/RESULT_INDEX.md`, `research/BRANCH_SYNC_20260824.md`, `docs/PROVEN.md`, `docs/FALSIFIED.md`, and this file. If another result already closed the question or yielded a concrete target, use it instead of building a new broad analyzer.
+Before any new LIVE/TTD/build, read `research/RESULT_INDEX.md`, `research/BRANCH_SYNC_20260824.md`, `research/TRANSPORT_SYNC_20260824.md`, `docs/PROVEN.md`, `docs/FALSIFIED.md`, and this file. If another result already closed the question or yielded a concrete target, use it instead of building a new broad analyzer.
