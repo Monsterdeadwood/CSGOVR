@@ -1,78 +1,97 @@
 # CSGOVR — STATE SYNC
 
-Snapshot imported from canonical ledger: 2026-08-23
+Snapshot: 2026-08-24 urgent cross-branch sync.
 
-## AUTHORITY
-Canonical source: `CSGOVR_KNOWLEDGE_BASE_CANONICAL_20260823.md`.
-If an older chat/state conflicts with that ledger, the canonical ledger wins.
+## REMOTE-FIRST CHECK
+- repo: `Monsterdeadwood/CSGOVR`
+- branch: `main`
+- only visible branch at sync time: `main`
+- remote HEAD before this sync: `20f76e6bbd849b5aff5f25d00ae63505ef1b96c0`
+- that remote already contained the projection child integrity CI and the preceding byte-locked Quest projection candidate work
+- no available branch/result had closed G3
 
-## LATEST RESULT / CURRENT TRUTH
-- GOLDEN: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
-- Stereo: two real world streams are PROVEN; pass1 LEFT, pass2 RIGHT, pass3 monitor; full `CViewSetup` copy size is `0x198`.
-- Projection: custom projection enable at `+0x68` and matrix `+0x6C..+0xAB` are PROVEN; M00/M02/M11/M12 semantics were causally measured.
-- Quest 3 FOV/derived coefficients are PROVEN; recommended eye target 1504x1616; `viewStateFlags=0xF`; passive eye separation about 64.780 mm.
-- Camera origin is real and reaches GPU c2, but the tested late `DoRenderView` eye-origin nudge did not survive to final captured raster.
-- Culling: `client.dll+0x0525BA60` shared-inside-both-eyes cache hypothesis is FALSIFIED; `client.dll+0x003A16A6` is a concrete pre-eye reader/dataflow site with a complete recovered evidence packet; exact semantic destination remains unclassified.
+## LATEST RESULT
+- Current-gate accepted projection result: `CSGOVR_CUSTOM_PROJECTION_MATRIX_RESULT_20260821_042218.zip` — custom projection semantics PROVEN.
+- XR input: `CSGOVR_OPENXR_FOV_DIAGNOSTIC_20260821_150332.zip` — Quest FOV/two views PROVEN.
+- Latest forensic result overall: `CSGOVR_TTD_FRUSTUM_ARG2_PERSISTENCE_RESULT_20260823_164733.zip` — first 0x40 transpose/restore PROVEN; persistent tail FALSIFIED.
+- No accepted G3 runtime/headset result yet.
+- Unrun local diagnostic package: `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`, SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`; not baseline.
 
 ## PROVEN
-- Full `CViewSetup` size: `0x198`; old `0x14C` full-size claim is SUPERSEDED.
-- HLAE two-world-stream stereo baseline is real and known-good.
-- Custom projection path: bool `+0x68`, matrix `+0x6C..+0xAB`.
-- Quest 3 asymmetric FOV and projection coefficients.
-- Off-center projection fields from the controlled HLAE path: top `+0x138`, bottom `+0x13C`, left `+0x140`, right `+0x144`, `m_bOffCenter` at flags `+0x148` bit0.
-- `client.dll+0x003A16A6..+0x003A16DC` is a concrete pre-eye frustum/cache reader; call stack and bounded dataflow were recovered.
-- First `0x40` bytes of helper arg2 undergo a temporary in-place transpose and are restored.
-- CSimpleWorldView lineage is proven; final visibility ownership is still OPEN.
+- GOLDEN `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
+- pass1 LEFT world, pass2 RIGHT world, pass3 monitor.
+- full `CViewSetup=0x198`; old full-size `0x14C` is SUPERSEDED.
+- HLAE `DoRenderView +0x00022340`; `CViewSetup_csgo` copy ctor `+0x00014BA0`.
+- HLAE object controls: `this+0x30 forceCache`, `this+0x50 DoRenderViewCount`.
+- custom projection `+0x68`, matrix `+0x6C..+0xAB`; M00/M02/M11/M12 semantics causally measured.
+- Quest 3 FOV and matrix coefficients are PROVEN; recommended eye size 1504x1616; passive separation ~64.780 mm.
+- off-center fields `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148 bit0`.
+- CPU `CViewSetup.origin` -> GPU VS `c2/CAMERA_POS` exact path; `WORLD_X_PAIR` proved a small RenderView origin translation can affect pixels/draw membership.
+- original v0.5.5 BMPs independently show depth-dependent L/R parallax with negligible vertical disparity.
+- pre-eye reader `client+0x003A16A6` has a recovered evidence packet; destination semantics PENDING.
+- first helper arg2 `0x40` bytes transpose/restore is PROVEN.
+- CSimpleWorldView main-world lineage PROVEN.
 
-## SUPPORTED / RETAINED CANDIDATES
-- `client.dll+0x0038D123`: origin.x writer/mutation seam candidate.
-- `CViewSetup.origin.x @ +0xB8`.
-- next true `RenderView`: `client.dll+0x003A5280`.
-- persistent/global CView candidate: `client.dll+0x052632CC`.
-- origin-global candidate: `client.dll+0x05263384`.
-- yaw mutation seam `client.dll+0x0038D15B`; global commit `+0x0038D1DE`; `g_vecRenderAngles.y` candidate `+0x05245AB8`.
-These origin/yaw control runs are **INFRASTRUCTURE**, not causal camera ownership proof.
+## EVIDENCE CONFLICT / RECONCILIATION
+Do not erase either path:
+- `CSGOVR_NATIVE_STEREO_SEAM_RESULT_20260821_041928`: one tested late DUAL_ORIGIN intervention did not authoritatively change its final capture.
+- GOLDEN + stock causal evidence: v0.5.5 images show real stereo parallax; WORLD_X_PAIR shows RenderView-origin translation can reach GPU/raster.
+
+Resolution: the late intervention is a negative result for that exact point/capture, not a general falsification of eye translation. Do not restart broad TAB3 origin search before G3.
 
 ## FALSIFIED / CLOSED
-- `client.dll+0x0525BA60` as a cache reused inside BOTH LEFT and RIGHT eye marker regions.
-- Persistent helper arg2 output outside the first `0x40` bytes (`+0x40..+0x1FF`).
-- Treating originX/yaw byte-integrity mutation runs as camera/control proof.
-- Broad OpenXR rediscovery: XR input is already proven.
-- Sequential screenshot comparisons as quantitative culling/disparity proof; temporal drift requires same-frame capture.
+- `client+0x0525BA60` reused inside BOTH eye marker regions.
+- persistent helper arg2 output beyond first 0x40.
+- old parser conclusion falsifying first-0x40 transpose — INVALID/SUPERSEDED.
+- originX/yaw byte-integrity wrappers as camera ownership proof.
+- broad OpenXR rediscovery.
+- sequential screenshot comparison as quantitative culling/disparity truth.
+- contaminated FULL_EXPERIMENTAL failure as renderer evidence.
+- repeating sign/transpose projection roulette after v0.6.1.
+- old 8–12 point eye-origin batch until a post-G3 visible origin blocker exists.
 
 ## CURRENT FINALISTS
-1. Integration: known Quest asymmetric projection -> known-good HLAE eye path.
-2. If a visible culling blocker remains after projection integration: pre-eye reader `client.dll+0x003A16A6` + CSimpleWorldView lineage.
+1. `experiments/quest_projection_child/eye_patch_quest_projection.c` — byte-locked minimal G3 child; parent exact v0.5.5.
+2. `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch` + `tools/verify_quest_projection_child.py` + Evidence Integrity CI.
+3. Unrun diagnostic support package `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`; matrix-only is PRIMARY-useful, FOV/aspect phases secondary G4 harvest.
+4. If and only if G3 leaves a visible culling blocker: `+0x003A16A6`, `+0x003A01E4`, `+0x0086E9C0`, CSimpleWorldView.
 
 ## CONCRETE TARGETS
-- GOLDEN eye path: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
-- HLAE `CAfxStreams::DoRenderView` RVA `0x00022340`.
-- HLAE `CViewSetup_csgo` copy constructor `+0x00014BA0`, exact object size `0x198`.
-- Custom projection: `+0x68` enable, `+0x6C..+0xAB` matrix.
-- Off-center projection: `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148` bit0.
-- Pre-eye frustum/cache reader: `client.dll+0x003A16A6`.
-- GeneratePerspectiveFrustum family: `client.dll+0x0086E9C0`, lane writes starting `+0x0086EB3C`.
+- frozen `RenderView client+0x003A5280`
+- HLAE `DoRenderView +0x22340`
+- HLAE copy ctor `+0x14BA0`
+- CViewSetup custom projection `+0x68/+0x6C`
+- origin `+0xB8`, angles `+0xC4`, zNear/zFar `+0xD0/+0xD4`, aspect `+0xE0`
+- off-center `+0x138/+0x13C/+0x140/+0x144`, flag `+0x148 bit0`
+- pre-eye readers `client+0x003A16A6`, `client+0x003A01E4`
+- `GeneratePerspectiveFrustum client+0x0086E9C0`, writers around `+0x0086EB3C`
+- CSimpleWorldView vtable `client+0x00BF4434`, Draw `+0x003B0870`, fields `+0x168/+0x16C/+0x170`
+- retained infrastructure only: `+0x0038D123`, `+0x052632CC`, `+0x05263384`, yaw `+0x0038D15B/+0x0038D1DE`, `+0x05245AB8`
 
 ## CURRENT GATE
-Integrate the already-PROVEN Quest asymmetric projection into the known-good eye path and test it in-headset. Reverse further only against a concrete visible blocker that survives this integration.
+**G3 — integrate the already-PROVEN Quest asymmetric projection into the known-good v0.5.5 eye path and obtain a runtime/headset verdict.**
 
 ## NEXT
-1. Preserve v0.5.5 GOLDEN exactly.
-2. Feed known Quest 3 asymmetric coefficients through the proven custom/off-center projection path for LEFT/RIGHT.
-3. Validate same-frame stereo in headset, not by temporally separated screenshot comparison.
-4. If geometry/culling still fails, continue from `+0x003A16A6` / CSimpleWorldView, not from the falsified shared-cache theory.
-5. Keep origin/yaw seams as infrastructure candidates only until a new causal experiment proves authority.
+Run the repository byte-locked minimal projection child after integrity verification. Preserve v0.5.5 origin and pass scheduling; no culling/origin/head/weapon mutation in the same PRIMARY. If G3 passes, freeze projection and select the next gate from the actual visible blocker. If transport is black/absent, solve transport as transport. If culling visibly fails, use the retained G4 targets.
 
 ## METHOD ALREADY USED
-- OpenXR FOV/view acquisition and independent projection derivation.
-- HLAE source/static seam archaeology.
-- v0.5.5 HLAE multipass stereo GOLDEN.
-- Custom projection and off-center canary causal tests.
-- TTD frustum/cache replay and recovered pre-eye reader dataflow.
-- Origin/yaw infrastructure mutation windows with byte-integrity checks.
+- source/donor corpus harvest
+- retail CViewSetup canaries
+- D3D9 GPU constant provenance
+- HLAE seam/pass archaeology
+- full-0x198 eye-copy GOLDEN
+- custom projection/off-center causal tests
+- deterministic frozen projection capture
+- OpenXR FOV acquisition
+- TTD frustum/cache and targeted reader recovery
+- x32dbg origin/yaw infrastructure controls
+- CSimpleWorldView class funnel
+- GitHub source integrity verifier + CI
 
 ## HARD CONSTRAINTS
-- Evidence labels must follow the canonical ledger: PROVEN / SUPPORTED / PENDING / INFRASTRUCTURE / FALSIFIED / INVALID / SUPERSEDED.
-- Do not upgrade infrastructure to ownership proof.
-- Do not retest `+0x0525BA60` both-eye reuse without contradictory evidence.
-- Preserve known-good stereo GOLDEN while integrating projection.
+- evidence grades stay strict
+- do not upgrade INFRASTRUCTURE to ownership
+- do not retest `+0x0525BA60` both-eye reuse without contradictory evidence
+- preserve v0.5.5 GOLDEN
+- no broad OpenXR/projection/origin archaeology before G3 verdict
+- no weapon/HUD work before upstream gates
