@@ -8,17 +8,7 @@ Original one-click artifact:
 Artifact SHA256:
 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
 
-## Exact recovery
-The binary ZIP is stored as UTF-8 base64 text because the GitHub connector writes text content:
-`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF_ONECLICK.zip.b64`
-
-PowerShell recovery:
-```powershell
-$b64 = Get-Content -Raw .\CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF_ONECLICK.zip.b64
-[IO.File]::WriteAllBytes('.\CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF_ONECLICK.zip',[Convert]::FromBase64String($b64.Trim()))
-Get-FileHash .\CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF_ONECLICK.zip -Algorithm SHA256
-```
-Expected SHA256 is the value above.
+The exact binary ZIP was produced in the integration branch and is identified by the hash above. This GitHub sync records its full state/provenance and file hashes; it does not falsely label the artifact as LIVE-proven.
 
 ## Purpose
 Minimal transport child on top of the v0.5.5 HLAE stereo contract.
@@ -70,7 +60,7 @@ Frozen transport gate requires Meta/Oculus active runtime manifest `oculus_openx
 ## Evidence status
 No user LIVE result has been returned yet. Do not label XR transport PROVEN until `CSGOVR_XR_TRANSPORT_RESULT_*.zip` demonstrates the PASS contract in `experiments/NEXT_EXPERIMENT.md`.
 
-## Source SHA256 inside ZIP
+## Source SHA256 inside the prepared ZIP
 - `src/eye_transport.c` `9EA00805D454A64632EF467BD080E5C89D4928D074E30CC0F155EC51A9621158`
 - `src/injector.c` `8765AF9ED6977497541A90DB2102A7398442B71E4DE10467B855FBAA8DA4D9D9`
 - `src/transport_protocol.h` `7E0D80744B0F5D78548844F62119B34253DCDC5D0E439E07DFA8B9F24450B15E`
