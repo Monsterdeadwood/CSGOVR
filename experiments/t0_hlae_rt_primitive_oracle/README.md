@@ -1,4 +1,4 @@
-# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.0
+# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.1
 
 Evidence label: **STATIC-AUDITED / NOT LIVE-PROVEN**.
 
@@ -45,15 +45,18 @@ The scanner emits heuristic role labels:
 
 It also enumerates **thin direct callers** of each finalist. This is intended to expose the small global wrapper functions that source code uses around the underlying `g_NewDirect3DDevice9` member methods.
 
-The runner extracts a compact `ROLE_SUMMARY.txt` with:
+The v1.1.1 runner additionally extracts the first thin-caller RVA per role into `ROLE_SUMMARY.txt`:
 
 - `BestPushMemberRVA`
+- `BestPushThinCallerRVA`
 - `BestPopMemberRVA`
+- `BestPopThinCallerRVA`
 - `BestGpuWaitMemberRVA`
+- `BestGpuWaitThinCallerRVA`
 - `BoundedCoreFinalists`
 - `SemanticVerdict`
 
-`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped binary census collapsed to bounded candidates. It does **not** promote any RVA to PROVEN and does **not** authorize runtime mutation by itself.
+`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped binary census collapsed to bounded candidates. The thin-caller fields are also heuristic. Neither member nor wrapper RVA is promoted to PROVEN until its decompile/call graph is checked against the exact pinned source.
 
 ## Broader fingerprints retained
 
