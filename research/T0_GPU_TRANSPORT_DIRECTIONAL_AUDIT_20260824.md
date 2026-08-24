@@ -1,166 +1,222 @@
-# CSGOVR T0 GPU transport directional audit 2026-08-24
+# CSGOVR T0 GPU transport directional audit — 2026-08-24
 
-Evidence label: STATIC-AUDITED / NOT LIVE-PROVEN.
+Evidence label: **STATIC-AUDITED / NOT LIVE-PROVEN**.
 
 ## Scope
 
-Resolve one narrow T0 question before another LIVE: which exact pinned HLAE GPU-interoperability path can move a completed v0.5.5 LEFT/RIGHT game render toward the external x64 OpenXR host without changing projection, origin, head pose, culling, viewmodel or HUD.
+Resolve the exact T0 GPU-export architecture around protected parent:
 
-Pinned source: `advancedfx/advancedfx@b97636852b8eecae09285b5a386192bb285638eb`.
-Protected parent: `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`.
+`CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
 
-Companion format audit: `research/T0_D3D9EX_D3D11_SHARED_FORMAT_AUDIT_20260824.md`.
+Pinned source:
+`advancedfx/advancedfx@b97636852b8eecae09285b5a386192bb285638eb`.
 
-## RESULT
+No projection, origin, pose, culling, viewmodel or HUD mutation belongs in this audit.
 
-The previous protocol guard was directionally incomplete.
+## Direction result
 
-### Old pre-v6/v7 PrepareDraw path
+### Old pre-v6/v7 replacement-target path
 
-`DrawingThreadPrepareDraw` can receive `sharedColorTextureHandle`, inspect the tracked game RT, open a matching D3D9 render-target texture using that handle, obtain its surface and push it with `AfxD3d9PushRenderTargetEx`.
+`DrawingThreadPrepareDraw` can receive `sharedColorTextureHandle`, inspect the HLAE tracked game RT, open a same-size/same-format D3D9 replacement render-target texture using the supplied handle, obtain its surface and call `AfxD3d9PushRenderTargetEx`.
 
-This is an output/replacement-target path: subsequent game rendering is redirected into the external shared render target while HLAE keeps its tracked render-target state coherent.
+This is an output/replacement-target path:
 
-Class: exact-source game -> shared-target capability PROVEN.
+**game render -> shared replacement target**.
 
-### Modern v6/v7 HandleDrawingMessage path
+Class: exact-source export-capable primitive PROVEN.
 
-For server major 6/7, `DrawingThreadPrepareDraw` bypasses the old PrepareDraw replacement-target exchange.
+### Modern v6/v7 shared-texture Continue
 
-`HandleDrawingMessage` still has a shared-texture `Continue` operation, but its direction is different:
+`HandleDrawingMessage` receives an external shared texture, opens it, binds it through `AfxDrawRect` as a texture source and draws into the current D3D9 target.
 
-1. it receives a shared texture handle plus width/height/format;
-2. opens that texture through `IDirect3DDevice9Ex::CreateTexture(..., &sharedTextureHandle)`;
-3. calls `AfxDrawRect(m_SharedSurface.Texture, ...)`;
-4. `AfxDrawRect` binds that texture with `SetTexture(0, texture)` and draws it into the current D3D9 render target;
-5. waits for GPU completion.
+Direction:
 
-Therefore this operation is external shared texture -> current game RT / composite. It is not evidence that the completed LEFT/RIGHT game image is exported to the x64 host.
+**external shared texture -> game/current RT composite**.
+
+It is not proof that a completed LEFT/RIGHT game eye is exported.
 
 Class: exact-source directional semantics PROVEN.
 
-## Consequence for T0 finalist A
+## Exact binary promotion
 
-Do not treat a successful modern v6/v7 shared-texture `Continue` as a T0 game-frame export PASS.
+The first v1.1.3 heuristic incorrectly ranked `AfxHookSource.dll+0x36150` as Push. Manual exact-source review proved it is an R32F helper lineage and FALSIFIED it as Push.
 
-The exact-source export-capable primitive remains the old replacement-target mechanism. A modern companion may still be useful for other operations, but its shared-texture draw path does not by itself close T0.
+Corrected v1.1.4 exact-hash CI independently reproduced the manually reviewed primitives:
 
-The companion shared-format audit adds a second independent guard: the old replacement path opens the external handle using the authoritative tracked RT's exact `desc.Format`, while Microsoft's D3D9 -> D3D11 shared-resource endpoint has a restricted documented format/resource contract. Therefore protocol compatibility alone is not sufficient for A0/A1a.
+- PushRT: `AfxHookSource.dll+0x00034830`
+- PopRT: `+0x000346A0`
+- GPU EVENT wait: `+0x000343F0`
 
-## Candidate ordering after audit
+Push entry signature:
 
-### A0 - verified old-compatible direct replacement-target protocol
+`558BECA1B0D6211083EC0C85C00F848100000056578B7D08B91CD721108945F8`
 
-KEEP conditionally.
+The HLAE binary seam is therefore no longer a current unknown.
 
-Use only if an exact compatible host/protocol mode can be pinned and logged **and** the authoritative tracked eye RT format is directly compatible with the D3D9 -> D3D11 endpoint.
+See `research/T0_HLAE_BINARY_PROMOTION_20260824.md`.
 
-It must actually exercise:
+## Replacement surface is authoritative staging, not necessarily final transport storage
 
-`sharedColorTextureHandle -> exact tracked desc -> m_RenderTargetReplacement -> AfxD3d9PushRenderTargetEx`.
+Pinned HLAE source opens the replacement texture using the current tracked RT's exact width, height and format, then Pushes that replacement and later `PopRenderTarget(true)` restores/copies back through HLAE's tracked state.
 
-Do not infer direct-share eligibility from protocol success alone.
+HLAE stores one persistent `m_RenderTargetReplacement`, so pointer persistence does not imply persistent LEFT and RIGHT contents.
 
-### A1a - direct replacement transplant in the proven v0.5.5 eye discriminator
+Treat the replacement as **mutable authoritative eye staging**.
 
-Implementation fallback that removes protocol-generation ambiguity but retains the direct shared-format requirement.
+Required per-pass invariant:
 
-For force-cache pass1/pass2 only:
+`pass1 LEFT -> immediate GPU snapshot to LEFT transport slot`
 
-- retain byte-identical v0.5.5 `0x198` local CView transaction;
-- obtain the HLAE-tracked RT dimensions/format;
-- open per-eye shared D3D9 render-target texture using the same authoritative format;
-- use source-proven replacement-surface bookkeeping / push behavior around the eye render;
-- wait for GPU completion before publishing the eye generation;
-- restore/pop exactly;
-- pass3 remains untouched.
+before
 
-This is preferred over a blind `IDirect3DDevice9::SetRenderTarget` because pinned HLAE tracks and unwraps its render target internally. `AfxD3d9PushRenderTargetEx` links source/replacement surfaces and updates `trackedRenderTarget`, preventing HLAE state from silently diverging from raw D3D9 state.
+`pass2 RIGHT -> immediate GPU snapshot to RIGHT transport slot`.
 
-### A1b - HLAE-aware GPU format bridge
+Do not wait until both eye renders are over to capture both from one mutable staging surface.
 
-New strongest GPU-lane fallback if the exact eye RT format is not directly shareable to D3D11.
+See `research/T0_REPLACEMENT_SURFACE_EXPORT_TOPOLOGY_20260824.md`.
 
-The authoritative HLAE eye source remains pass-scoped. While that source is still known, perform a GPU-only resolve/copy plus checked format conversion into a non-MSAA D3D9 shared carrier whose format maps to the documented D3D9 -> D3D11 endpoint, currently `D3DFMT_A8B8G8R8 -> DXGI_FORMAT_R8G8B8A8_UNORM`.
+## Current GPU candidates
 
-Required gates include:
+### A1a — direct staging-resource sharing
 
-- actual source `desc.Format` and MSAA state logged;
-- `CheckDeviceFormatConversion(actualSourceFormat, D3DFMT_A8B8G8R8) == D3D_OK`;
-- relevant `StretchRect` capability present;
-- shared carrier creation succeeds in `D3DPOOL_DEFAULT`, 1 mip, non-MSAA;
-- GPU copy/resolve-convert succeeds;
-- D3D9 EVENT completion precedes READY;
-- x64 D3D11 `OpenSharedResource` succeeds on the required adapter;
-- same-cycle LEFT/RIGHT remains atomic and `mixedPairCount=0`.
+Eligible only if runtime proves all of:
 
-A1b is not a CPU fallback and does not alter projection/origin/camera.
+- replacement format is inside documented D3D9->D3D11 direct interop set;
+- non-MSAA;
+- shared creation succeeds;
+- size is compatible with chosen x64 operation;
+- x64 import succeeds on OpenXR-required D3D11 adapter;
+- producer/consumer ownership prevents staging overwrite while consumer reads it.
 
-### A2 - naive post-hook GPU copy
+Because HLAE staging may be reused sequentially, direct A1a can lose to dedicated carriers for lifetime reasons even if its format is technically shareable.
 
-**STOP.**
+### A1b-D9 — preferred dedicated D3D9 carrier
 
-The correct pass image is not proven to remain available as raw RT0 after the external v0.5.5 hook returns. A naive `GetRenderTarget(0)` there can capture a restored or unrelated surface.
+`authoritative HLAE staging eye`
+` -> immediate D3D9 GPU StretchRect/resolve/format/size bridge`
+` -> dedicated non-MSAA shared carrier`
+` -> D3D9 EVENT producer fence`
+` -> READY(pairSeq, eye, generation)`.
 
-Do not confuse A1b with A2: A1b executes against an authoritative HLAE-tracked/pass-scoped source; A2 guessed the source after the ownership boundary was lost.
+Preferred 8-bit carrier candidate:
+`D3DFMT_A8B8G8R8 -> DXGI_FORMAT_R8G8B8A8_UNORM`.
 
-### B - prepared CPU fallback
+Actual format conversion/resolve support remains a runtime device-cap fact.
 
-`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF` remains FINALIST B, PREPARED / STATIC-AUDITED / NOT LIVE-PROVEN. Activate only after a concrete GPU export/import blocker or as a bounded compatibility control.
+### A1b-D11 — x64 shader-blit/scaler
 
-## Exact HLAE render-target state facts imported
+If a legal shared carrier can be imported at source size but XR destination size/format differ:
 
-Pinned `d3d9Hooks.cpp` maintains a tracked render target. `AfxGetRenderTargetSurface()` returns `UnwrapSurface(trackedRenderTarget)`.
+`shared carrier -> D3D11 SRV -> fullscreen shader blit -> XR RTV`.
 
-`AfxD3d9PushRenderTargetEx(replacementSurface)`:
+The XR swapchain must request `COLOR_ATTACHMENT_BIT` for this path. Its exact format/color interpretation must come from `xrEnumerateSwapchainFormats`, not a hard-coded guess.
 
-- links the tracked source surface to replacement surface;
-- if raw RT0 equals the tracked RT, switches raw RT0 to replacement;
-- changes HLAE `trackedRenderTarget` to replacement and takes a reference.
+### A2 — naive post-hook raw RT0 copy
 
-`AfxD3d9PopRenderTarget(...)` follows the reverse source/replacement mapping and restores tracked/device state.
+STOP. HLAE may restore raw RT state before a naive outer-hook post-copy, while the explicit replacement surface is already a better source object.
 
-This is why the HLAE primitive is more authoritative than an out-of-band COM RT switch.
+### B — prepared CPU fallback
 
-## Current COLD closure state
+`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF` remains fallback only after a concrete GPU blocker or as a bounded compatibility control. It is not T0 primary.
 
-Closed by source/documentation:
+## Windows interop ownership contract
 
-1. modern v6/v7 shared-texture direction is input/composite, not completed-eye export;
-2. old replacement-target path is the source-proven game -> shared-target donor;
-3. old direct path inherits exact tracked `desc.Format`;
-4. D3D9 -> D3D11 sharing has a restricted documented resource/format contract;
-5. if direct format sharing is unavailable, GPU format conversion is capability-dependent and must be queried, not assumed.
+D3D9Ex legacy sharing is unsynchronized. The transport ring must be an ownership protocol, not merely two buffers.
 
-Still OPEN before the first transport mutation:
+Minimum state machine:
 
-1. exact helper RVAs/fingerprints for HLAE-state-aware replacement bookkeeping / GPU completion in the frozen `AfxHookSource.dll`;
-2. exact authoritative v0.5.5 eye RT format and MSAA state;
-3. direct-share eligibility of that exact format on the frozen adapter/driver path;
-4. if needed, actual `CheckDeviceFormatConversion` / `StretchRect` support into the cross-API carrier;
-5. Reset/device-generation invalidation for both eye shared resources;
-6. same-cycle identity: LEFT count `0->1`, RIGHT `1->2`, same `CAfxStreams*`, complete pair only READY, `mixedPairCount=0`.
+`FREE -> PRODUCER_WRITING -> PRODUCER_FENCING -> READY -> CONSUMER_READING -> CONSUMER_FENCING -> FREE`.
 
-The prepared read-only oracle under `experiments/t0_hlae_rt_primitive_oracle/` closes item 1 without launching CS:GO/HLAE.
+Producer publishes only after D3D9 EVENT completion.
 
-Items 2-4 are runtime device facts and should be grouped into one bounded compatibility control only after item 1 is closed.
+Consumer returns slot to FREE only after explicit D3D11 GPU completion, with `D3D11_QUERY_EVENT` the preferred initial proof primitive.
 
-## PREFLIGHT for the first eventual T0 transport LIVE
+Pair coherence sits above slot ownership:
 
-MISSING FACT: whether exact v0.5.5 pass1/pass2 can be rendered/exported through one verified shared-GPU output path and imported/submitted by the x64 Meta OpenXR host as one coherent pair.
-WHY NOT COLD: exact source and API contracts now resolve path direction, HLAE RT ownership and format constraints, but only runtime proves the frozen resource format/caps, sharing, synchronization, pair sequencing and XR submission.
-PASS: same-cycle LEFT/RIGHT exported, both GPU-complete before READY, x64 imports/copies both resources, one `xrEndFrame` per coherent pair, `mixedPairCount=0`, non-black headset, pass3/GOLDEN unchanged.
-FAIL: no export-capable path, direct/conversion format incompatibility, shared-handle/import failure, wrong RT capture, mixed generation, GPU sync failure, XR copy/submit failure, black/freeze, or GOLDEN/pass3 regression.
-BASELINE MUST HOLD: frozen client hash, `-insecure`, HLAE 2.191.1/b976, v0.5.5 full `0x198` local eye copies, pass1 LEFT/pass2 RIGHT/pass3 monitor, BASE projection/origin/camera, reversible cleanup.
+- same HLAE cycle;
+- same `pairSeq`;
+- same reset generation;
+- both eyes READY;
+- `mixedPairCount = 0`.
+
+Legacy shared handle tokens are not normal NT handles: do not `CloseHandle` / `DuplicateHandle`; invalidate them by resource/generation lifetime.
+
+See:
+- `research/T0_WINDOWS_D3D9EX_D3D11_INTEROP_CONTRACT_20260824.md`
+- `research/T0_D3D11_CONSUMER_SYNC_COLOR_CONTRACT_20260824.md`
+
+## OpenXR destination contract
+
+Current accepted Quest facts remain:
+
+- Meta/Oculus OpenXR `1.205.0`;
+- Quest 3;
+- recommended eye `1504x1616`;
+- required D3D11 adapter LUID previously `00000000:000118D1`;
+- min feature level previously `0xB000`.
+
+But canonical CSGOVR evidence did not preserve the actual `xrEnumerateSwapchainFormats` list. T0 must harvest it in the real host as secondary evidence.
+
+Direct D3D11 `CopyResource` cannot scale. If source/destination dimensions differ, use A1b-D9 sizing or A1b-D11 shader blit.
+
+Color encoding is part of correctness: OpenXR distinguishes plain linear UNORM from sRGB formats. Do not silently interchange them.
+
+See:
+- `research/T0_OPENXR_D3D11_COPY_CONTRACT_20260824.md`
+- `research/T0_D3D11_CONSUMER_SYNC_COLOR_CONTRACT_20260824.md`.
+
+## Bounded compatibility control status
+
+`experiments/t0_rt_format_compat_control/` is **PREPARED / GATED / DO NOT RUN**.
+
+The reviewed template now contains:
+
+- Push `+0x34830` and exact signature;
+- Pop `+0x346A0`;
+- GPU wait `+0x343F0`;
+- v1.1.3 false Push `+0x36150` explicitly falsified.
+
+But it intentionally remains:
+
+- `Status=NOT_PROMOTED`
+- `ReviewerVerdict=REVIEWED_COLD_ONLY`.
+
+No active `PROMOTED_RVAS.ini` is committed. `BUILD_GATED.ps1` refuses an active build until the bounded LIVE is intentionally authorized.
+
+### Future compatibility-control PRIMARY
+
+Observe exact replacement staging descriptor/device capability and decide A1a vs A1b.
+
+Required harvest:
+
+- staging pointer identity pass1/pass2/cycles;
+- width/height/format/MSAA;
+- D3D9Ex availability;
+- producer adapter LUID when available;
+- direct shared creation result;
+- `A8B8G8R8` carrier support;
+- format-conversion capability;
+- no camera/projection/origin mutation;
+- no actual OpenXR submission.
 
 ## KEEP / ADAPT / STOP
 
-- STOP the interpretation `modern v6/v7 shared-texture Continue == game-frame export`.
-- KEEP A0 only as a protocol- and format-conditional direct path.
-- ADAPT A1 into A1a direct replacement and A1b HLAE-aware GPU format bridge.
-- KEEP old replacement-target primitive as exact-source donor.
-- STOP guessing actual eye format from fallback source guards.
-- STOP naive post-hook A2.
-- KEEP CPU v0.7.1 only as fallback B.
+- `KEEP`: v0.5.5 pass1 LEFT / pass2 RIGHT / pass3 monitor.
+- `KEEP`: HLAE replacement surface as authoritative eye staging.
+- `KEEP`: exact promoted Push/Pop/Event primitives.
+- `ADAPT`: snapshot each eye immediately into dedicated transport ownership before next pass can overwrite staging.
+- `ADAPT`: A1b split into D3D9 carrier and D3D11 shader-blit variants.
+- `ADAPT`: explicit D3D9 producer + D3D11 consumer fences.
+- `STOP`: modern v6/v7 shared-texture Continue as game-export evidence.
+- `STOP`: `+0x36150` as PushRT.
+- `STOP`: naive raw-RT0 post-copy.
+- `STOP`: `CopyResource` as scaler.
+- `STOP`: hard-coded XR format/gamma assumptions.
+
+## Current gate
+
+HLAE static/binary archaeology is sufficiently saturated for T0.
+
+Next information-efficient step remains one bounded D3D9 compatibility control, not another broad source scan and not a full OpenXR transport LIVE.
 
 No runtime RESULT is claimed by this document.
