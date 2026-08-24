@@ -1,0 +1,129 @@
+[CANDIDATE 1]
+Entry=100346a0
+RVA=0x346a0
+Name=FUN_100346a0
+Score=278
+SourceRoleHint=RT_POP_MEMBER_FINALIST
+TotalCalls=8
+SetRT=1 GetRT=1 StretchRect=1 CreateTexture=0 CreateQuery=0 QueryIssue=0 QueryGetData=0
+BodyBytes=246
+RELEVANT_CALLS
+  10034709  CALL dword ptr [EAX + 0x98]
+    100346f9  LEA EDX, [EBP + -0x4]
+    100346fc  PUSH EDX
+    100346fd  MOV dword ptr [EBP + -0x4], 0x0
+    10034704  PUSH 0x0
+    10034706  MOV EAX, dword ptr [ECX]
+    10034708  PUSH ECX
+  > 10034709  CALL dword ptr [EAX + 0x98]
+    1003470f  TEST EAX, EAX
+    10034711  JS 0x10034738
+    10034713  MOV ECX, dword ptr [EBP + -0x4]
+    10034716  CMP ECX, dword ptr [0x1021d6b0]
+    1003471c  JNZ 0x10034732
+    1003471e  MOV EAX, [0x1021d5e0]
+  10034729  CALL dword ptr [ECX + 0x94]
+    1003471c  JNZ 0x10034732
+    1003471e  MOV EAX, [0x1021d5e0]
+    10034723  PUSH ESI
+    10034724  PUSH 0x0
+    10034726  PUSH EAX
+    10034727  MOV ECX, dword ptr [EAX]
+  > 10034729  CALL dword ptr [ECX + 0x94]
+    1003472f  MOV ECX, dword ptr [EBP + -0x4]
+    10034732  MOV EAX, dword ptr [ECX]
+    10034734  PUSH ECX
+    10034735  CALL dword ptr [EAX + 0x8]
+    10034738  CMP byte ptr [EBP + 0x8], 0x0
+    1003473c  JZ 0x10034759
+  10034753  CALL dword ptr [EDX + 0x88]
+    10034745  PUSH 0x0
+    10034747  PUSH ESI
+    10034748  MOV EDX, dword ptr [EAX]
+    1003474a  PUSH 0x0
+    1003474c  PUSH dword ptr [0x1021d6b0]
+    10034752  PUSH EAX
+  > 10034753  CALL dword ptr [EDX + 0x88]
+    10034759  MOV EAX, [0x1021d6b0]
+    1003475e  MOV ECX, 0x1021d714
+    10034763  MOV dword ptr [EBP + -0x8], EAX
+    10034766  LEA EAX, [EBP + -0x8]
+    10034769  PUSH EAX
+    1003476a  MOV dword ptr [EBP + -0xc], ESI
+CALLERS
+  from=10089ede caller=10089e20/FUN_10089e20
+  from=1002942a caller=10029330/FUN_10029330
+  from=10089c29 caller=100898f0/FUN_100898f0
+  from=10085cfd caller=10085ce0/FUN_10085ce0
+  from=10016d6b caller=10016d60/FUN_10016d60
+THIN_CALLER_CANDIDATES
+  RVA=0x16d60 Entry=10016d60 Name=FUN_10016d60 BodyBytes=26 Calls=1 RefFrom=10016d6b SigLen=26 SigHex=833DE4E020100074106A00E830D9010083C404FF0DE4E02010C3
+  THIN_INSTRUCTIONS_BEGIN
+      10016d60  CMP dword ptr [0x1020e0e4], 0x0
+      10016d67  JZ 0x10016d79
+      10016d69  PUSH 0x0
+      10016d6b  CALL 0x100346a0
+      10016d70  ADD ESP, 0x4
+      10016d73  DEC dword ptr [0x1020e0e4]
+      10016d79  RET
+  THIN_INSTRUCTIONS_END
+  THIN_DECOMPILE_BEGIN
+
+void FUN_10016d60(void)
+
+{
+  if (DAT_1020e0e4 != 0) {
+    FUN_100346a0(0);
+    DAT_1020e0e4 = DAT_1020e0e4 + -1;
+  }
+  return;
+}
+
+
+  THIN_DECOMPILE_END
+ThinCallerCountShown=1
+DECOMPILE_BEGIN
+
+void FUN_100346a0(char param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  undefined1 local_1c [8];
+  int local_14;
+  int *local_10;
+  int *local_c;
+  int *local_8;
+  
+  piVar1 = DAT_1021d6b0;
+  if (DAT_1021d6b0 != (int *)0x0) {
+    local_8 = DAT_1021d6b0;
+    _Find_lower_bound<>(local_1c,&local_8);
+    if ((*(char *)(local_14 + 0xd) != '\0') || (piVar1 < *(int **)(local_14 + 0x10))) {
+      local_14 = DAT_1021d714;
+    }
+    if ((local_14 != DAT_1021d714) && (piVar1 = *(int **)(local_14 + 0x14), piVar1 != (int *)0x0)) {
+      local_8 = (int *)0x0;
+      iVar2 = (**(code **)(*DAT_1021d5e0 + 0x98))(DAT_1021d5e0,0,&local_8);
+      if (-1 < iVar2) {
+        if (local_8 == DAT_1021d6b0) {
+          (**(code **)(*DAT_1021d5e0 + 0x94))(DAT_1021d5e0,0,piVar1);
+        }
+        (**(code **)(*local_8 + 8))(local_8);
+      }
+      if (param_1 != '\0') {
+        (**(code **)(*DAT_1021d5e0 + 0x88))(DAT_1021d5e0,DAT_1021d6b0,0,piVar1,0,0);
+      }
+      local_c = DAT_1021d6b0;
+      local_10 = piVar1;
+      FUN_10039e40(&local_c);
+      FUN_10039e40(&local_10);
+      (**(code **)(*DAT_1021d6b0 + 8))(DAT_1021d6b0);
+      DAT_1021d6b0 = piVar1;
+    }
+  }
+  return;
+}
+
+
+DECOMPILE_END
