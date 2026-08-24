@@ -69,6 +69,32 @@ Log at minimum:
 
 If the imported shared carrier format differs from the XR swapchain format, perform a documented D3D11 conversion/render/copy path instead of assuming `CopyResource` is legal across formats.
 
+### Size / scaling gate
+
+Microsoft's D3D11 `CopyResource` contract requires source and destination resources to have identical dimensions and compatible formats. It performs copy only and explicitly does **not** stretch. `CopySubresourceRegion` can place/crop a source region, but it also does not perform stretch/scaling.
+
+The accepted Quest baseline currently recommends `1504x1616` per eye. The exact HLAE replacement-eye RT dimensions have not yet been promoted as a frozen fact.
+
+Therefore T0 must not assume:
+
+`OpenSharedResource -> CopyResource -> XR swapchain`
+
+unless the imported carrier and acquired XR texture are actually dimension-compatible.
+
+If dimensions differ, retain two GPU-only choices:
+
+1. **D3D9-side sized carrier:** use a checked `StretchRect`/resolve path from the authoritative eye RT into a non-MSAA shared carrier sized for the XR destination. Direct3D 9 `StretchRect` supports RT-to-RT stretching and can downsample a multisampled render target into a non-MSAA render target. Format-conversion support must be checked with the actual device.
+2. **D3D11-side shader blit/scaler:** import the source carrier at its native size, sample it on the x64 D3D11 device, and render a fullscreen pass into the acquired XR texture at the runtime-selected eye size/format.
+
+Do not use `CopySubresourceRegion` as a fake scaler.
+
+This creates a useful A1b sub-classification:
+
+- `A1b-D9`: D3D9 GPU resolve/format/size bridge before sharing;
+- `A1b-D11`: share a legal carrier at source size, then D3D11 shader-blit into XR size/format.
+
+Selection should be based on real format/MSAA/dimension/capability evidence, not on assumed performance.
+
 ### Acquire / wait / copy / release discipline
 
 For each coherent LEFT/RIGHT pair:
@@ -94,7 +120,8 @@ A future T0 result should log:
 
 - imported D3D11 source texture desc;
 - XR destination texture desc;
-- copy/conversion operation chosen;
+- copy/conversion/scaling operation chosen;
+- source and destination dimensions;
 - HRESULT / debug-layer errors if available;
 - consumer GPU completion result;
 - per-eye acquire/wait/copy/release status.
@@ -123,9 +150,11 @@ Add to the eventual T0 RESULT:
 - actual D3D11 device LUID / FL;
 - `xrEnumerateSwapchainFormats` relevant list;
 - selected XR format and usage flags;
+- authoritative D3D9 eye/replacement RT width/height/format/MSAA;
 - D3D11 source texture desc for each transport slot;
 - XR destination texture desc;
-- copy/conversion result per eye;
+- selected path: direct copy / D3D9 sized carrier / D3D11 shader blit;
+- copy/conversion/scaling result per eye;
 - consumer GPU completion state;
 - acquire/wait/release counts and errors;
 - `xrEndFrame` count;
