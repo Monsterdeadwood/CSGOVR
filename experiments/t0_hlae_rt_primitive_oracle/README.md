@@ -1,4 +1,4 @@
-# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.1
+# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.2
 
 Evidence label: **STATIC-AUDITED / NOT LIVE-PROVEN**.
 
@@ -27,9 +27,9 @@ The BAT first runs a Windows PowerShell parser gate. The runner then locates the
 
 Return that ZIP to the CSGOVR analysis branch.
 
-## v1.1 source-guided role ranking
+## Source-guided role ranking
 
-The probe still performs a broad D3D9 call census, but now ranks exact-source-shaped roles before the generic candidates.
+The probe still performs a broad D3D9 call census, but ranks exact-source-shaped roles before generic candidates.
 
 Pinned source contract:
 
@@ -37,15 +37,15 @@ Pinned source contract:
 - `AfxD3d9PopRenderTarget` member path: `GetRenderTarget` plus `SetRenderTarget` plus the optional `StretchRect(slot34 / 0x88)` restoration/copy path.
 - GPU wait member path: `IDirect3DQuery9::Issue(slot6 / 0x18)` plus `GetData(slot7 / 0x1C)` in a bounded wait loop. The EVENT query is created separately through `CreateQuery(slot118 / 0x1D8)`.
 
-The scanner emits heuristic role labels:
+Heuristic role labels:
 
 - `RT_PUSH_MEMBER_FINALIST`
 - `RT_POP_MEMBER_FINALIST`
 - `GPU_WAIT_MEMBER_FINALIST`
 
-It also enumerates **thin direct callers** of each finalist. This is intended to expose the small global wrapper functions that source code uses around the underlying `g_NewDirect3DDevice9` member methods.
+The scanner also enumerates **thin direct callers** to expose likely global wrappers around the underlying `g_NewDirect3DDevice9` member methods.
 
-The v1.1.1 runner additionally extracts the first thin-caller RVA per role into `ROLE_SUMMARY.txt`:
+The v1.1.2 runner extracts compact role fields:
 
 - `BestPushMemberRVA`
 - `BestPushThinCallerRVA`
@@ -56,7 +56,12 @@ The v1.1.1 runner additionally extracts the first thin-caller RVA per role into 
 - `BoundedCoreFinalists`
 - `SemanticVerdict`
 
-`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped binary census collapsed to bounded candidates. The thin-caller fields are also heuristic. Neither member nor wrapper RVA is promoted to PROVEN until its decompile/call graph is checked against the exact pinned source.
+Two hardening changes matter in v1.1.2:
+
+1. member fields are normalized to pure `0x...` RVA values rather than carrying the rest of the scan line;
+2. thin-caller extraction is isolated to one candidate block. If a role has no thin caller, it returns `NONE` and cannot accidentally steal a wrapper RVA from a later candidate.
+
+`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped census collapsed to bounded candidates. Member and wrapper RVAs remain heuristic until decompile/call graph review against exact pinned source.
 
 ## Broader fingerprints retained
 
@@ -70,17 +75,7 @@ D3D9 device vtable fingerprints:
 
 Operand matching is deliberately tolerant to Ghidra rendering variants. Promotion is never based on a displacement alone; the candidate must also match callers, decompilation, and pinned source semantics.
 
-For bounded candidates the scan records:
-
-- exact VA/RVA;
-- source-guided role hint;
-- score and matched D3D9 operations;
-- relevant disassembly context;
-- direct callers;
-- thin caller/wrapper candidates;
-- decompiled body;
-- any surviving symbol-name matches;
-- the known DoRenderView anchor decompilation for context.
+For bounded candidates the scan records exact VA/RVA, source-guided role hint, matched operations, disassembly context, callers, thin callers, decompiled body, symbol-name matches, and the known DoRenderView anchor context.
 
 ## Source-semantic target
 
@@ -90,7 +85,7 @@ The strongest current target is the HLAE-aware replacement-target pair:
 
 `AfxD3d9PopRenderTarget(stretchRect)`
 
-Pinned source shows that Push links the current tracked source surface to the replacement, switches raw RT0 when appropriate, and updates HLAE `trackedRenderTarget`. Pop reverses that mapping and restores the state. This is safer than a blind out-of-band `IDirect3DDevice9::SetRenderTarget` from the injected child.
+Pinned source shows that Push links the current tracked source surface to the replacement, switches raw RT0 when appropriate, and updates HLAE `trackedRenderTarget`. Pop reverses that mapping and restores state. This is safer than an out-of-band `IDirect3DDevice9::SetRenderTarget` from an injected child.
 
 The GPU completion path is source-proven to use an EVENT query: `Issue(D3DISSUE_END)` followed by `GetData(..., D3DGETDATA_FLUSH)` until completion.
 
@@ -100,7 +95,7 @@ The 2026-08-24 directional audit proved that modern AfxInterop v6/v7 `HandleDraw
 
 The older replacement-target path is the exact source-proven game-render-to-shared-target primitive. T0 therefore needs either a verified compatible old protocol mode or a minimal transplant of its HLAE-state-aware mechanics.
 
-A second guard also remains: direct D3D9 -> D3D11 sharing depends on the authoritative tracked eye RT format/MSAA state. If direct sharing is incompatible, the preferred fallback remains GPU-only conversion into a compatible non-MSAA carrier, not CPU readback.
+A second guard remains: direct D3D9 -> D3D11 sharing depends on authoritative tracked eye RT format/MSAA. If direct sharing is incompatible, the preferred fallback remains GPU-only conversion into a compatible non-MSAA carrier, not CPU readback.
 
 See:
 
