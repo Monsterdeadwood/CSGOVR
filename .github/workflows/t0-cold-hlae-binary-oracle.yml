@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   exact-binary-static-oracle:
@@ -145,10 +145,99 @@ jobs:
           ) | Set-Content -LiteralPath (Join-Path $result 'INPUT_IDENTITY.txt') -Encoding UTF8
           Copy-Item -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'experiments\t0_hlae_rt_primitive_oracle\PREFLIGHT.txt') -Destination (Join-Path $result 'PREFLIGHT.txt')
 
-      - name: Upload compact COLD result
+      - name: Build compact source-review result
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $result = Join-Path $env:GITHUB_WORKSPACE '_ci_t0_hlae_cold_result'
+          $scan = Join-Path $result 'HLAE_RT_PRIMITIVE_SCAN.txt'
+          $text = Get-Content -LiteralPath $scan -Raw
+
+          function Get-Rva([string]$Key) {
+            $m = [regex]::Match($text, '(?m)^' + [regex]::Escape($Key) + '=(0x[0-9A-Fa-f]+)')
+            if ($m.Success) { return $m.Groups[1].Value }
+            return 'NONE'
+          }
+          function Get-Value([string]$Key) {
+            $m = [regex]::Match($text, '(?m)^' + [regex]::Escape($Key) + '=(.*)$')
+            if ($m.Success) { return $m.Groups[1].Value.Trim() }
+            return 'MISSING'
+          }
+          function Get-RoleBlock([string]$Role) {
+            $blocks = [regex]::Split($text, '(?m)^={32,}\s*$')
+            foreach ($b in $blocks) {
+              if ($b -match ('(?m)^SourceRoleHint=' + [regex]::Escape($Role) + '\s*$')) { return $b.Trim() }
+            }
+            return 'NO_CANDIDATE_BLOCK'
+          }
+          function Get-WrapperField([string]$Role,[string]$Field) {
+            $b = Get-RoleBlock $Role
+            if ($b -eq 'NO_CANDIDATE_BLOCK') { return 'NONE' }
+            $m = [regex]::Match($b, '(?m)^\s+RVA=(0x[0-9A-Fa-f]+).*?SigLen=(\d+)\s+SigHex=([0-9A-Fa-f]+)\s*$')
+            if (-not $m.Success) { return 'NONE' }
+            if ($Field -eq 'RVA') { return $m.Groups[1].Value }
+            if ($Field -eq 'SIG') { return $m.Groups[3].Value.ToUpperInvariant() }
+            return 'NONE'
+          }
+
+          $pushWrapper = Get-WrapperField 'RT_PUSH_MEMBER_FINALIST' 'RVA'
+          $pushSig = Get-WrapperField 'RT_PUSH_MEMBER_FINALIST' 'SIG'
+          $popWrapper = Get-WrapperField 'RT_POP_MEMBER_FINALIST' 'RVA'
+          $popSig = Get-WrapperField 'RT_POP_MEMBER_FINALIST' 'SIG'
+          $waitWrapper = Get-WrapperField 'GPU_WAIT_MEMBER_FINALIST' 'RVA'
+          $waitSig = Get-WrapperField 'GPU_WAIT_MEMBER_FINALIST' 'SIG'
+
+          @(
+            'CSGOVR T0 HLAE COLD CI ROLE SUMMARY',
+            'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
+            ('SourceCommit=' + $env:GITHUB_SHA),
+            ('SemanticVerdict=' + (Get-Value 'SemanticVerdict')),
+            ('BoundedCoreFinalists=' + (Get-Value 'BoundedCoreFinalists')),
+            ('BestPushMemberRVA=' + (Get-Rva 'BestPushMemberRVA')),
+            ('BestPushThinCallerRVA=' + $pushWrapper),
+            ('BestPushThinCallerSigHex=' + $pushSig),
+            ('BestPopMemberRVA=' + (Get-Rva 'BestPopMemberRVA')),
+            ('BestPopThinCallerRVA=' + $popWrapper),
+            ('BestPopThinCallerSigHex=' + $popSig),
+            ('BestGpuWaitMemberRVA=' + (Get-Rva 'BestGpuWaitMemberRVA')),
+            ('BestGpuWaitThinCallerRVA=' + $waitWrapper),
+            ('BestGpuWaitThinCallerSigHex=' + $waitSig),
+            'PromotionPolicy=NO AUTO PROMOTION; inspect committed finalist decompiles against pinned source.',
+            'RuntimeAuthorization=NO'
+          ) | Set-Content -LiteralPath (Join-Path $result 'ROLE_SUMMARY.txt') -Encoding UTF8
+
+          Get-RoleBlock 'RT_PUSH_MEMBER_FINALIST' | Set-Content -LiteralPath (Join-Path $result 'PUSH_FINALIST.txt') -Encoding UTF8
+          Get-RoleBlock 'RT_POP_MEMBER_FINALIST' | Set-Content -LiteralPath (Join-Path $result 'POP_FINALIST.txt') -Encoding UTF8
+          Get-RoleBlock 'GPU_WAIT_MEMBER_FINALIST' | Set-Content -LiteralPath (Join-Path $result 'GPU_WAIT_FINALIST.txt') -Encoding UTF8
+          $scanHash = (Get-FileHash -LiteralPath $scan -Algorithm SHA256).Hash.ToUpperInvariant()
+          ('FullScanSHA256=' + $scanHash) | Set-Content -LiteralPath (Join-Path $result 'FULL_SCAN_SHA256.txt') -Encoding UTF8
+
+      - name: Upload full COLD result artifact
         uses: actions/upload-artifact@v4
         with:
           name: csgovr-t0-hlae-cold-${{ github.run_id }}
           path: _ci_t0_hlae_cold_result/
           if-no-files-found: error
           retention-days: 14
+
+      - name: Commit compact COLD review result to research branch
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $result = Join-Path $env:GITHUB_WORKSPACE '_ci_t0_hlae_cold_result'
+          $dest = Join-Path $env:GITHUB_WORKSPACE ('research\ci_results\T0_HLAE_COLD_CI\' + $env:GITHUB_SHA)
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          foreach ($name in @('INPUT_IDENTITY.txt','PREFLIGHT.txt','ROLE_SUMMARY.txt','PUSH_FINALIST.txt','POP_FINALIST.txt','GPU_WAIT_FINALIST.txt','FULL_SCAN_SHA256.txt')) {
+            Copy-Item -LiteralPath (Join-Path $result $name) -Destination (Join-Path $dest $name) -Force
+          }
+
+          git config user.name 'csgovr-cold-oracle-bot'
+          git config user.email 'csgovr-cold-oracle-bot@users.noreply.github.com'
+          git add -- 'research/ci_results/T0_HLAE_COLD_CI'
+          if ((git diff --cached --name-only).Length -eq 0) {
+            Write-Host '[INFO] Compact result already committed.'
+            exit 0
+          }
+          git commit -m "COLD RESULT: exact HLAE RT oracle $env:GITHUB_SHA"
+          git pull --rebase origin $env:GITHUB_REF_NAME
+          git push origin "HEAD:$env:GITHUB_REF_NAME"
