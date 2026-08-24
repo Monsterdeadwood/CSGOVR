@@ -1,0 +1,6 @@
+# Local promotion evidence and generated binaries must never be committed by accident.
+PROMOTED_RVAS.ini
+_BUILD_GATED/
+*.dll
+*.exe
+*.log
