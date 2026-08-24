@@ -1,0 +1,10 @@
+EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN
+OracleVersion=1.1.4
+HLAEAsset=hlae_2_191_1.zip
+AfxHookSourceSHA256=5B9D13AE9ABFFEEF80851E10861302162A47D1B43D8483B4A8FCEC7EAA19B035
+GhidraTag=Ghidra_12.1.3_build
+SourceCommit=f17fc4d13a00ad306b763e81d8f5a6d385448f1e
+GameLaunched=NO
+HLAELaunched=NO
+Injection=NO
+BinaryPatched=NO
