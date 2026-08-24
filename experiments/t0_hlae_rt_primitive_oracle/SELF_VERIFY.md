@@ -10,10 +10,12 @@ Status before runtime: **PREPARED / UNRUN**.
 - PASS: `CAfxStreams::DoRenderView` known RVA `0x22340` is retained as an anchor only.
 - PASS: D3D9 device slot fingerprints are explicit: SetRT 37, GetRT 38, StretchRect 34, CreateTexture 23, CreateQuery 118.
 - PASS: D3D9 query slot fingerprints are explicit: Issue 6, GetData 7.
-- PASS: v1.1 adds source-guided role ranking for Push member, Pop member and GPU-wait member.
-- PASS: source role ranking remains explicitly heuristic and cannot auto-promote an RVA to PROVEN.
+- PASS: source-guided role ranking covers Push member, Pop member and GPU-wait member.
+- PASS: source role ranking is explicitly heuristic and cannot auto-promote an RVA to PROVEN.
 - PASS: thin direct callers are emitted to expose likely global wrapper functions around member implementations.
-- PASS: v1.1.1 runner extracts first thin-caller RVA for Push/Pop/GPU-wait into the compact role summary.
+- PASS: runner extracts first thin-caller RVA for Push/Pop/GPU-wait into the compact role summary.
+- PASS: v1.1.2 isolates thin-caller parsing to one candidate block; zero-call candidates return `NONE` rather than borrowing a later candidate's wrapper.
+- PASS: v1.1.2 normalizes best-member fields to pure `0x...` RVAs.
 - PASS: thin-caller extraction remains heuristic and is not runtime authorization.
 - PASS: operand matching tolerates Ghidra rendering variants, while semantic promotion still requires callers/decompilation/source agreement.
 - PASS: candidate output includes RVAs, role hints, call contexts, callers, thin callers and decompilation.
