@@ -61,7 +61,14 @@ function Get-ScanValue([string]$Text, [string]$Key) {
     return 'MISSING'
 }
 
-Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.0'
+function Get-ThinCallerForRole([string]$Text, [string]$Role) {
+    $roleEsc = [regex]::Escape($Role)
+    $m = [regex]::Match($Text, '(?ms)\[CANDIDATE\s+\d+\].*?SourceRoleHint=' + $roleEsc + '.*?THIN_CALLER_CANDIDATES\s*\r?\n\s+RVA=(0x[0-9A-Fa-f]+)')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return 'NONE'
+}
+
+Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.1'
 Write-Host 'READ-ONLY STATIC ANALYSIS. CS:GO/HLAE WILL NOT BE LAUNCHED OR PATCHED.'
 
 Banner '1/6 EXACT INPUT'
@@ -93,7 +100,7 @@ $StagedHash = (Get-FileHash -LiteralPath $StagedAfx -Algorithm SHA256).Hash.ToUp
 if ($StagedHash -ne $ExpectedAfx) { throw 'Staged AfxHookSource.dll hash mismatch.' }
 @(
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
-    ('OracleVersion=1.1.0'),
+    'OracleVersion=1.1.1',
     ('OriginalPath=' + $Afx),
     ('SHA256=' + $StagedHash),
     ('ExpectedTimestamp=0x{0:X8}' -f $ExpectedTimestamp),
@@ -141,6 +148,9 @@ $bounded = Get-ScanValue $scanText 'BoundedCoreFinalists'
 $push = Get-ScanValue $scanText 'BestPushMemberRVA'
 $pop = Get-ScanValue $scanText 'BestPopMemberRVA'
 $wait = Get-ScanValue $scanText 'BestGpuWaitMemberRVA'
+$pushWrapper = Get-ThinCallerForRole $scanText 'RT_PUSH_MEMBER_FINALIST'
+$popWrapper = Get-ThinCallerForRole $scanText 'RT_POP_MEMBER_FINALIST'
+$waitWrapper = Get-ThinCallerForRole $scanText 'GPU_WAIT_MEMBER_FINALIST'
 $resultClass = if ($semantic -eq 'BOUNDED_FINALISTS') { 'PASS_BOUNDED_FINALISTS_PENDING_SOURCE_REVIEW' } else { 'INCONCLUSIVE_STATIC' }
 
 @(
@@ -149,8 +159,11 @@ $resultClass = if ($semantic -eq 'BOUNDED_FINALISTS') { 'PASS_BOUNDED_FINALISTS_
     ('SemanticVerdict=' + $semantic),
     ('BoundedCoreFinalists=' + $bounded),
     ('BestPushMemberRVA=' + $push),
+    ('BestPushThinCallerRVA=' + $pushWrapper),
     ('BestPopMemberRVA=' + $pop),
+    ('BestPopThinCallerRVA=' + $popWrapper),
     ('BestGpuWaitMemberRVA=' + $wait),
+    ('BestGpuWaitThinCallerRVA=' + $waitWrapper),
     'PromotionPolicy=HEURISTIC ONLY; compare candidate decompile and thin callers against pinned source before promotion.',
     'RuntimeAuthorization=NO'
 ) | Set-Content -LiteralPath (Join-Path $Stage 'ROLE_SUMMARY.txt') -Encoding UTF8
@@ -158,15 +171,18 @@ $resultClass = if ($semantic -eq 'BOUNDED_FINALISTS') { 'PASS_BOUNDED_FINALISTS_
 @(
     'CSGOVR T0 HLAE RT PRIMITIVE ORACLE',
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
-    'OracleVersion=1.1.0',
+    'OracleVersion=1.1.1',
     ('ExactHash=' + $StagedHash),
     ('ScanComplete=' + [bool]($scanText -match 'SCAN_COMPLETE=YES')),
     ('ResultClass=' + $resultClass),
     ('SemanticVerdict=' + $semantic),
     ('BoundedCoreFinalists=' + $bounded),
     ('BestPushMemberRVA=' + $push),
+    ('BestPushThinCallerRVA=' + $pushWrapper),
     ('BestPopMemberRVA=' + $pop),
+    ('BestPopThinCallerRVA=' + $popWrapper),
     ('BestGpuWaitMemberRVA=' + $wait),
+    ('BestGpuWaitThinCallerRVA=' + $waitWrapper),
     'InterpretationPolicy=Source-guided role output narrows candidates but never auto-promotes an RVA to PROVEN.',
     'NoRuntimeResultClaimed=YES'
 ) | Set-Content -LiteralPath (Join-Path $Stage 'RESULT_SUMMARY.txt') -Encoding UTF8
@@ -180,5 +196,7 @@ $ZipHash = (Get-FileHash -LiteralPath $Zip -Algorithm SHA256).Hash.ToUpperInvari
 Write-Host ('[DONE] RESULT=' + $Zip)
 Write-Host ('[DONE] SHA256=' + $ZipHash)
 Write-Host ('[DONE] SemanticVerdict=' + $semantic)
-Write-Host ('[DONE] Push=' + $push + ' Pop=' + $pop + ' Wait=' + $wait)
+Write-Host ('[DONE] Push=' + $push + ' wrapper=' + $pushWrapper)
+Write-Host ('[DONE] Pop=' + $pop + ' wrapper=' + $popWrapper)
+Write-Host ('[DONE] Wait=' + $wait + ' wrapper=' + $waitWrapper)
 Write-Host '[RETURN] Send the small RESULT ZIP back to the CSGOVR branch.'
