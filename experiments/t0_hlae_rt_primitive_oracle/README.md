@@ -1,4 +1,4 @@
-# CSGOVR T0 COLD HLAE RT primitive oracle v1.0.0
+# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.0
 
 Evidence label: **STATIC-AUDITED / NOT LIVE-PROVEN**.
 
@@ -27,9 +27,37 @@ The BAT first runs a Windows PowerShell parser gate. The runner then locates the
 
 Return that ZIP to the CSGOVR analysis branch.
 
-## What the probe searches
+## v1.1 source-guided role ranking
 
-D3D9 device vtable fingerprints used by the exact source implementation:
+The probe still performs a broad D3D9 call census, but now ranks exact-source-shaped roles before the generic candidates.
+
+Pinned source contract:
+
+- `AfxD3d9PushRenderTargetEx` member path: `GetRenderTarget(slot38 / 0x98)` plus `SetRenderTarget(slot37 / 0x94)`, with no `StretchRect` in the push body.
+- `AfxD3d9PopRenderTarget` member path: `GetRenderTarget` plus `SetRenderTarget` plus the optional `StretchRect(slot34 / 0x88)` restoration/copy path.
+- GPU wait member path: `IDirect3DQuery9::Issue(slot6 / 0x18)` plus `GetData(slot7 / 0x1C)` in a bounded wait loop. The EVENT query is created separately through `CreateQuery(slot118 / 0x1D8)`.
+
+The scanner emits heuristic role labels:
+
+- `RT_PUSH_MEMBER_FINALIST`
+- `RT_POP_MEMBER_FINALIST`
+- `GPU_WAIT_MEMBER_FINALIST`
+
+It also enumerates **thin direct callers** of each finalist. This is intended to expose the small global wrapper functions that source code uses around the underlying `g_NewDirect3DDevice9` member methods.
+
+The runner extracts a compact `ROLE_SUMMARY.txt` with:
+
+- `BestPushMemberRVA`
+- `BestPopMemberRVA`
+- `BestGpuWaitMemberRVA`
+- `BoundedCoreFinalists`
+- `SemanticVerdict`
+
+`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped binary census collapsed to bounded candidates. It does **not** promote any RVA to PROVEN and does **not** authorize runtime mutation by itself.
+
+## Broader fingerprints retained
+
+D3D9 device vtable fingerprints:
 
 - slot 37 / displacement `0x94`: `SetRenderTarget`
 - slot 38 / displacement `0x98`: `GetRenderTarget`
@@ -37,19 +65,19 @@ D3D9 device vtable fingerprints used by the exact source implementation:
 - slot 23 / displacement `0x5C`: `CreateTexture`
 - slot 118 / displacement `0x1D8`: `CreateQuery`
 
-Operand matching is deliberately tolerant to Ghidra rendering variants. Promotion is never based on the displacement alone; the candidate must also match callers, decompilation, and pinned source semantics.
+Operand matching is deliberately tolerant to Ghidra rendering variants. Promotion is never based on a displacement alone; the candidate must also match callers, decompilation, and pinned source semantics.
 
-For bounded candidates it records:
+For bounded candidates the scan records:
 
 - exact VA/RVA;
+- source-guided role hint;
 - score and matched D3D9 operations;
 - relevant disassembly context;
 - direct callers;
+- thin caller/wrapper candidates;
 - decompiled body;
 - any surviving symbol-name matches;
 - the known DoRenderView anchor decompilation for context.
-
-The result is intentionally a candidate census. An RVA is promoted only when its exact binary semantics match the pinned source behavior.
 
 ## Source-semantic target
 
@@ -61,7 +89,7 @@ The strongest current target is the HLAE-aware replacement-target pair:
 
 Pinned source shows that Push links the current tracked source surface to the replacement, switches raw RT0 when appropriate, and updates HLAE `trackedRenderTarget`. Pop reverses that mapping and restores the state. This is safer than a blind out-of-band `IDirect3DDevice9::SetRenderTarget` from the injected child.
 
-The oracle also harvests `CreateTexture` / `CreateQuery` candidates needed to map shared-resource creation and GPU completion.
+The GPU completion path is source-proven to use an EVENT query: `Issue(D3DISSUE_END)` followed by `GetData(..., D3DGETDATA_FLUSH)` until completion.
 
 ## Why this gate exists
 
@@ -69,16 +97,21 @@ The 2026-08-24 directional audit proved that modern AfxInterop v6/v7 `HandleDraw
 
 The older replacement-target path is the exact source-proven game-render-to-shared-target primitive. T0 therefore needs either a verified compatible old protocol mode or a minimal transplant of its HLAE-state-aware mechanics.
 
-See `research/T0_GPU_TRANSPORT_DIRECTIONAL_AUDIT_20260824.md`.
+A second guard also remains: direct D3D9 -> D3D11 sharing depends on the authoritative tracked eye RT format/MSAA state. If direct sharing is incompatible, the preferred fallback remains GPU-only conversion into a compatible non-MSAA carrier, not CPU readback.
+
+See:
+
+- `research/T0_GPU_TRANSPORT_DIRECTIONAL_AUDIT_20260824.md`
+- `research/T0_D3D9EX_D3D11_SHARED_FORMAT_AUDIT_20260824.md`
 
 ## PREFLIGHT
 
 MISSING FACT: exact frozen HLAE binary RVAs/fingerprints for HLAE-state-aware RT replacement and GPU completion.
 
-WHY NOT COLD: this is fully answerable from the exact-hash binary plus pinned source, so runtime would have lower information efficiency and unnecessary mutation risk.
+WHY NOT COLD: this experiment **is** the cold/static closure; runtime is unnecessary and unauthorized here.
 
-PASS: bounded candidates match source semantics closely enough to select exact helper RVAs/fingerprints for A1 implementation.
+PASS: source-guided binary fingerprints collapse PushRT/PopRT/GPU-wait to bounded finalists with decompile/caller context sufficient for exact source-semantic review.
 
-FAIL: candidate semantics remain ambiguous or contradict pinned source; then A1 is not authorized from this result.
+FAIL: core roles remain ambiguous or contradict pinned source; then A1 is not authorized from this result.
 
 BASELINE MUST HOLD: no CS:GO/HLAE launch, no injection, no patching, exact input hash only.
