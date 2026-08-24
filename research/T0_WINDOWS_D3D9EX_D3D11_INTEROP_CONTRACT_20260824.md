@@ -67,7 +67,32 @@ DXGI legacy shared handles can be marshaled between processes, but Microsoft sta
 
 Reference: Microsoft Learn, `IDXGIResource::GetSharedHandle`.
 
+### 7. D3D9Ex exposes a cross-API adapter identity
+
+`IDirect3D9Ex::GetAdapterLUID` returns the hardware-specific adapter LUID, and Microsoft explicitly describes it as suitable for robust mappings across Direct3D 9 and DXGI.
+
+Reference: Microsoft Learn, `IDirect3D9Ex::GetAdapterLUID`.
+
+Therefore T0 can compare the D3D9Ex producer's adapter identity directly with the `adapterLuid` returned by OpenXR's `xrGetD3D11GraphicsRequirementsKHR` rather than inferring GPU identity from device names or window/display placement.
+
 ## CSGOVR transport consequences
+
+### Adapter-LUID gate comes before format blame
+
+The bounded compatibility control should record:
+
+- D3D9 device creation adapter ordinal;
+- `IDirect3D9Ex::GetAdapterLUID(adapterOrdinal)` result;
+- OpenXR-required D3D11 `adapterLuid`;
+- actual D3D11 device adapter LUID.
+
+Preferred direct path condition:
+
+`D3D9Ex producer LUID == OpenXR-required D3D11 LUID == actual x64 D3D11 LUID`
+
+If these identities differ, classify a concrete adapter/topology blocker before interpreting `OpenSharedResource` failures as format or HLAE failures.
+
+The actual behavior of a cross-adapter legacy D3D9 shared handle should not be guessed into a supported T0 path. T0 targets the runtime-required XR adapter.
 
 ### Two-slot minimum becomes an ownership protocol, not merely buffering
 
@@ -147,7 +172,8 @@ Remain eligible only if the authoritative eye/replacement RT is:
 
 - non-MSAA;
 - directly representable by the documented D3D9 -> D3D11 allowed format set;
-- actually creatable/openable on the frozen devices.
+- actually creatable/openable on the frozen devices;
+- on the same adapter LUID required by OpenXR.
 
 ### A1b GPU carrier
 
@@ -161,6 +187,8 @@ The actual `StretchRect`/conversion capability remains a runtime device-cap fact
 
 A future transport PASS should record:
 
+- D3D9Ex producer adapter LUID;
+- OpenXR-required and actual D3D11 adapter LUIDs;
 - at least two reusable transport slots or an equivalent ownership-safe queue;
 - explicit slot state transitions;
 - no producer reuse before consumer completion;
