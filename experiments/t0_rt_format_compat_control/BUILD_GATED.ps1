@@ -72,7 +72,7 @@ Write-Host 'This script never launches CS:GO/HLAE and never injects the produced
 
 Banner '1/5 PROMOTION GATE'
 if (-not (Test-Path -LiteralPath $ConfigPath)) {
-    throw 'PROMOTED_RVAS.ini is absent. This is intentional before COLD semantic review. Build refused.'
+    throw 'PROMOTED_RVAS.ini is absent. This is intentional before bounded compatibility LIVE authorization. Build refused.'
 }
 $cfg = Read-SimpleIni $ConfigPath
 $status = Require-Key $cfg 'Status'
@@ -83,15 +83,15 @@ $coldHash = (Require-Key $cfg 'ColdResultSHA256').ToUpperInvariant()
 if ($coldHash -notmatch '^[0-9A-F]{64}$') { throw 'ColdResultSHA256 must be exactly 64 hex characters.' }
 $review = Require-Key $cfg 'ReviewerVerdict'
 if ($review -ne 'PROVEN_SOURCE_MATCH') { throw 'ReviewerVerdict must be PROVEN_SOURCE_MATCH.' }
-$rvaText = Require-Key $cfg 'PushWrapperRVA'
-if ($rvaText -notmatch '^0x[0-9A-Fa-f]{1,8}$') { throw 'PushWrapperRVA must be 0x... hex.' }
+$rvaText = Require-Key $cfg 'PushPrimitiveRVA'
+if ($rvaText -notmatch '^0x[0-9A-Fa-f]{1,8}$') { throw 'PushPrimitiveRVA must be 0x... hex.' }
 $rva = [Convert]::ToUInt32($rvaText.Substring(2),16)
-if ($rva -eq 0) { throw 'PushWrapperRVA cannot be zero.' }
-$sig = (Require-Key $cfg 'PushWrapperSigHex').Replace(' ','').Replace('-','').ToUpperInvariant()
-if ($sig -notmatch '^[0-9A-F]+$' -or ($sig.Length % 2) -ne 0) { throw 'PushWrapperSigHex must be even-length hex.' }
+if ($rva -eq 0) { throw 'PushPrimitiveRVA cannot be zero.' }
+$sig = (Require-Key $cfg 'PushPrimitiveSigHex').Replace(' ','').Replace('-','').ToUpperInvariant()
+if ($sig -notmatch '^[0-9A-F]+$' -or ($sig.Length % 2) -ne 0) { throw 'PushPrimitiveSigHex must be even-length hex.' }
 $sigBytes = [int]($sig.Length / 2)
-if ($sigBytes -lt 6 -or $sigBytes -gt 64) { throw 'PushWrapperSigHex must contain 6..64 bytes.' }
-Write-Host ('[OK] promoted Push wrapper RVA=' + $rvaText + ' signatureBytes=' + $sigBytes)
+if ($sigBytes -lt 6 -or $sigBytes -gt 64) { throw 'PushPrimitiveSigHex must contain 6..64 bytes.' }
+Write-Host ('[OK] promoted Push primitive RVA=' + $rvaText + ' signatureBytes=' + $sigBytes)
 Write-Host ('[OK] cold RESULT SHA256=' + $coldHash)
 
 Banner '2/5 TOOLCHAIN'
@@ -110,10 +110,15 @@ $byteItems = New-Object System.Collections.Generic.List[string]
 for ($i=0; $i -lt $sig.Length; $i += 2) { $byteItems.Add(('0x' + $sig.Substring($i,2))) }
 @(
     '#pragma once',
-    ('#define CSGOVR_PUSH_WRAPPER_RVA 0x{0:X8}u' -f $rva),
+    ('#define CSGOVR_PUSH_PRIMITIVE_RVA 0x{0:X8}u' -f $rva),
     ('#define CSGOVR_PROMOTION_COLD_RESULT_SHA256 "' + $coldHash + '"'),
-    ('static const unsigned char CSGOVR_PUSH_WRAPPER_SIG[] = { ' + ($byteItems -join ', ') + ' };'),
-    '#define CSGOVR_PUSH_WRAPPER_SIG_LEN ((unsigned int)sizeof(CSGOVR_PUSH_WRAPPER_SIG))'
+    ('static const unsigned char CSGOVR_PUSH_PRIMITIVE_SIG[] = { ' + ($byteItems -join ', ') + ' };'),
+    '#define CSGOVR_PUSH_PRIMITIVE_SIG_LEN ((unsigned int)sizeof(CSGOVR_PUSH_PRIMITIVE_SIG))',
+    '',
+    '/* Temporary source compatibility aliases. The target is the promoted primitive itself, not an unknown wrapper. */',
+    '#define CSGOVR_PUSH_WRAPPER_RVA CSGOVR_PUSH_PRIMITIVE_RVA',
+    '#define CSGOVR_PUSH_WRAPPER_SIG CSGOVR_PUSH_PRIMITIVE_SIG',
+    '#define CSGOVR_PUSH_WRAPPER_SIG_LEN CSGOVR_PUSH_PRIMITIVE_SIG_LEN'
 ) | Set-Content -LiteralPath $header -Encoding ASCII
 Write-Host ('[OK] generated ' + $header)
 
@@ -145,8 +150,8 @@ Banner '5/5 BUILD CONTRACT'
     'EvidenceLabel=PREPARED / GATED / NOT LIVE-PROVEN',
     ('ColdResultSHA256=' + $coldHash),
     ('ExactAfxSHA256=' + $afxHash),
-    ('PushWrapperRVA=' + ('0x{0:X8}' -f $rva)),
-    ('PushWrapperSigBytes=' + $sigBytes),
+    ('PushPrimitiveRVA=' + ('0x{0:X8}' -f $rva)),
+    ('PushPrimitiveSigBytes=' + $sigBytes),
     ('ProbeDLLSHA256=' + $dllHash),
     ('Zig=' + $zig),
     ('MinHook=' + $mh),
@@ -157,4 +162,4 @@ Banner '5/5 BUILD CONTRACT'
 
 Write-Host ''
 Write-Host '[DONE] GATED BUILD ONLY. No game was launched and no DLL was injected.' -ForegroundColor Green
-Write-Host '[STOP] Do not inject until the compatibility LIVE is explicitly authorized after COLD review.' -ForegroundColor Yellow
+Write-Host '[STOP] Do not inject until the bounded compatibility LIVE is explicitly authorized.' -ForegroundColor Yellow
