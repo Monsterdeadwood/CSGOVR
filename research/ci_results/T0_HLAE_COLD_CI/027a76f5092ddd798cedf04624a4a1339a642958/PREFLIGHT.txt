@@ -1,0 +1,5 @@
+MISSING FACT: exact frozen AfxHookSource.dll helper RVAs / binary fingerprints for HLAE-state-aware render-target replacement and GPU completion.
+WHY NOT COLD: this fact is resolvable from the byte-identical HLAE binary and exact pinned source; no game runtime is required.
+PASS: the exact binary yields bounded candidates whose vtable-call/decompile semantics match source-proven PushRT/PopRT/StretchRect/CreateTexture/CreateQuery behavior closely enough to select stable RVAs/fingerprints.
+FAIL: candidates remain ambiguous or exact binary semantics contradict the pinned source model; no runtime mutation is authorized from this result.
+BASELINE MUST HOLD: no CS:GO launch, no HLAE launch, no process injection, no file patching, exact input hash only.
