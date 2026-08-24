@@ -1,0 +1,128 @@
+[CANDIDATE 2]
+Entry=10036150
+RVA=0x36150
+Name=FUN_10036150
+Score=252
+SourceRoleHint=RT_PUSH_MEMBER_FINALIST
+TotalCalls=13
+SetRT=1 GetRT=1 StretchRect=0 CreateTexture=1 CreateQuery=0 QueryIssue=0 QueryGetData=0
+BodyBytes=367
+RELEVANT_CALLS
+  100361d8  CALL dword ptr [EAX + 0x5c]
+    100361cb  PUSH 0x72
+    100361cd  PUSH 0x1
+    100361cf  PUSH 0x1
+    100361d1  PUSH dword ptr [EBP + -0x8]
+    100361d4  PUSH dword ptr [EBP + -0xc]
+    100361d7  PUSH ECX
+  > 100361d8  CALL dword ptr [EAX + 0x5c]
+    100361db  TEST EAX, EAX
+    100361dd  JNS 0x10036211
+    100361df  MOV dword ptr [0x1021d6b8], 0x0
+    100361e9  XOR EAX, EAX
+    100361eb  POP EBX
+    100361ec  MOV ECX, dword ptr [EBP + -0x4]
+  1003624c  CALL dword ptr [EAX + 0x98]
+    1003623c  LEA EDX, [EBP + -0x4c]
+    1003623f  PUSH EDX
+    10036240  MOV dword ptr [EBP + -0x4c], 0x0
+    10036247  PUSH 0x0
+    10036249  MOV EAX, dword ptr [ECX]
+    1003624b  PUSH ECX
+  > 1003624c  CALL dword ptr [EAX + 0x98]
+    10036252  TEST EAX, EAX
+    10036254  JS 0x100362a5
+    10036256  MOV ECX, dword ptr [0x1021d5e0]
+    1003625c  PUSH dword ptr [EBP + -0x48]
+    1003625f  PUSH 0x0
+    10036261  MOV EAX, dword ptr [ECX]
+  10036264  CALL dword ptr [EAX + 0x94]
+    10036254  JS 0x100362a5
+    10036256  MOV ECX, dword ptr [0x1021d5e0]
+    1003625c  PUSH dword ptr [EBP + -0x48]
+    1003625f  PUSH 0x0
+    10036261  MOV EAX, dword ptr [ECX]
+    10036263  PUSH ECX
+  > 10036264  CALL dword ptr [EAX + 0x94]
+    1003626a  TEST EAX, EAX
+    1003626c  JS 0x10036291
+    1003626e  MOV EAX, dword ptr [EBP + -0x48]
+    10036271  PUSH EAX
+    10036272  MOV ECX, dword ptr [EAX]
+    10036274  CALL dword ptr [ECX + 0x8]
+CALLERS
+  from=100169de caller=100169b0/FUN_100169b0
+  from=10022e29 caller=10022c80/FUN_10022c80
+  from=1002328a caller=100230c0/FUN_100230c0
+THIN_CALLER_CANDIDATES
+ThinCallerCountShown=0
+DECOMPILE_BEGIN
+
+/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+
+int * FUN_10036150(void)
+
+{
+  int iVar1;
+  bool bVar2;
+  int *local_50;
+  int *local_4c;
+  undefined1 local_48 [24];
+  int local_30;
+  int local_2c;
+  undefined1 local_28 [24];
+  int local_10;
+  int local_c;
+  uint local_8;
+  
+  local_8 = DAT_10216680 ^ (uint)&stack0xfffffffc;
+  if (DAT_1021d6b0 == (int *)0x0) {
+    return (int *)0x0;
+  }
+  iVar1 = (**(code **)(*DAT_1021d6b0 + 0x30))(DAT_1021d6b0,local_28);
+  if (iVar1 < 0) {
+    return (int *)0x0;
+  }
+  bVar2 = DAT_1021d6b8 != (int *)0x0;
+  if ((DAT_1021d6b8 == (int *)0x0) ||
+     (((iVar1 = (**(code **)(*DAT_1021d6b8 + 0x44))(DAT_1021d6b8,0,local_48), -1 < iVar1 &&
+       (local_30 == local_10)) && (local_2c == local_c)))) {
+    if (bVar2) goto LAB_10036217;
+  }
+  else {
+    (**(code **)(*DAT_1021d6b8 + 8))(DAT_1021d6b8);
+    DAT_1021d6b8 = (int *)0x0;
+  }
+  iVar1 = (**(code **)(*DAT_1021d5e0 + 0x5c))
+                    (DAT_1021d5e0,local_10,local_c,1,1,0x72,0,&DAT_1021d6b8,0);
+  if (iVar1 < 0) {
+    DAT_1021d6b8 = (int *)0x0;
+    return (int *)0x0;
+  }
+LAB_10036217:
+  if (DAT_1021d6b8 != (int *)0x0) {
+    local_4c = (int *)0x0;
+    iVar1 = (**(code **)(*DAT_1021d6b8 + 0x48))(DAT_1021d6b8,0,&local_4c);
+    if (-1 < iVar1) {
+      local_50 = (int *)0x0;
+      iVar1 = (**(code **)(*DAT_1021d5e0 + 0x98))(DAT_1021d5e0,0,&local_50);
+      if (-1 < iVar1) {
+        iVar1 = (**(code **)(*DAT_1021d5e0 + 0x94))(DAT_1021d5e0,0,local_4c);
+        if (-1 < iVar1) {
+          (**(code **)(*local_4c + 8))(local_4c);
+          DAT_1021d6b0 = local_4c;
+          return local_50;
+        }
+        if (local_50 != (int *)0x0) {
+          (**(code **)(*local_50 + 8))(local_50);
+          local_50 = (int *)0x0;
+        }
+      }
+      (**(code **)(*local_4c + 8))(local_4c);
+    }
+  }
+  return (int *)0x0;
+}
+
+
+DECOMPILE_END
