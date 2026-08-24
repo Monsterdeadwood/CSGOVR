@@ -1,0 +1,114 @@
+name: T0 Cold Native Stream Capture Seam
+
+on:
+  push:
+    branches:
+      - research/t0-gpu-transport-direction-audit-v2
+    paths:
+      - .github/workflows/t0-cold-stream-capture-seam.yml
+      - experiments/t0_stream_capture_seam_oracle/scripts/CsgovrHlaeCaptureSeamProbe.java
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: t0-cold-stream-capture-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  exact-binary-stream-capture:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      EXPECTED_AFX_SHA256: 5B9D13AE9ABFFEEF80851E10861302162A47D1B43D8483B4A8FCEC7EAA19B035
+      HLAE_TAG: v2.191.1
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Resolve exact official HLAE binary
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP 'hlae_assets'
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          $release=(gh api "repos/advancedfx/advancedfx/releases/tags/$env:HLAE_TAG" | ConvertFrom-Json)
+          $found=$null
+          $assetName=$null
+          foreach($asset in @($release.assets | Where-Object { $_.name -match '(?i)\.zip$' })) {
+            $zip=Join-Path $root $asset.name
+            Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
+            $extract=Join-Path $root ([IO.Path]::GetFileNameWithoutExtension($asset.name))
+            New-Item -ItemType Directory -Force -Path $extract | Out-Null
+            Expand-Archive -LiteralPath $zip -DestinationPath $extract -Force
+            foreach($dll in (Get-ChildItem -LiteralPath $extract -Filter 'AfxHookSource.dll' -File -Recurse -ErrorAction SilentlyContinue)) {
+              $hash=(Get-FileHash -LiteralPath $dll.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+              Write-Host ('[CANDIDATE] '+$hash+' '+$dll.FullName)
+              if($hash -eq $env:EXPECTED_AFX_SHA256) { $found=$dll; $assetName=$asset.name; break }
+            }
+            if($found){break}
+          }
+          if(-not $found){throw 'Exact pinned AfxHookSource.dll not found.'}
+          ('AFX_EXACT='+$found.FullName) | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          ('HLAE_ASSET_NAME='+$assetName) | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Download official Ghidra
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $release=(gh api 'repos/NationalSecurityAgency/ghidra/releases/latest' | ConvertFrom-Json)
+          $asset=$release.assets | Where-Object { $_.name -match '(?i)PUBLIC.*\.zip$' } | Select-Object -First 1
+          if(-not $asset){throw 'Official Ghidra PUBLIC ZIP not found.'}
+          $zip=Join-Path $env:RUNNER_TEMP $asset.name
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip
+          $root=Join-Path $env:RUNNER_TEMP 'ghidra'
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          Expand-Archive -LiteralPath $zip -DestinationPath $root -Force
+          $headless=Get-ChildItem -LiteralPath $root -Filter analyzeHeadless.bat -File -Recurse | Select-Object -ExpandProperty FullName -First 1
+          if(-not $headless){throw 'analyzeHeadless.bat not found.'}
+          ('GHIDRA_HEADLESS='+$headless) | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+          ('GHIDRA_TAG='+$release.tag_name) | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run capture seam oracle
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $result=Join-Path $env:GITHUB_WORKSPACE '_ci_t0_stream_capture'
+          $project=Join-Path $env:RUNNER_TEMP 'ghidra_capture_project'
+          New-Item -ItemType Directory -Force -Path $result,$project | Out-Null
+          $scan=Join-Path $result 'HLAE_NATIVE_STREAM_CAPTURE_SCAN.txt'
+          $log=Join-Path $result 'GHIDRA_HEADLESS.log'
+          $scriptDir=Join-Path $env:GITHUB_WORKSPACE 'experiments\t0_stream_capture_seam_oracle\scripts'
+          $args=@($project,'csgovr_t0_capture','-import',$env:AFX_EXACT,'-overwrite','-scriptPath',$scriptDir,'-postScript','CsgovrHlaeCaptureSeamProbe.java',$scan,'-deleteProject')
+          $saved=$ErrorActionPreference
+          $ErrorActionPreference='Continue'
+          try { & $env:GHIDRA_HEADLESS @args 2>&1 | Tee-Object -FilePath $log; $ec=$LASTEXITCODE } finally { $ErrorActionPreference=$saved }
+          if($ec -ne 0){throw ('Ghidra exit code '+$ec)}
+          if(-not (Select-String -LiteralPath $scan -SimpleMatch 'SCAN_COMPLETE=YES' -Quiet)){throw 'Capture seam scan incomplete.'}
+          @(
+            'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
+            'OracleVersion=1.0.0',
+            ('HLAEAsset='+$env:HLAE_ASSET_NAME),
+            ('AfxHookSourceSHA256='+((Get-FileHash -LiteralPath $env:AFX_EXACT -Algorithm SHA256).Hash.ToUpperInvariant())),
+            ('GhidraTag='+$env:GHIDRA_TAG),
+            ('SourceCommit='+$env:GITHUB_SHA),
+            'GameLaunched=NO','HLAELaunched=NO','Injection=NO','BinaryPatched=NO'
+          ) | Set-Content -LiteralPath (Join-Path $result 'INPUT_IDENTITY.txt') -Encoding UTF8
+          ('FullScanSHA256='+((Get-FileHash -LiteralPath $scan -Algorithm SHA256).Hash.ToUpperInvariant())) | Set-Content -LiteralPath (Join-Path $result 'FULL_SCAN_SHA256.txt') -Encoding UTF8
+
+      - name: Upload COLD artifact only
+        uses: actions/upload-artifact@v4
+        with:
+          name: csgovr-t0-stream-capture-${{ github.run_id }}
+          path: _ci_t0_stream_capture/
+          if-no-files-found: error
+          retention-days: 14
