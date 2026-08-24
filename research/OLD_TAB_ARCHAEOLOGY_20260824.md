@@ -1,8 +1,8 @@
-# CSGOVR — OLD TAB ARCHAEOLOGY 2026-08-24
+# CSGOVR - OLD TAB ARCHAEOLOGY 2026-08-24
 
 Purpose: recover exact facts from older tabs / Library artifacts and correct stale verdict labels without disturbing the current T0 GPU-transport serial gate.
 
-## Writer -> same CViewSetup -> next RenderView — already imported
+## Writer -> same CViewSetup -> next RenderView - already imported
 Recovered artifact:
 `CSGOVR_BREAKTHROUGH_WRITER_TO_RECLASS_RESULT_20260823_040106.zip`.
 
@@ -11,7 +11,7 @@ Exact chain:
 
 The returned result recorded the same CViewSetup pointer at writer and RenderView and unchanged raw origin coordinates across that edge. This fact is already represented in current project state and is not promoted again as a new discovery.
 
-## Origin.x=0 one-field control — infrastructure only
+## Origin.x=0 one-field control - infrastructure only
 Recovered artifact:
 `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip`.
 
@@ -33,7 +33,47 @@ Classification:
 
 This agrees with the current rule that origin/yaw wrappers are retained infrastructure only.
 
-## client+0x3A0333 scoped owner-slot path — stale FALSIFIED labels corrected
+## Final-pose yaw one-field control - strong lineage/persistence support, terminal scientific verdict not emitted
+Recovered artifact:
+`CSGOVR_CAUSAL_YAW_FINAL_POSE_CONTROL_RESULT_20260823_071600.zip`.
+
+Frozen target:
+`client+0x0038D15B -> CViewSetup.yaw+0xC8 -> client+0x0038D1DE -> g_vecRenderAngles.y+0x05245AB8 -> next RenderView+0x003A5280`.
+
+Predetermined mutation:
+raw float `0x43090000` = `137.0f`, changing only the yaw field.
+
+Observed exact runtime sequence in `yaw_control.log`:
+- final-pose seam hit with one CViewSetup pointer;
+- normal yaw raw `0x42280000` = `42.0f`;
+- one nudge changed yaw to `0x43090000` = `137.0f`;
+- commit `client+0x0038D1DE` executed `movss` into the global yaw location;
+- source yaw raw at commit was `0x43090000`;
+- global yaw after commit was `0x43090000`;
+- next true `RenderView+0x003A5280` hit used the **same CViewSetup pointer**;
+- that next RenderView snapshot still contained yaw `137.0f`;
+- global yaw still matched the same mutated raw value.
+
+Snapshot integrity:
+- all snapshots are full `0x198`-byte CViewSetup images;
+- before -> after mutation differs only within yaw bytes `+0xC8..+0xCB` (only two byte values physically differ because the unchanged zero bytes of the float remain zero);
+- `03_next_RenderView.bin` contains the mutated yaw raw value unchanged.
+
+Why this is **not** promoted to final scientific PROVEN:
+The actual runtime log stops after writing the `OBSERVED:` line and does not contain the script's terminal `VERDICT: PROVEN` marker. The generated `BREAKTHROUGH_SUMMARY.txt` deliberately records:
+`VERDICT: INFRASTRUCTURE`.
+
+Therefore classification remains:
+**STRONG EXACT LINEAGE / ONE-FIELD PERSISTENCE SUPPORT / INFRASTRUCTURE, NOT FINAL CAMERA-OWNERSHIP PASS.**
+
+Reusable exact facts:
+- `CViewSetup+0xC8` is yaw in this frozen retail contract;
+- `client+0x0038D1DE` commits that yaw into the retained global yaw location;
+- a bounded one-field yaw mutation can survive that commit and persist into the next true RenderView on the same CViewSetup object.
+
+Do not reinterpret this result as proof that this seam is the final headset-visible HMD ownership point. Current T0 transport remains the serial gate, and origin/head work stays downstream.
+
+## client+0x3A0333 scoped owner-slot path - stale FALSIFIED labels corrected
 Recovered artifacts:
 - `CSGOVR_TTD_WORLDLIST_OWNERSHIP_RESULT_20260823_024720.zip`
 - `CSGOVR_TTD_WORLDLIST_OWNER_SLOT_CONTEXT_RESULT_20260823_041017.zip`
