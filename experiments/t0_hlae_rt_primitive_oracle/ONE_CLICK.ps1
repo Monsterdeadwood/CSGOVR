@@ -61,14 +61,26 @@ function Get-ScanValue([string]$Text, [string]$Key) {
     return 'MISSING'
 }
 
-function Get-ThinCallerForRole([string]$Text, [string]$Role) {
-    $roleEsc = [regex]::Escape($Role)
-    $m = [regex]::Match($Text, '(?ms)\[CANDIDATE\s+\d+\].*?SourceRoleHint=' + $roleEsc + '.*?THIN_CALLER_CANDIDATES\s*\r?\n\s+RVA=(0x[0-9A-Fa-f]+)')
+function Get-ScanRva([string]$Text, [string]$Key) {
+    $m = [regex]::Match($Text, '(?m)^' + [regex]::Escape($Key) + '=(0x[0-9A-Fa-f]+)')
     if ($m.Success) { return $m.Groups[1].Value }
     return 'NONE'
 }
 
-Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.1'
+function Get-ThinCallerForRole([string]$Text, [string]$Role) {
+    # Split at the hard candidate separators so a role with zero thin callers
+    # can never steal the first thin caller from a later candidate block.
+    $blocks = [regex]::Split($Text, '(?m)^={32,}\s*$')
+    foreach ($block in $blocks) {
+        if ($block -notmatch ('(?m)^SourceRoleHint=' + [regex]::Escape($Role) + '\s*$')) { continue }
+        $m = [regex]::Match($block, '(?ms)THIN_CALLER_CANDIDATES\s*\r?\n\s+RVA=(0x[0-9A-Fa-f]+)')
+        if ($m.Success) { return $m.Groups[1].Value }
+        return 'NONE'
+    }
+    return 'NONE'
+}
+
+Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.2'
 Write-Host 'READ-ONLY STATIC ANALYSIS. CS:GO/HLAE WILL NOT BE LAUNCHED OR PATCHED.'
 
 Banner '1/6 EXACT INPUT'
@@ -100,7 +112,7 @@ $StagedHash = (Get-FileHash -LiteralPath $StagedAfx -Algorithm SHA256).Hash.ToUp
 if ($StagedHash -ne $ExpectedAfx) { throw 'Staged AfxHookSource.dll hash mismatch.' }
 @(
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
-    'OracleVersion=1.1.1',
+    'OracleVersion=1.1.2',
     ('OriginalPath=' + $Afx),
     ('SHA256=' + $StagedHash),
     ('ExpectedTimestamp=0x{0:X8}' -f $ExpectedTimestamp),
@@ -145,9 +157,9 @@ Banner '5/6 RESULT CONTRACT'
 $scanText = Get-Content -LiteralPath $Scan -Raw
 $semantic = Get-ScanValue $scanText 'SemanticVerdict'
 $bounded = Get-ScanValue $scanText 'BoundedCoreFinalists'
-$push = Get-ScanValue $scanText 'BestPushMemberRVA'
-$pop = Get-ScanValue $scanText 'BestPopMemberRVA'
-$wait = Get-ScanValue $scanText 'BestGpuWaitMemberRVA'
+$push = Get-ScanRva $scanText 'BestPushMemberRVA'
+$pop = Get-ScanRva $scanText 'BestPopMemberRVA'
+$wait = Get-ScanRva $scanText 'BestGpuWaitMemberRVA'
 $pushWrapper = Get-ThinCallerForRole $scanText 'RT_PUSH_MEMBER_FINALIST'
 $popWrapper = Get-ThinCallerForRole $scanText 'RT_POP_MEMBER_FINALIST'
 $waitWrapper = Get-ThinCallerForRole $scanText 'GPU_WAIT_MEMBER_FINALIST'
@@ -171,7 +183,7 @@ $resultClass = if ($semantic -eq 'BOUNDED_FINALISTS') { 'PASS_BOUNDED_FINALISTS_
 @(
     'CSGOVR T0 HLAE RT PRIMITIVE ORACLE',
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
-    'OracleVersion=1.1.1',
+    'OracleVersion=1.1.2',
     ('ExactHash=' + $StagedHash),
     ('ScanComplete=' + [bool]($scanText -match 'SCAN_COMPLETE=YES')),
     ('ResultClass=' + $resultClass),
