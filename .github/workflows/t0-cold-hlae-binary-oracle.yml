@@ -7,10 +7,20 @@ on:
     paths:
       - .github/workflows/t0-cold-hlae-binary-oracle.yml
       - experiments/t0_hlae_rt_primitive_oracle/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/t0-cold-hlae-binary-oracle.yml
+      - experiments/t0_hlae_rt_primitive_oracle/**
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: t0-cold-hlae-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   exact-binary-static-oracle:
@@ -20,10 +30,14 @@ jobs:
       EXPECTED_AFX_SHA256: 5B9D13AE9ABFFEEF80851E10861302162A47D1B43D8483B4A8FCEC7EAA19B035
       HLAE_TAG: v2.191.1
       GH_TOKEN: ${{ github.token }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
     steps:
-      - name: Checkout CSGOVR branch
+      - name: Checkout CSGOVR head branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
 
       - name: Set up JDK 21 for Ghidra
         uses: actions/setup-java@v4
@@ -137,7 +151,7 @@ jobs:
             ('AfxHookSourceSHA256=' + $afxHash),
             ('ExpectedAfxHookSourceSHA256=' + $env:EXPECTED_AFX_SHA256),
             ('GhidraTag=' + $env:GHIDRA_TAG),
-            ('CSGOVRCommit=' + $env:GITHUB_SHA),
+            ('SourceCommit=' + $env:SOURCE_SHA),
             'GameLaunched=NO',
             'HLAELaunched=NO',
             'Injection=NO',
@@ -190,7 +204,7 @@ jobs:
           @(
             'CSGOVR T0 HLAE COLD CI ROLE SUMMARY',
             'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
-            ('SourceCommit=' + $env:GITHUB_SHA),
+            ('SourceCommit=' + $env:SOURCE_SHA),
             ('SemanticVerdict=' + (Get-Value 'SemanticVerdict')),
             ('BoundedCoreFinalists=' + (Get-Value 'BoundedCoreFinalists')),
             ('BestPushMemberRVA=' + (Get-Rva 'BestPushMemberRVA')),
@@ -225,7 +239,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $result = Join-Path $env:GITHUB_WORKSPACE '_ci_t0_hlae_cold_result'
-          $dest = Join-Path $env:GITHUB_WORKSPACE ('research\ci_results\T0_HLAE_COLD_CI\' + $env:GITHUB_SHA)
+          $dest = Join-Path $env:GITHUB_WORKSPACE ('research\ci_results\T0_HLAE_COLD_CI\' + $env:SOURCE_SHA)
           New-Item -ItemType Directory -Force -Path $dest | Out-Null
           foreach ($name in @('INPUT_IDENTITY.txt','PREFLIGHT.txt','ROLE_SUMMARY.txt','PUSH_FINALIST.txt','POP_FINALIST.txt','GPU_WAIT_FINALIST.txt','FULL_SCAN_SHA256.txt')) {
             Copy-Item -LiteralPath (Join-Path $result $name) -Destination (Join-Path $dest $name) -Force
@@ -238,6 +252,6 @@ jobs:
             Write-Host '[INFO] Compact result already committed.'
             exit 0
           }
-          git commit -m "COLD RESULT: exact HLAE RT oracle $env:GITHUB_SHA"
-          git pull --rebase origin $env:GITHUB_REF_NAME
-          git push origin "HEAD:$env:GITHUB_REF_NAME"
+          git commit -m "COLD RESULT: exact HLAE RT oracle $env:SOURCE_SHA"
+          git pull --rebase origin $env:TARGET_BRANCH
+          git push origin "HEAD:$env:TARGET_BRANCH"
