@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 echo ================================================================
-echo  CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.1
+echo  CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.2
 echo  READ-ONLY: DOES NOT LAUNCH OR PATCH CS:GO / HLAE
 echo ================================================================
 set "CSGOVR_PS1=%~dp0ONE_CLICK.ps1"
