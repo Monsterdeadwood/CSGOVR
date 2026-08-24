@@ -41,6 +41,34 @@ Therefore do not design A1a around a replacement surface of arbitrary XR dimensi
 
 This removes one ambiguity from T0.
 
+## Replacement is a mutable staging surface
+
+Pinned source stores one `m_RenderTargetReplacement` member and only opens/creates it when that member is null (or after the protocol marks the color texture lost and HLAE releases it).
+
+Therefore do **not** assume pass1 LEFT and pass2 RIGHT automatically live in two distinct HLAE replacement objects.
+
+For T0, treat the HLAE replacement surface as a mutable staging render destination that may be reused by sequential renders.
+
+### Per-pass snapshot invariant
+
+Each eye must be copied/resolved into its own transport slot immediately after that eye render is complete and before a later eye render can overwrite the staging surface.
+
+Required ordering:
+
+`pass1 LEFT render -> snapshot LEFT into slot L(pairSeq) -> producer fence`
+
+then
+
+`pass2 RIGHT render -> snapshot RIGHT into slot R(pairSeq) -> producer fence`
+
+Only after both snapshots are complete may the coherent pair become publishable.
+
+Never defer the LEFT snapshot until after RIGHT is rendered merely because both passes reference the same replacement-surface pointer.
+
+This prevents the failure mode:
+
+`LEFT rendered -> staging reused by RIGHT -> both transport slots observe RIGHT`.
+
 ## Preferred A1 topology after this finding
 
 ### A1a — direct replacement sharing
@@ -50,17 +78,21 @@ Use the HLAE replacement surface itself as the cross-process shared resource onl
 - tracked eye format is inside the documented direct cross-API set;
 - non-MSAA;
 - game/replacement dimensions are compatible with the intended D3D11 destination operation;
-- D3D11 import succeeds on the OpenXR-required adapter.
+- D3D11 import succeeds on the OpenXR-required adapter;
+- producer/consumer ownership ensures the staging resource is not overwritten while the consumer still uses it.
+
+Because a single HLAE replacement object may be reused across sequential passes, direct A1a must prove a safe per-eye resource schedule. If that cannot be proven cheaply, prefer dedicated per-eye/per-slot transport carriers rather than sharing the mutable staging object itself.
 
 ### A1b — authoritative replacement -> second GPU carrier
 
-If format, MSAA or dimensions block direct A1a, **do not abandon the replacement surface as the eye source**.
+If format, MSAA, dimensions **or staging reuse** block direct A1a, **do not abandon the replacement surface as the eye source**.
 
 Preferred topology:
 
 `v0.5.5 eye render`
-`    -> HLAE source-proven replacement surface (authoritative completed eye)`
-`    -> GPU-only resolve / StretchRect / shader conversion into transport carrier`
+`    -> HLAE source-proven replacement surface (authoritative completed eye / mutable staging)`
+`    -> immediate per-pass GPU snapshot / resolve / StretchRect / shader conversion`
+`    -> dedicated transport slot for that eye + pairSeq`
 `    -> producer EVENT fence`
 `    -> READY(pairSeq, eye, generation, handle)`
 `    -> x64 D3D11 OpenSharedResource`
@@ -68,9 +100,9 @@ Preferred topology:
 `    -> consumer completion fence`
 `    -> FREE`
 
-This separates **render correctness** from **transport compatibility**.
+This separates **render correctness** from **transport compatibility and lifetime**.
 
-The HLAE replacement surface remains tied to the game RT contract. A second carrier is allowed to satisfy the D3D9->D3D11 transport contract.
+The HLAE replacement surface remains tied to the game RT contract. Dedicated transport carriers preserve eye snapshots even if the HLAE staging surface is reused immediately by the next pass.
 
 ## Why this is stronger than naive post-hook RT0 copy
 
@@ -102,9 +134,11 @@ Candidate data flow:
 1. PushRT hook observes replacement surface pointer and takes a bounded COM reference for the current render generation.
 2. Original PushRT executes normally.
 3. Existing v0.5.5 eye-local `DoRenderView` proceeds unchanged.
-4. On return from the original eye render, transport uses the captured explicit replacement surface, not raw RT0.
-5. GPU carrier operation + EVENT fence complete before pair publication.
-6. temporary reference is released after the carrier no longer needs the source.
+4. On return from **that eye's** original render, transport uses the captured explicit replacement surface, not raw RT0.
+5. It immediately snapshots that eye into its dedicated transport slot.
+6. GPU carrier operation + EVENT fence complete before that slot is marked READY.
+7. temporary source reference is released after the carrier no longer needs the staging surface.
+8. pass2 must never be allowed to overwrite the only LEFT image before step 5 for pass1 has queued/completed according to the chosen ownership contract.
 
 This must still be implemented and runtime-proven. It is a source-derived seam, not yet a LIVE result.
 
@@ -117,17 +151,20 @@ Transport code must not race or reorder that lifecycle. The safest initial desig
 - let HLAE Push/Pop run exactly as designed;
 - capture the explicit replacement object identity;
 - perform transport work only at a proven post-render point where the replacement contains the completed eye;
-- do not replace HLAE's internal source/replacement maps.
+- do not replace HLAE's internal source/replacement maps;
+- snapshot each eye before a later pass can reuse the same staging surface.
 
 ## New runtime facts still required
 
 A bounded compatibility control should now log from the explicit replacement surface:
 
+- pointer identity across pass1/pass2 and across cycles;
+- whether the same replacement object is reused by both eyes in the frozen runtime;
 - width / height;
 - D3DFORMAT;
 - multisample type / quality;
 - device / D3D9Ex availability;
-- D3D9Ex adapter LUID;
+- D3D9Ex adapter LUID when available;
 - direct shared-create result;
 - `A8B8G8R8` carrier capability;
 - `CheckDeviceFormatConversion(source -> A8B8G8R8)`;
@@ -139,7 +176,9 @@ No camera/projection/origin/culling/viewmodel/HUD mutation belongs in this contr
 ## KEEP / ADAPT / STOP
 
 - `KEEP`: HLAE replacement target as authoritative completed-eye source.
+- `ADAPT`: model it as mutable staging; snapshot each eye immediately into dedicated transport storage.
 - `ADAPT`: A1b becomes replacement-surface -> second GPU carrier, not raw-RT0 post-copy.
 - `STOP`: assumption that native HLAE replacement can arbitrarily choose XR dimensions/format.
+- `STOP`: assumption that one persistent replacement pointer implies persistent LEFT/RIGHT contents.
 - `STOP`: naive post-return `GetRenderTarget(0)` as the preferred eye-source oracle.
 - `KEEP`: v0.5.5 pass1 LEFT / pass2 RIGHT / pass3 monitor unchanged.
