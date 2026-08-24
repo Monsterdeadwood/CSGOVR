@@ -52,8 +52,10 @@ Shared-target and `D3DQUERYTYPE_EVENT` primitives themselves remain valid source
 - v0.6.5 XRFOV end-to-end failure - path wiring (`g_xrFovPath` empty/uninitialized, stale INI path), not XR/stereo/math falsification
 - `CSGOVR_TTD_WORLDLIST_OWNERSHIP_RESULT_20260823_024720.zip` - its old `FALSIFIED` label is INVALID as scientific evidence; replay/query failed with an argument-type mismatch before the ownership prediction was tested.
 - `CSGOVR_TTD_WORLDLIST_OWNER_SLOT_CONTEXT_RESULT_20260823_041017.zip` - its old `FALSIFIED` label is INVALID as scientific evidence; CDB replay watchdog exceeded 25 minutes before matched L/R owner contexts were recovered.
+- `CSGOVR_TTD_VIEWCLASS_ORDINAL_SCREEN_RESULT_20260823_052754.zip` - its old `FALSIFIED` label is INVALID as scientific evidence; the returned `OBSERVED` says replay ended before all ordinal contexts were emitted, so the ordinal/vtable stability prediction was never completed. Treat as INFRASTRUCTURE / INCOMPLETE REPLAY, not a negative class result.
 - exact-retail static code at `client+0x3A0310..+0x3A0337` remains valid despite those replay failures: `[this+4]+0x4C0` is temporarily replaced with arg1 for one virtual call and then restored; the runtime semantic owner role remains OPEN. See `research/OLD_TAB_ARCHAEOLOGY_20260824.md`.
 - `CSGOVR_CAUSAL_ORIGINX_ZERO_CONTROL_RESULT_20260823_043045.zip` remains INFRASTRUCTURE only: byte snapshots isolate `origin.x +0xB8`, but the returned control log does not contain the validated writer -> next true RenderView causal sequence needed for ownership proof.
+- `CSGOVR_CAUSAL_YAW_FINAL_POSE_CONTROL_RESULT_20260823_071600.zip` remains INFRASTRUCTURE/lineage support rather than final camera-ownership proof: one-field yaw persistence through `+0x38D1DE` into the next true RenderView is strongly supported, but the actual runtime log did not emit its terminal scientific `VERDICT: PROVEN` marker and the generated summary explicitly classified it as INFRASTRUCTURE.
 - missing defines/link flags/stale PID/gameplay gate/parser failures - infrastructure unless scientific prediction executed
 
 ## Retained speculative camera anchors - NOT ownership
