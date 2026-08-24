@@ -55,7 +55,13 @@ function Find-JdkHome {
     return $null
 }
 
-Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.0.0'
+function Get-ScanValue([string]$Text, [string]$Key) {
+    $m = [regex]::Match($Text, '(?m)^' + [regex]::Escape($Key) + '=(.*)$')
+    if ($m.Success) { return $m.Groups[1].Value.Trim() }
+    return 'MISSING'
+}
+
+Banner 'CSGOVR T0 COLD HLAE RT PRIMITIVE ORACLE v1.1.0'
 Write-Host 'READ-ONLY STATIC ANALYSIS. CS:GO/HLAE WILL NOT BE LAUNCHED OR PATCHED.'
 
 Banner '1/6 EXACT INPUT'
@@ -87,6 +93,7 @@ $StagedHash = (Get-FileHash -LiteralPath $StagedAfx -Algorithm SHA256).Hash.ToUp
 if ($StagedHash -ne $ExpectedAfx) { throw 'Staged AfxHookSource.dll hash mismatch.' }
 @(
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
+    ('OracleVersion=1.1.0'),
     ('OriginalPath=' + $Afx),
     ('SHA256=' + $StagedHash),
     ('ExpectedTimestamp=0x{0:X8}' -f $ExpectedTimestamp),
@@ -122,19 +129,45 @@ if (-not (Select-String -LiteralPath $Scan -SimpleMatch 'SCAN_COMPLETE=YES' -Qui
 Banner '5/6 RESULT CONTRACT'
 @(
     'MISSING FACT: exact frozen AfxHookSource.dll helper RVAs / binary fingerprints for HLAE-state-aware render-target replacement and GPU completion.',
-    'WHY NOT COLD: this fact is resolvable from the byte-identical HLAE binary and exact pinned source; no game runtime is required.',
-    'PASS: the exact binary yields bounded candidates whose vtable-call/decompile semantics match source-proven PushRT/PopRT/StretchRect/CreateTexture/CreateQuery behavior closely enough to select stable RVAs/fingerprints.',
-    'FAIL: candidates remain ambiguous or exact binary semantics contradict the pinned source model; no runtime mutation is authorized from this result.',
+    'WHY NOT COLD: this experiment IS the cold/static closure; no game runtime is required or authorized.',
+    'PASS: source-guided binary fingerprints collapse PushRT/PopRT/GPU-wait to bounded finalists with decompile/caller context sufficient for exact source-semantic review.',
+    'FAIL: core roles remain ambiguous or exact binary semantics contradict the pinned source model; no runtime mutation is authorized from this result.',
     'BASELINE MUST HOLD: no CS:GO launch, no HLAE launch, no process injection, no file patching, exact input hash only.'
 ) | Set-Content -LiteralPath (Join-Path $Stage 'PREFLIGHT.txt') -Encoding UTF8
 
 $scanText = Get-Content -LiteralPath $Scan -Raw
+$semantic = Get-ScanValue $scanText 'SemanticVerdict'
+$bounded = Get-ScanValue $scanText 'BoundedCoreFinalists'
+$push = Get-ScanValue $scanText 'BestPushMemberRVA'
+$pop = Get-ScanValue $scanText 'BestPopMemberRVA'
+$wait = Get-ScanValue $scanText 'BestGpuWaitMemberRVA'
+$resultClass = if ($semantic -eq 'BOUNDED_FINALISTS') { 'PASS_BOUNDED_FINALISTS_PENDING_SOURCE_REVIEW' } else { 'INCONCLUSIVE_STATIC' }
+
+@(
+    'CSGOVR T0 HLAE RT SOURCE-GUIDED ROLE SUMMARY',
+    'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
+    ('SemanticVerdict=' + $semantic),
+    ('BoundedCoreFinalists=' + $bounded),
+    ('BestPushMemberRVA=' + $push),
+    ('BestPopMemberRVA=' + $pop),
+    ('BestGpuWaitMemberRVA=' + $wait),
+    'PromotionPolicy=HEURISTIC ONLY; compare candidate decompile and thin callers against pinned source before promotion.',
+    'RuntimeAuthorization=NO'
+) | Set-Content -LiteralPath (Join-Path $Stage 'ROLE_SUMMARY.txt') -Encoding UTF8
+
 @(
     'CSGOVR T0 HLAE RT PRIMITIVE ORACLE',
     'EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN',
+    'OracleVersion=1.1.0',
     ('ExactHash=' + $StagedHash),
     ('ScanComplete=' + [bool]($scanText -match 'SCAN_COMPLETE=YES')),
-    'InterpretationPolicy=Candidate output requires source-semantic review before any RVA is promoted.',
+    ('ResultClass=' + $resultClass),
+    ('SemanticVerdict=' + $semantic),
+    ('BoundedCoreFinalists=' + $bounded),
+    ('BestPushMemberRVA=' + $push),
+    ('BestPopMemberRVA=' + $pop),
+    ('BestGpuWaitMemberRVA=' + $wait),
+    'InterpretationPolicy=Source-guided role output narrows candidates but never auto-promotes an RVA to PROVEN.',
     'NoRuntimeResultClaimed=YES'
 ) | Set-Content -LiteralPath (Join-Path $Stage 'RESULT_SUMMARY.txt') -Encoding UTF8
 
@@ -146,4 +179,6 @@ if (Test-Path -LiteralPath $Zip) { Remove-Item -LiteralPath $Zip -Force }
 $ZipHash = (Get-FileHash -LiteralPath $Zip -Algorithm SHA256).Hash.ToUpperInvariant()
 Write-Host ('[DONE] RESULT=' + $Zip)
 Write-Host ('[DONE] SHA256=' + $ZipHash)
+Write-Host ('[DONE] SemanticVerdict=' + $semantic)
+Write-Host ('[DONE] Push=' + $push + ' Pop=' + $pop + ' Wait=' + $wait)
 Write-Host '[RETURN] Send the small RESULT ZIP back to the CSGOVR branch.'
