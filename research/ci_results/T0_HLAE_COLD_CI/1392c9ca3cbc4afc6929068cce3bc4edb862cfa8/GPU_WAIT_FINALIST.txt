@@ -1,0 +1,64 @@
+[CANDIDATE 6]
+Entry=100343f0
+RVA=0x343f0
+Name=FUN_100343f0
+Score=120
+SourceRoleHint=GPU_WAIT_MEMBER_FINALIST
+TotalCalls=2
+SetRT=0 GetRT=0 StretchRect=0 CreateTexture=0 CreateQuery=0 QueryIssue=1 QueryGetData=1
+BodyBytes=56
+RELEVANT_CALLS
+  10034408  CALL dword ptr [EAX + 0x18]
+    100343f9  MOV ECX, dword ptr [0x1021d6bc]
+    100343ff  TEST ECX, ECX
+    10034401  JZ 0x10034427
+    10034403  MOV EAX, dword ptr [ECX]
+    10034405  PUSH 0x1
+    10034407  PUSH ECX
+  > 10034408  CALL dword ptr [EAX + 0x18]
+    1003440b  NOP dword ptr [EAX + EAX*0x1]
+    10034410  MOV ECX, dword ptr [0x1021d6bc]
+    10034416  PUSH 0x1
+    10034418  PUSH 0x0
+    1003441a  PUSH 0x0
+    1003441c  MOV EAX, dword ptr [ECX]
+  1003441f  CALL dword ptr [EAX + 0x1c]
+    10034410  MOV ECX, dword ptr [0x1021d6bc]
+    10034416  PUSH 0x1
+    10034418  PUSH 0x0
+    1003441a  PUSH 0x0
+    1003441c  MOV EAX, dword ptr [ECX]
+    1003441e  PUSH ECX
+  > 1003441f  CALL dword ptr [EAX + 0x1c]
+    10034422  CMP EAX, 0x1
+    10034425  JZ 0x10034410
+    10034427  RET
+    10034430  PUSH EBP
+    10034431  MOV EBP, ESP
+    10034433  PUSH -0x1
+CALLERS
+  from=10085adb caller=10085aa0/FUN_10085aa0
+  from=10085beb caller=10085bb0/FUN_10085bb0
+  from=10085e0f caller=10085db0/FUN_10085db0
+  from=1008c820 caller=1008a490/FUN_1008a490
+  from=1008e004 caller=1008a490/FUN_1008a490
+THIN_CALLER_CANDIDATES
+ThinCallerCountShown=0
+DECOMPILE_BEGIN
+
+void FUN_100343f0(void)
+
+{
+  int iVar1;
+  
+  if ((DAT_1021d5e0 != 0) && (DAT_1021d6bc != (int *)0x0)) {
+    (**(code **)(*DAT_1021d6bc + 0x18))(DAT_1021d6bc,1);
+    do {
+      iVar1 = (**(code **)(*DAT_1021d6bc + 0x1c))(DAT_1021d6bc,0,0,1);
+    } while (iVar1 == 1);
+  }
+  return;
+}
+
+
+DECOMPILE_END
