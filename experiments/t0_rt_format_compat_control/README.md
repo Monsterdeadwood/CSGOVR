@@ -2,66 +2,123 @@
 
 Status: **PREPARED / GATED / DO NOT RUN**.
 
-This is the next bounded runtime control after `experiments/t0_hlae_rt_primitive_oracle/` closes and a human/source-semantic review promotes the exact Push wrapper RVA and machine-byte signature.
+This is the next bounded runtime control after the HLAE exact-binary COLD closure. Exact source review plus corrected v1.1.4 CI now agree on the primitive seam:
+
+- PushRT `AfxHookSource.dll+0x00034830`
+- PopRT `+0x000346A0`
+- GPU EVENT wait `+0x000343F0`
+- v1.1.3 false Push `+0x00036150` = R32F helper, FALSIFIED as Push
+
+Push entry signature:
+
+`558BECA1B0D6211083EC0C85C00F848100000056578B7D08B91CD721108945F8`
+
+The package remains intentionally inactive. The reviewed values live in `PROMOTED_RVAS.template.ini`, but the template keeps `Status=NOT_PROMOTED`; no active local `PROMOTED_RVAS.ini` is committed.
 
 It is deliberately not a transport implementation. It does not submit OpenXR frames and must not alter projection, origin, camera, eye separation, culling, viewmodel or HUD.
 
 ## Single PRIMARY question
 
-For the HLAE replacement surface associated with the frozen v0.5.5 eye schedule, what actual D3D9 descriptor/capability state selects the next GPU transport path?
+For the exact HLAE replacement surface associated with the frozen v0.5.5 eye schedule, what actual descriptor/device/capability state selects the next GPU transport path?
 
-- **A1a direct** only if the observed target is non-MSAA, uses a D3D9 format allowed by the D3D9->D3D11 shared-resource contract, the device is D3D9Ex-capable, and same-format shared `CreateTexture` succeeds.
-- **A1b GPU bridge** if direct sharing is blocked but a non-MSAA `D3DFMT_A8B8G8R8` render-target carrier is supported, shared creation succeeds, and the device reports the relevant `StretchRect` format conversion as supported.
-- **NO VERDICT** if the relevant HLAE surface cannot be correlated or capability results are contradictory.
+The control should harvest:
 
-A failure of A1a does not imply CPU fallback. A1b remains the preferred GPU-only fallback until separately falsified.
+- replacement pointer identity and reuse pattern;
+- width / height;
+- D3DFORMAT;
+- MSAA type / quality;
+- device / D3D9Ex availability;
+- D3D9 adapter ordinal and D3D9Ex LUID when available;
+- direct shared `CreateTexture` result;
+- `D3DFMT_A8B8G8R8` carrier support;
+- `CheckDeviceFormatConversion(source -> A8B8G8R8)`;
+- same-format / carrier shared-handle creation outcome.
 
-## Why the package is hard-gated
+## Transport selection after the control
 
-The exact wrapper RVA is not known yet. The COLD v1.1.2 oracle intentionally emits heuristic member/wrapper finalists, not PROVEN addresses. This control therefore has no usable default RVA.
+### A1a direct
 
-`PROMOTED_RVAS.template.ini` contains `Status=NOT_PROMOTED` and zero placeholders. The builder must refuse to emit a DLL unless a reviewed `PROMOTED_RVAS.ini` contains all of:
+Remain eligible only if the observed replacement is non-MSAA, uses a documented direct D3D9->D3D11 compatible format, shared creation succeeds, and later D3D11 import succeeds on the OpenXR-required adapter.
 
-- `Status=PROVEN_SOURCE_MATCH`
-- exact COLD RESULT SHA256
-- exact pinned AfxHookSource SHA256
-- non-zero Push wrapper RVA
-- a non-empty machine-byte signature for that wrapper
+Because pinned HLAE owns one persistent `m_RenderTargetReplacement`, direct sharing must also prove the staging resource cannot be overwritten while the x64 consumer still reads it. If that lifetime is awkward, prefer dedicated transport carriers even when the format itself is directly shareable.
 
-This prevents a guessed or stale RVA from becoming a LIVE hook.
+### A1b-D9
 
-## Intended observation seam
+Preferred when D3D9 can resolve/convert/scale the authoritative replacement eye into a dedicated non-MSAA `D3DFMT_A8B8G8R8` shared carrier.
 
-The promoted global `AfxD3d9PushRenderTargetEx(IDirect3DSurface9 *replacementSurface)` wrapper is preferred because its argument is already an HLAE-owned replacement surface. The probe can query the surface without rebinding it:
+This can solve format, MSAA and size incompatibility before cross-process import.
 
-1. `IDirect3DSurface9::GetDesc`
-2. `IDirect3DSurface9::GetDevice`
-3. device `QueryInterface(IDirect3DDevice9Ex)`
-4. `GetCreationParameters` / `GetDirect3D`
-5. `CheckDeviceFormat`
-6. `CheckDeviceFormatConversion`
-7. one-shot unbound shared `CreateTexture` attempts
+### A1b-D11
 
-The probe calls the original Push wrapper normally. It does **not** call `SetRenderTarget`, `StretchRect`, `GetRenderTargetData`, OpenXR, or any pixel readback function.
+Retain when a legal carrier can be shared at source size but XR dimensions/format differ. The x64 host imports that carrier and performs a D3D11 shader blit/scaler into an XR swapchain created with `COLOR_ATTACHMENT_BIT` as well as the intended transfer usage.
 
-A read-only hook on the already-proven `CAfxStreams::DoRenderView +0x22340` may be used only to timestamp/pass-label the existing force-cache pass1/pass2 schedule. It must pass the original `view` pointer unchanged.
+A failure of A1a does not imply CPU fallback. GPU carrier paths remain preferred until concretely falsified.
 
-## Microsoft contract carried into the verdict
+## Why the package remains hard-gated
 
-Microsoft documents D3D9->D3D11 shared textures as 2D, one mip, default usage, non-MSAA, created through D3D9 `CreateTexture(..., pSharedHandle)`. The documented cross-API format set is limited to the D3D9 equivalents of `R10G10B10A2_UNORM`, `R16G16B16A16_FLOAT`, and `R8G8B8A8_UNORM`.
+The binary seam is no longer unknown, but a COLD proof is not permission to mutate the frozen runtime.
 
-`IDirect3D9::CheckDeviceFormatConversion` can be used to test format combinations permitted for `StretchRect`, and `StretchRect` can resolve a multisampled render target into a non-multisampled render target.
+`PROMOTED_RVAS.template.ini` contains the reviewed primitive addresses/signatures while intentionally keeping:
 
-Reference documentation:
+- `Status=NOT_PROMOTED`
+- `ReviewerVerdict=REVIEWED_COLD_ONLY`
 
-- https://learn.microsoft.com/windows/win32/api/d3d11/nf-d3d11-id3d11device-opensharedresource
-- https://learn.microsoft.com/windows/win32/api/d3d9/nf-d3d9-idirect3d9-checkdeviceformatconversion
-- https://learn.microsoft.com/windows/win32/api/d3d9/nf-d3d9-idirect3ddevice9-stretchrect
+`BUILD_GATED.ps1` refuses to build an active probe unless a local-only `PROMOTED_RVAS.ini` explicitly changes both gates to `PROVEN_SOURCE_MATCH`.
+
+This preserves the PRE-FLIGHT boundary between static proof and bounded LIVE.
+
+## Observation seam
+
+The exact `AfxD3d9PushRenderTargetEx(IDirect3DSurface9 *replacementSurface)` primitive at `+0x34830` is the observation seam.
+
+Exact binary call graph shows a one-stack-argument ABI for the replacement-surface pointer; a separate guessed wrapper is not required.
+
+The probe can inspect the HLAE-owned replacement surface without rebinding it:
+
+1. call original Push primitive normally;
+2. inspect `IDirect3DSurface9::GetDesc`;
+3. `GetDevice`;
+4. device `QueryInterface(IDirect3DDevice9Ex)` when available;
+5. `GetCreationParameters` / `GetDirect3D`;
+6. `IDirect3D9Ex::GetAdapterLUID` when available;
+7. `CheckDeviceFormat`;
+8. `CheckDeviceFormatConversion`;
+9. bounded, unbound shared `CreateTexture` capability attempts.
+
+The control must not call `SetRenderTarget`, execute a real transport `StretchRect`, call `GetRenderTargetData`, perform pixel readback, create OpenXR, or submit images.
+
+## Mutable-staging rule
+
+Pinned HLAE source stores one persistent `m_RenderTargetReplacement` and creates it only when absent/lost. Do not assume LEFT and RIGHT have separate HLAE surfaces.
+
+The control should therefore log replacement pointer identity across pass1/pass2/cycles.
+
+Actual T0 transport must snapshot each eye immediately after its eye render into dedicated transport storage before a later pass can overwrite the staging surface.
+
+## Official platform contract carried into the verdict
+
+D3D9->D3D11 sharing is unsynchronized. Producer and consumer need explicit ownership/fence logic.
+
+The documented direct shared resource path requires a one-mip, DEFAULT, non-MSAA 2D texture in the narrow supported cross-API format set. `D3DFMT_A8B8G8R8` maps to `DXGI_FORMAT_R8G8B8A8_UNORM` and is the preferred 8-bit carrier candidate.
+
+`CheckDeviceFormatConversion` is a capability check for D3D9 `StretchRect`; `StretchRect` can also resolve a multisampled RT to a non-MSAA RT. Actual device behavior remains runtime evidence.
+
+If D3D9Ex is available, compare its producer adapter LUID with the OpenXR-required D3D11 LUID. If D3D9Ex is unavailable, record `LUID_UNAVAILABLE` rather than automatically falsifying sharing; the later real D3D11 import test is authoritative.
 
 ## Explicit exclusions
 
-This control does not prove D3D11 import, adapter-LUID match, GPU synchronization, pair coherence, or OpenXR submission. Those remain later gates. The purpose here is narrower: select **direct shared target vs GPU carrier conversion** from actual frozen D3D9 runtime facts.
+This control does not prove:
+
+- D3D11 `OpenSharedResource` success;
+- D3D9/D3D11 adapter match when LUID is unavailable;
+- D3D11 consumer GPU completion;
+- pair coherence;
+- OpenXR swapchain formats;
+- OpenXR image submission;
+- visual color/gamma correctness.
+
+Those are later/secondary T0 gates. The purpose here is narrower: select direct replacement sharing vs dedicated GPU carrier architecture from actual frozen D3D9 facts.
 
 ## Current action
 
-Do not create `PROMOTED_RVAS.ini` manually. First run and return the COLD RT primitive RESULT. Review its decompilation/call graph against pinned source, then promote or reject the wrapper candidate. Only after that review may this package be built.
+Keep the package sealed until a bounded compatibility LIVE is intentionally authorized under the exact five-line PREFLIGHT. No more broad HLAE binary archaeology is needed before that decision.
