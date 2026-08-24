@@ -1,4 +1,4 @@
-// CSGOVR T0 exact-HLAE render-target primitive census v1.1
+// CSGOVR T0 exact-HLAE render-target primitive census v1.1.3
 // @category CSGOVR
 import ghidra.app.script.GhidraScript;
 import ghidra.app.decompiler.*;
@@ -45,8 +45,6 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
     private boolean hasDisp(String s, int disp) {
         String x = s.toLowerCase().replace(" ", "");
         String h = Integer.toHexString(disp).toLowerCase();
-        // Ghidra operand rendering varies across analyzers / syntax. Keep this
-        // deliberately tolerant, then rely on source-guided role ranking + decompile review.
         return x.contains("+0x" + h) || x.contains("+" + h + "h") ||
                x.contains("[0x" + h + "]") || x.contains("[" + h + "h]");
     }
@@ -56,6 +54,31 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
         InstructionIterator ii = listing.getInstructions(f.getBody(), true);
         while (ii.hasNext()) if (ii.next().getFlowType().isCall()) n++;
         return n;
+    }
+
+    private String bytesHex(Address start, int wanted) {
+        try {
+            int n = Math.max(0, Math.min(wanted, 64));
+            byte[] b = new byte[n];
+            int got = currentProgram.getMemory().getBytes(start, b);
+            if (got <= 0) return "NONE";
+            StringBuilder sb = new StringBuilder(got * 2);
+            for (int i = 0; i < got; i++) sb.append(String.format("%02X", b[i] & 0xff));
+            return sb.toString();
+        } catch (Throwable t) {
+            return "ERROR";
+        }
+    }
+
+    private void dumpFunctionInstructions(PrintWriter out, Listing listing, Function f, int maxInstructions) {
+        InstructionIterator ii = listing.getInstructions(f.getBody(), true);
+        int n = 0;
+        while (ii.hasNext() && n < maxInstructions) {
+            Instruction ins = ii.next();
+            out.println("      " + ins.getAddress() + "  " + text(ins));
+            n++;
+        }
+        if (ii.hasNext()) out.println("      ... instruction dump truncated ...");
     }
 
     private void ctx(PrintWriter out, Listing listing, Address center, int before, int after) {
@@ -91,11 +114,6 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
     }
 
     private String roleHint(Hit h) {
-        // Exact pinned-source structure:
-        // Push member: GetRT + SetRT, no StretchRect.
-        // Pop member:  GetRT + SetRT + optional StretchRect branch.
-        // Wait member: IDirect3DQuery9 Issue(slot6=0x18) + GetData(slot7=0x1c).
-        // These are ranking hints only; no RVA is auto-promoted without decompile/source review.
         if (h.setRt() && h.getRt() && h.stretch()) return "RT_POP_MEMBER_FINALIST";
         if (h.setRt() && h.getRt() && !h.stretch()) return "RT_PUSH_MEMBER_FINALIST";
         if (!h.setRt() && !h.getRt() && h.queryIssue() && h.queryGetData() && h.totalCalls <= 16)
@@ -108,7 +126,8 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
     }
 
     private void printThinCallers(PrintWriter out, Listing listing, FunctionManager fm,
-                                  ReferenceManager rm, Function target, Address base) {
+                                  ReferenceManager rm, Function target, Address base,
+                                  DecompInterface di) {
         out.println("THIN_CALLER_CANDIDATES");
         int shown = 0;
         HashSet<Address> seen = new HashSet<Address>();
@@ -122,11 +141,20 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
             int calls = callCount(listing, cf);
             if (bytes <= 160 && calls <= 4) {
                 long rva = cf.getEntryPoint().subtract(base);
+                int sigLen = (int)Math.min(32L, Math.max(6L, bytes));
+                String sig = bytesHex(cf.getEntryPoint(), sigLen);
                 out.println("  RVA=0x" + Long.toHexString(rva) +
                             " Entry=" + cf.getEntryPoint() +
                             " Name=" + cf.getName() +
                             " BodyBytes=" + bytes + " Calls=" + calls +
-                            " RefFrom=" + r.getFromAddress());
+                            " RefFrom=" + r.getFromAddress() +
+                            " SigLen=" + sigLen + " SigHex=" + sig);
+                out.println("  THIN_INSTRUCTIONS_BEGIN");
+                dumpFunctionInstructions(out, listing, cf, 80);
+                out.println("  THIN_INSTRUCTIONS_END");
+                out.println("  THIN_DECOMPILE_BEGIN");
+                out.println(decompile(di, cf));
+                out.println("  THIN_DECOMPILE_END");
                 shown++;
                 if (shown >= 12) break;
             }
@@ -146,7 +174,7 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
         Address base = pg.getImageBase();
         PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(args[0]), "UTF-8"));
 
-        out.println("CSGOVR_T0_HLAE_RT_PRIMITIVE_SCAN_V1_1");
+        out.println("CSGOVR_T0_HLAE_RT_PRIMITIVE_SCAN_V1_1_3");
         out.println("Program=" + pg.getName());
         out.println("ImageBase=" + base);
         out.println("DoRenderViewRVA=0x22340");
@@ -188,8 +216,8 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
             if (h.createTexture()) h.score += 12;
             if (h.createQuery()) h.score += 18;
             if (h.setRt() && h.getRt()) h.score += 80;
-            if (h.setRt() && h.getRt() && h.stretch()) h.score += 90; // source-shaped Pop
-            if (h.setRt() && h.getRt() && !h.stretch()) h.score += 70; // source-shaped Push
+            if (h.setRt() && h.getRt() && h.stretch()) h.score += 90;
+            if (h.setRt() && h.getRt() && !h.stretch()) h.score += 70;
             if (h.queryIssue() && h.queryGetData() && h.totalCalls <= 16) h.score += 120;
             if (h.score > 0) hits.add(h);
         }
@@ -232,7 +260,6 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
         out.println("BoundedCoreFinalists=" + ((bestPush != null && bestPop != null) ? "YES" : "NO"));
         out.println("SemanticVerdict=" + ((bestPush != null && bestPop != null) ? "BOUNDED_FINALISTS" : "AMBIGUOUS"));
 
-        // Put source-shaped finalists first, then retain the broader census for falsification.
         ArrayList<Hit> ordered = new ArrayList<Hit>();
         for (Hit h : hits) if (!roleHint(h).equals("OTHER") && roleHint(h).contains("FINALIST")) ordered.add(h);
         for (Hit h : hits) if (!ordered.contains(h)) ordered.add(h);
@@ -276,7 +303,7 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
                 callers++;
                 if (callers >= 30) break;
             }
-            printThinCallers(out, listing, fm, rm, h.f, base);
+            printThinCallers(out, listing, fm, rm, h.f, base, di);
 
             out.println("DECOMPILE_BEGIN");
             out.println(decompile(di, h.f));
@@ -322,6 +349,6 @@ public class CsgovrHlaeRtPrimitiveProbe extends GhidraScript {
         di.dispose();
         out.println("SCAN_COMPLETE=YES");
         out.close();
-        println("CSGOVR T0 HLAE RT primitive scan v1.1 complete");
+        println("CSGOVR T0 HLAE RT primitive scan v1.1.3 complete");
     }
 }
