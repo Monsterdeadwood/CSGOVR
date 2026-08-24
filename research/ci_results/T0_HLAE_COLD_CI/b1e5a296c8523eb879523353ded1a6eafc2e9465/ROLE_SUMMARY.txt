@@ -1,0 +1,16 @@
+CSGOVR T0 HLAE COLD CI ROLE SUMMARY
+EvidenceLabel=STATIC-AUDITED / NOT LIVE-PROVEN
+SourceCommit=b1e5a296c8523eb879523353ded1a6eafc2e9465
+SemanticVerdict=BOUNDED_FINALISTS
+BoundedCoreFinalists=YES
+BestPushMemberRVA=0x36150
+BestPushThinCallerRVA=NONE
+BestPushThinCallerSigHex=NONE
+BestPopMemberRVA=0x346a0
+BestPopThinCallerRVA=0x16d60
+BestPopThinCallerSigHex=833DE4E020100074106A00E830D9010083C404FF0DE4E02010C3
+BestGpuWaitMemberRVA=0x343f0
+BestGpuWaitThinCallerRVA=NONE
+BestGpuWaitThinCallerSigHex=NONE
+PromotionPolicy=NO AUTO PROMOTION; inspect committed finalist decompiles against pinned source.
+RuntimeAuthorization=NO
