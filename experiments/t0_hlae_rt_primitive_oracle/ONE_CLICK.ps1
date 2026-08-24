@@ -98,7 +98,7 @@ Banner '4/6 GHIDRA HEADLESS SCAN'
 $ScriptDir = Join-Path $Root 'scripts'
 $Scan = Join-Path $Stage 'HLAE_RT_PRIMITIVE_SCAN.txt'
 $ProjectName = 'csgovr_t0_hlae_rt_' + $Stamp
-$args = @(
+$ghArgs = @(
     $ProjectDir,
     $ProjectName,
     '-import', $StagedAfx,
@@ -110,7 +110,7 @@ $args = @(
 $saved = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
 try {
-    & $Ghidra @args 2>&1 | Tee-Object -FilePath (Join-Path $Stage 'GHIDRA_HEADLESS.log')
+    & $Ghidra @ghArgs 2>&1 | Tee-Object -FilePath (Join-Path $Stage 'GHIDRA_HEADLESS.log')
     $GhidraEc = $LASTEXITCODE
 } finally {
     $ErrorActionPreference = $saved
