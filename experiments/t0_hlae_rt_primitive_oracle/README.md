@@ -1,4 +1,4 @@
-# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.2
+# CSGOVR T0 COLD HLAE RT primitive oracle v1.1.3
 
 Evidence label: **STATIC-AUDITED / NOT LIVE-PROVEN**.
 
@@ -25,11 +25,11 @@ The BAT first runs a Windows PowerShell parser gate. The runner then locates the
 
 `CSGOVR_T0_HLAE_RT_PRIMITIVE_RESULT_<timestamp>.zip`
 
-Return that ZIP to the CSGOVR analysis branch.
+Return that ZIP to the CSGOVR analysis branch if the CI route is unavailable.
 
 ## Source-guided role ranking
 
-The probe still performs a broad D3D9 call census, but ranks exact-source-shaped roles before generic candidates.
+The probe performs a broad D3D9 call census, but ranks exact-source-shaped roles before generic candidates.
 
 Pinned source contract:
 
@@ -43,25 +43,46 @@ Heuristic role labels:
 - `RT_POP_MEMBER_FINALIST`
 - `GPU_WAIT_MEMBER_FINALIST`
 
-The scanner also enumerates **thin direct callers** to expose likely global wrappers around the underlying `g_NewDirect3DDevice9` member methods.
+The scanner enumerates **thin direct callers** to expose likely global wrappers around the underlying `g_NewDirect3DDevice9` member methods.
 
-The v1.1.2 runner extracts compact role fields:
+The v1.1.3 output now records, for each thin wrapper candidate:
+
+- wrapper RVA and entry VA;
+- body size and call count;
+- first 6..32 machine bytes as `SigHex`;
+- bounded instruction listing;
+- decompiled wrapper body.
+
+The runner extracts compact fields:
 
 - `BestPushMemberRVA`
 - `BestPushThinCallerRVA`
+- `BestPushThinCallerSigHex`
 - `BestPopMemberRVA`
 - `BestPopThinCallerRVA`
+- `BestPopThinCallerSigHex`
 - `BestGpuWaitMemberRVA`
 - `BestGpuWaitThinCallerRVA`
+- `BestGpuWaitThinCallerSigHex`
 - `BoundedCoreFinalists`
 - `SemanticVerdict`
 
-Two hardening changes matter in v1.1.2:
+Candidate-block isolation prevents a role with no thin caller from borrowing another role's wrapper. Member fields are normalized to pure `0x...` RVAs.
 
-1. member fields are normalized to pure `0x...` RVA values rather than carrying the rest of the scan line;
-2. thin-caller extraction is isolated to one candidate block. If a role has no thin caller, it returns `NONE` and cannot accidentally steal a wrapper RVA from a later candidate.
+`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped census collapsed to bounded candidates. RVA and signature promotion still requires explicit decompile/call-graph comparison against exact pinned source.
 
-`SemanticVerdict=BOUNDED_FINALISTS` means only that the source-shaped census collapsed to bounded candidates. Member and wrapper RVAs remain heuristic until decompile/call graph review against exact pinned source.
+## CI COLD route
+
+`.github/workflows/t0-cold-hlae-binary-oracle.yml` can perform the same closure without the local machine:
+
+1. query the official AdvancedFX `v2.191.1` release;
+2. inspect official ZIP assets until the exact pinned `AfxHookSource.dll` SHA is found;
+3. download an official Ghidra release and JDK 21;
+4. run this exact Java oracle;
+5. upload the full static result as an Actions artifact;
+6. commit only compact review evidence back under `research/ci_results/T0_HLAE_COLD_CI/<source-commit>/`.
+
+The CI result still has `RuntimeAuthorization=NO`. It is a transport COLD closure, not a runtime experiment.
 
 ## Broader fingerprints retained
 
@@ -75,11 +96,9 @@ D3D9 device vtable fingerprints:
 
 Operand matching is deliberately tolerant to Ghidra rendering variants. Promotion is never based on a displacement alone; the candidate must also match callers, decompilation, and pinned source semantics.
 
-For bounded candidates the scan records exact VA/RVA, source-guided role hint, matched operations, disassembly context, callers, thin callers, decompiled body, symbol-name matches, and the known DoRenderView anchor context.
-
 ## Source-semantic target
 
-The strongest current target is the HLAE-aware replacement-target pair:
+The strongest target is the HLAE-aware replacement-target pair:
 
 `AfxD3d9PushRenderTargetEx(replacementSurface)`
 
@@ -101,6 +120,7 @@ See:
 
 - `research/T0_GPU_TRANSPORT_DIRECTIONAL_AUDIT_20260824.md`
 - `research/T0_D3D9EX_D3D11_SHARED_FORMAT_AUDIT_20260824.md`
+- `experiments/t0_rt_format_compat_control/`
 
 ## PREFLIGHT
 
