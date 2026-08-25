@@ -1,6 +1,6 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, and MASTER 3.1 v0.9.2 pre-causal XR-invalid result.
+Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, and MASTER 3.1 camera-origin authority PASS from live run `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` plus cold raster re-analysis.
 
 ## AUTHORITY / CURRENT PROGRAM
 Execution order remains strict:
@@ -21,63 +21,59 @@ Retain CPU D3D9 complete-pair transport to Meta OpenXR. Do not reopen.
 ## MASTER 2 — PASS
 Retain exact Quest 3 asymmetric projection through `CViewSetup +0x68/+0x6C`. Do not rerun.
 
-## MASTER 3.1 v0.9.2 — INVALID / PRE-CAUSAL XR SESSION
-Result: `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_071816.zip`.
-SHA256: `C4AB4FD0DFA9D8F90D7C47E18588EEC95185F9FEDC242B3175B1B469FFFBF91C`.
+## MASTER 3.1 — PASS: NATIVE ORIGIN AUTHORITY
+Live result: `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip`.
 
-The package built successfully, but did not launch CS:GO and did not attempt the causal origin experiment.
+Runtime proof:
+- XR session/game layer active;
+- exact Quest matrix path/hash proof PASS;
+- exact native RenderView guard PASS at `client.dll+0x003A5280`;
+- local full `CViewSetup 0x198`, caller-owned write=0;
+- `EARLY_ORIGIN_APPLY` LEFT and RIGHT applied exact +32 camera-right translation with tiny vector error;
+- same-HLAE L/R pair proof retained, drops=0.
 
-Passed before abort:
-- frozen target/hash preflight
-- exact HLAE package preflight
-- x86 DLL/injector and x64 OpenXR host build
-- Meta OpenXR manifest selection
-- XR instance creation
-- D3D11 device creation
-- Quest view configuration enumeration
-- swapchain-format setup
+The bundled analyzer reported FAIL/INVALID because BASE_B did not visually reset to BASE_A and SHIFT/BASE_B same-eye captures were unstable. Cold log+raster review found the cause: the camera itself rotated materially during the causal window. This contaminates the reset-control metric but does not erase the causal translation evidence.
 
-Blocking raw XR observation:
-- `XR SESSION STATE=1`
-- `running=0`
-- no `XR SESSION RUNNING`
-- no diagnostic two-eye projection submission
-- producer pairs remained `0/0`
+Cold image evidence:
+- BASE_A A0->A1 median feature drift about -0.5 px for both eyes;
+- camera-right vector entering SHIFT changes only ~1.436 deg;
+- rotational contribution predicted from Quest M00 and 960 px width is ~10.9 px;
+- actual BASE_A->SHIFT motion is ~-114 to -116 px in both eyes;
+- far-only homography explains far features to ~1.6-2.5 px residual;
+- near geometry retains ~-86 to -89 px residual after that far-scene rotation/homography compensation.
 
-Runner failure message:
-`T0: OpenXR session did not reach RUNNING. Activate Quest Link / wake Quest 3.`
+This is depth-dependent parallax in the preregistered direction. Therefore `client.dll+0x003A5280` with `CViewSetup.origin +0xB8` is retained as the winning early native camera seam. Do not repeat M3.1.
 
-Because the run stopped at T0, there is no `EYE_TRANSPORT.log`, no `EARLY_ORIGIN_APPLY`, no HLAE continuous BASE/SHIFT/RESET capture, and no phase BMPs. The generated analyzer FAIL is not a semantic origin result.
+## PREPARED MASTER 3.2A — HMD ROTATION ONLY
+Package:
+`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.0_LIVE_ONECLICK.zip`
+SHA256 `C6E924E27C86E853960EBFB5498E8252BBED2DBE9A878660ABF237F32A9F84CE`.
+Static verification: 25/25 PASS.
 
-Scientific verdict: **INVALID / PRE-CAUSAL INFRASTRUCTURE**, not origin FAIL.
+Single new variable: relative Quest HMD orientation.
 
-Detailed record: `results/MASTER31_EARLY_ORIGIN_20260825_071816_INVALID_XR_SESSION.md`.
+Architecture:
+- x64 host publishes relative OpenXR HMD quaternion through unused shared-header reserved fields, preserving M1 ABI size 332;
+- first gameplay pose is anchor;
+- x86 eye DLL latches one pose for LEFT+RIGHT;
+- OpenXR-to-Source basis mapping: Source X=-XR Z, Source Y=-XR X, Source Z=+XR Y;
+- native local `CViewSetup` angles are composed from frozen base game camera + relative HMD rotation;
+- per-eye origin is recentered and IPD re-applied around the newly rotated head-right vector;
+- producer signals engine rotation active;
+- host then submits live eye ORIENTATION with anchor eye POSITION, avoiding double rotation while keeping translation intentionally disabled;
+- exact Quest matrix and M1 transport remain retained;
+- pass3 remains untouched.
 
-## PREPARED v0.9.3
-`CSGOVR_MASTER3_1_EARLY_ORIGIN_v0.9.3_XR_SESSION_RESILIENCE_ONECLICK.zip`
-SHA256 `C4846D8E02039FF47F8ACE8BF976FEE2983656AC8BEA57AF1A70B4A2158729FB`.
-
-v0.9.3 changes runner/T0 only:
-- best-effort official Meta `OVRService` probe/start;
-- start official Meta/Oculus desktop client if installed and not running;
-- optional best-effort Quest WAKEUP/MENU through already-authorized ADB only;
-- wait up to 180 seconds for `XR SESSION RUNNING`, retrying assist;
-- pre-causal failures are explicitly `INVALID_PRE_CAUSAL` and do not run the raster analyzer.
-
-C/C++ causal source is byte-identical to v0.9.2. Static retry verification: 12/12 PASS.
-
-Causal experiment remains unchanged:
-- native early RenderView `client+0x003A5280`;
-- local full `CViewSetup 0x198`;
-- only `origin +0xB8`;
-- deterministic `+32 Source units` camera RIGHT;
-- exact Quest matrix always retained;
-- continuous `BASE_A -> ORIGIN_SHIFT -> BASE_B` stream;
-- pass3 untouched;
-- no HMD pose, angles, hands, weapon, culling, A2, or MASTER4.
+Excluded:
+- HMD translation;
+- hands/controllers;
+- weapon/aim/muzzle;
+- culling;
+- A2/GPU replay;
+- MASTER4.
 
 ## CURRENT GATE
-**MASTER 3.1 — bounded early native origin ownership probe.**
+**MASTER 3.2A — Quest HMD rotation-only proof.**
 
 ## NEXT
-Run v0.9.3 once and return `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_*.zip`. Only a valid causal 3.1 PASS may open MASTER 3.2 real HMD pose.
+Run `00_RUN_MASTER32A_HMD_ROTATION.bat`. During the short LIVE window, wear Quest and turn the HEAD left/right then up/down, without moving the mouse. Return `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_*.zip` plus the headset observation. Only coherent rotation PASS opens M3.2B translation-only.
