@@ -23,23 +23,38 @@ The previous word `downward` for M12<0 was a prediction-text error. Prior causal
 ## UX RULE FROM M2
 Do not repeat burst capture. v0.8.1 showed three apparent static states because each phase ran `mirv_streams record` only long enough for two BMPs and stopped it again. MASTER3.1 must start recording once, keep the real stereo/game stream continuous, switch causal mode while recording, and stop only after the final reset.
 
+## PREPARED / UNRUN PACKAGE
+`CSGOVR_MASTER3_1_EARLY_ORIGIN_v0.9.0_LIVE_ONECLICK.zip`
+SHA256 `680D76F1C95BE286E0E2CCFF0B1327BF566A3F869C92811CE1AA61F09E8B2D4F`
+Status: **PREPARED / STATIC-VERIFIED 39/39 / UNRUN**.
+This is not runtime evidence.
+
+Runner policy:
+- exactly one causal `mirv_streams record start`;
+- continuous BASE_A -> ORIGIN_SHIFT_RIGHT -> BASE_B_RESET;
+- minimum 6 new frames/eye and 1200 ms per state;
+- exactly one causal `record end` after reset;
+- 12 selected evidence BMPs retained; bulk temporary raw BMPs removed after RESULT collection;
+- previous `$Host`, `$PID`, and Object[] eye-log failure classes guarded.
+
 ## NEXT ONE STEP
-Build/run one bounded native origin probe:
+Run the prepared package on the frozen target and return `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_*.zip`.
+
+Bounded native origin probe:
 - exact target `client.dll+0x003A5280`
 - validate timestamp `0x65272025`, SizeOfImage `0x05509000`, exact prologue and both known RenderView vtable slot6 targets
 - use a local full `0x198` CViewSetup copy
 - mutate only `origin +0xB8`
+- deterministic shift = +32 Source units along current camera RIGHT
 - current exact Quest matrix remains active
 - current M1 complete-pair CPU transport remains active
 - HLAE pass1/pass2 supplies eye identity; pass3 remains untouched
-- one continuous recording interval: `BASE -> ORIGIN_SHIFT -> BASE_RESET`
-- no stop/start between these phases
-- exact mode/pair IDs and selected same-pair images saved by the XR host
+- no stop/start between causal states
 
 ## PREFLIGHT — exactly 5 lines
 **MISSING FACT:** does a deterministic origin change at native RenderView entry survive to the real frozen-retail eye raster?
 **WHY NOT COLD:** the origin field and early function are exact-target facts, but only runtime raster proves this seam is authoritative at this point in the lifecycle.
-**PASS:** full-copy local origin mutation is logged at native entry and the selected SHIFT same-pair raster changes consistently beyond same-eye/reset drift while BASE_RESET returns to baseline.
+**PASS:** full-copy local origin mutation is logged at native entry and the selected SHIFT same-pair raster changes consistently beyond same-eye/reset drift while BASE_RESET returns to baseline, with predicted camera-right parallax direction.
 **FAIL:** exact hook/mutation is proven active but SHIFT raster does not exceed valid control drift, or mutation is overwritten before raster.
 **BASELINE MUST HOLD:** frozen client hash, HLAE 2.191.1, CViewSetup 0x198, M1 transport, M2 exact Quest matrix, pass3 untouched, -insecure/local only.
 
