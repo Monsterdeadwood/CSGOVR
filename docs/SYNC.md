@@ -1,6 +1,6 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, MASTER 3.1 native origin PASS, MASTER 3.2A real Quest HMD rotation PASS, and first pose-coherence Observatory build attempt.
+Snapshot: 2026-08-25 after valid pose-coherence Observatory v1.0.4 result.
 
 ## FROZEN BASELINE
 - legacy CS:GO x86, AppID `4465480`, BuildID `22100934`
@@ -11,55 +11,60 @@ Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, MASTER 3.1 native origi
 - `-insecure`, local/offline only
 
 ## CLOSED
-MASTER1 transport = PASS.
+MASTER1 transport semantics = PASS.
 MASTER2 Quest projection = PASS.
 MASTER3.1 native origin authority at `client+0x003A5280` = PASS.
-MASTER3.2A real Quest HMD rotation = PASS from `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_20260825_172017.zip` plus user visual report of almost normal VR.
+MASTER3.2A real Quest HMD rotation = PASS.
 
-## ACTIVE QUALITY BLOCKER
-User reports slight image shake specifically while turning the head.
+## POSE COHERENCE RESULT 194358
+`CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_194358.zip`
 
-Leading hypothesis: render/submit pose mismatch. In the successful rotation run GAME pair staleness is commonly roughly 19–33 ms while HMD pose updates more frequently, so a pair rendered on pose N may be submitted with newer pose N+1/N+2.
+Instrument verdict: PASS / ready for visual comparison.
+Evidence:
+- current host identity PASS;
+- native guard PASS;
+- exact Quest matrix retained;
+- pair proof PASS;
+- LEFT/RIGHT same pose PASS;
+- exact render-pose lookup/submission PASS;
+- 9/9 phases present;
+- pose lookup misses 0;
+- capture failures 0.
 
-## POSE COHERENCE OBSERVATORY v1.0.3 — INVALID / BUILD
-Result: `CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_184330.zip`.
+Exact render-pose submission is retained as the current timing policy.
 
-Raw status:
-- `MASTER32A_VERDICT=INVALID_PRE_CAUSAL`
-- `CAUSAL_ATTEMPTED=False`
-- `HOST_SHA256=MISSING`
+## NEW QUALITY BLOCKER
+The same run accumulated 179 `droppedPairs`.
+There were no provenance rejects, no pose/mode mismatches, no capture failures and no lookup misses. Source inspection shows these drops are generated when `claim_pair_slot()` finds both shared-memory pair slots occupied.
 
-Exact build failure:
-`xr_host.cpp:176:47: error: use of undeclared identifier 'g_lastPairConsumeAgeMs'`
+This converts the jitter investigation from a broad pose question into a bounded cadence question: two-slot starvation during short host stalls can discard newer pairs and leave an older complete pair displayed.
 
-The included `XR_HOST.log` starts with `CSGOVR XR HOST MASTER3.2B v1.1.0 FULL 6DOF`; therefore it is stale contamination from an older host process and must not be used as v1.0.3 evidence.
+Long-run metrics also show large stale bursts in some phases, with stale p95 roughly 131–175 ms and occasional eye-gap spikes above 80 ms.
 
-## PREPARED OBSERVATORY v1.0.4
+## PREPARED v1.0.5 — SLOT DEPTH A/B
 Package:
-`CSGOVR_MASTER3_2A_POSE_COHERENCE_OBSERVATORY_v1.0.4_BUILD_ISOLATION_FIX_ONECLICK.zip`
+`CSGOVR_MASTER3_2A_SLOT_DEPTH_AB_v1.0.5_ONECLICK.zip`
 
 SHA256:
-`310830529F5BC33251A5EF3D56489140336241D935E47E0E2F28F4954CC7DE1D`
+`2045FD7B13CC95A5F4FE7A145C729BA597C014DE35678F64C11EE19E4E2F25D9`
 
-Static verification: 19/19 PASS.
+Static verification: 20/20 PASS.
 
-Infrastructure fixes:
-- `g_lastPairConsumeAgeMs` and `g_lastEyeGapMs` declarations moved before `observe_host_phase()`;
-- unique host log `host_poseobs_v104.log`;
-- all stale `csgovr_*xr_host*` processes stopped before launch;
-- exact v1.0.4 host banner required for startup gate;
-- current host PID/SHA written into result identity metadata.
+Implementation:
+- shared transport grows to 8 physical complete-pair slots;
+- unique V105 mapping prevents stale ABI collision;
+- producer begins with active slot limit 2;
+- same live run switches active slot limit to 8;
+- host always consumes newest complete pair and frees older ready pairs;
+- exact render-pose association remains unchanged;
+- camera/projection/rotation ownership remain unchanged.
 
-Single active causal change remains exact render-pose association: each complete L/R GAME pair stamps the exact HMD pose sequence used to render it; host retrieves that historical quaternion and submits `ROT_RENDER_LATCHED_ANCHOR_POS`.
-
-HMD position remains disabled during this quality gate.
-
-One run contains nine passive phases: STILL, SLOW YAW, FAST YAW, PITCH, ROLL, DIAGONAL, REVERSAL, MICRO MOTION, CENTER STILL. Per-phase metrics include render/current pose sequence, angular gap, staleMs, consumeAgeMs, eyeGapMs, drops, failures and lookup misses.
+Matched phases compare 2-slot vs 8-slot STILL, FAST YAW and REVERSAL. Additional 8-slot pitch+roll, micro-motion and center-still phases measure stability.
 
 ## CURRENT GATE
-**MASTER3.2A pose coherence / jitter quality gate.**
+MASTER3.2A cadence quality, 2-slot vs 8-slot A/B.
 
 ## NEXT
-Run only `00_RUN_MASTER32A_POSE_OBSERVATORY.bat` from v1.0.4, keep mouse still, follow all nine phase prompts, return result ZIP and visual comparison: jitter less / same / more.
+Run `00_RUN_MASTER32A_SLOT_DEPTH_AB.bat`, keep mouse still, follow prompts, and compare phase 2 vs 5 and phase 3 vs 6. Return result ZIP plus which half felt smoother.
 
-If smoother, freeze exact render-pose policy and resume MASTER3.2B positional HMD translation. If unchanged, use the captured phase metrics to adapt timing only. Do not reopen native camera ownership or rotation proof.
+If 8 slots reduce drop growth/stale bursts and feel smoother, freeze 8-slot cadence and resume MASTER3.2B positional HMD translation. If not, optimize x64 host upload/pacing next. Do not reopen camera ownership or Quest projection.
