@@ -1,70 +1,74 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after valid pose-coherence Observatory v1.0.4 result.
+Snapshot: **2026-08-25 late reconciliation after M34 v0.2.x failure boundary was recorded.**
 
-## FROZEN BASELINE
+## FROZEN TARGET
 - legacy CS:GO x86, AppID `4465480`, BuildID `22100934`
 - frozen `client.dll` SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
-- HLAE 2.191.1 exact
-- pass1 LEFT / pass2 RIGHT / pass3 monitor
+- HLAE 2.191.1
+- pass1 LEFT / pass2 RIGHT / pass3 monitor lineage retained
 - full `CViewSetup = 0x198`
 - `-insecure`, local/offline only
 
-## CLOSED
-MASTER1 transport semantics = PASS.
-MASTER2 Quest projection = PASS.
-MASTER3.1 native origin authority at `client+0x003A5280` = PASS.
-MASTER3.2A real Quest HMD rotation = PASS.
-
-## POSE COHERENCE RESULT 194358
-`CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_194358.zip`
-
-Instrument verdict: PASS / ready for visual comparison.
-Evidence:
-- current host identity PASS;
-- native guard PASS;
-- exact Quest matrix retained;
-- pair proof PASS;
-- LEFT/RIGHT same pose PASS;
-- exact render-pose lookup/submission PASS;
-- 9/9 phases present;
-- pose lookup misses 0;
-- capture failures 0.
-
-Exact render-pose submission is retained as the current timing policy.
-
-## NEW QUALITY BLOCKER
-The same run accumulated 179 `droppedPairs`.
-There were no provenance rejects, no pose/mode mismatches, no capture failures and no lookup misses. Source inspection shows these drops are generated when `claim_pair_slot()` finds both shared-memory pair slots occupied.
-
-This converts the jitter investigation from a broad pose question into a bounded cadence question: two-slot starvation during short host stalls can discard newer pairs and leave an older complete pair displayed.
-
-Long-run metrics also show large stale bursts in some phases, with stale p95 roughly 131–175 ms and occasional eye-gap spikes above 80 ms.
-
-## PREPARED v1.0.5 — SLOT DEPTH A/B
-Package:
-`CSGOVR_MASTER3_2A_SLOT_DEPTH_AB_v1.0.5_ONECLICK.zip`
+## CURRENT GOLDEN
+`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
 SHA256:
-`2045FD7B13CC95A5F4FE7A145C729BA597C014DE35678F64C11EE19E4E2F25D9`
+`5E4092F2407D8C2C9C8E6C9B1CC11826099534D088F1F9E078921A72ACFFF6B2`
 
-Static verification: 20/20 PASS.
+Evidence:
+`CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`
 
-Implementation:
-- shared transport grows to 8 physical complete-pair slots;
-- unique V105 mapping prevents stale ABI collision;
-- producer begins with active slot limit 2;
-- same live run switches active slot limit to 8;
-- host always consumes newest complete pair and frees older ready pairs;
-- exact render-pose association remains unchanged;
-- camera/projection/rotation ownership remain unchanged.
+User visual verdict:
+**VR + full HMD 6DoF works.**
 
-Matched phases compare 2-slot vs 8-slot STILL, FAST YAW and REVERSAL. Additional 8-slot pitch+roll, micro-motion and center-still phases measure stability.
+Known remaining quality defect: tearing.
+
+## CLOSED
+- MASTER1 transport = PASS
+- MASTER2 Quest projection = PASS
+- MASTER3.1 native origin authority at `client+0x003A5280` = PASS
+- MASTER3.2A real Quest HMD rotation = PASS
+- MASTER3.2B positional translation / full 6DoF = PASS at the current GOLDEN
+
+## RETAINED POSE-COHERENCE EVIDENCE
+`CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_194358.zip` remains useful instrumentation evidence:
+- host/native/Quest-matrix/pair proof PASS
+- LEFT/RIGHT same pose PASS
+- exact render-pose submission PASS
+- all 9 phases PASS
+- pose lookup miss 0
+- capture failure 0
+
+That run also exposed two-slot starvation (`droppedPairs=179`) and stale bursts. This is retained as a cadence finding, not the current camera-ownership blocker.
+
+## M34 INVALID BOUNDARY
+`M34 v0.2.x = INVALID / FROZEN`.
+
+`_RUN_20260825_221228` reached launch, map load and both DLL injections. It then stopped at the first HLAE stereo render after both injections.
+
+Two changes were active together:
+1. LEFT/RIGHT `drawViewModel 0 -> 1`
+2. passive/global `C_BaseAnimating::BuildTransformations` vtable index 184 hook
+
+Because both were enabled before the same first render, the result cannot assign causality to either one.
+
+M33 had already reached real game pairs with the slot8/controller-capable transport lineage, so slot depth alone is not the leading M34 suspect.
 
 ## CURRENT GATE
-MASTER3.2A cadence quality, 2-slot vs 8-slot A/B.
+**Serial viewmodel-path isolation on exact M3.2B GOLDEN.**
 
-## NEXT
-Run `00_RUN_MASTER32A_SLOT_DEPTH_AB.bat`, keep mouse still, follow prompts, and compare phase 2 vs 5 and phase 3 vs 6. Return result ZIP plus which half felt smoother.
+A. exact GOLDEN baseline
+B. GOLDEN + `drawViewModel=1` only, no hand DLL
+C. only after B PASS: passive `BuildTransformations` observation, no controller, no mutation
+D. only after C PASS: controller IPC
+E. only after D PASS: viewmodel transform mutation
 
-If 8 slots reduce drop growth/stale bursts and feel smoother, freeze 8-slot cadence and resume MASTER3.2B positional HMD translation. If not, optimize x64 host upload/pacing next. Do not reopen camera ownership or Quest projection.
+## SYNC RESOLUTION
+Older documents that still say the current gate is T0/G2.5 transport certification or M3.2A slot-depth A/B are historical snapshots. The current runtime authority is the M3.2B GOLDEN plus the M34 rollback decision above.
+
+Detailed boundary note:
+`docs/M34_FAILURE_ROLLBACK_20260825.md`
+
+Cross-tab reconciliation:
+`research/LATE_SYNC_20260825_M34_ROLLBACK.md`

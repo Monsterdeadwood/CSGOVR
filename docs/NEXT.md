@@ -1,74 +1,70 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after valid pose-coherence Observatory v1.0.4 result `CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_194358.zip`.
+Snapshot: **2026-08-25 late sync after M34 rollback.**
 
-## CLOSED GATES
-MASTER 1 = PASS.
-MASTER 2 = PASS.
-MASTER 3.1 native camera-origin ownership = PASS.
-MASTER 3.2A real Quest HMD rotation = PASS.
-
-Do not repeat transport identity, Quest projection, +32 origin ownership, or rotation ownership.
-A2 remains parked until MASTER4 PERF numerically FAILS.
-
-## POSE COHERENCE v1.0.4 — INSTRUMENT PASS
-Raw result:
-- `MASTER32A_VERDICT=READY_FOR_VISUAL_CONFIRMATION`
-- `CAUSAL_ATTEMPTED=True`
-- `HOST_IDENTITY=PASS`
-- `NATIVE_GUARD=PASS`
-- `QUEST_MATRIX=PASS`
-- `PAIR_PROOF=PASS`
-- `LEFT_RIGHT_SAME_POSE=PASS`
-- `EXACT_RENDER_SUBMIT=PASS`
-- `NO_POSE_LOOKUP_MISS=PASS`
-- `ALL_9_PHASES=PASS`
-- `captureFailures=0`
-
-Exact historical render-pose submission therefore works. Do not revert it without contradictory evidence.
-
-## NEW LEADING BLOCKER — TWO-SLOT STARVATION
-The same 194358 run accumulated `droppedPairs=179`.
-
-Code-path review plus logs show:
-- no LEFT/RIGHT provenance rejects;
-- no pose/mode mismatch;
-- no capture failures;
-- no pose-history lookup misses.
-
-Therefore the drops are produced by `claim_pair_slot()` finding both shared-memory slots busy. A short host stall can fill two slots, after which newer complete pairs are discarded until a slot frees. This can leave the compositor showing an older pair and matches the user's slight shake during head turns.
-
-Observed long-run cadence also contains large stale bursts: phase p95 values reached roughly 131–175 ms in several phases, while `eyeGapMs` occasionally spiked above 80 ms.
-
-## CURRENT GATE
-**MASTER3.2A transport cadence quality: direct 2-slot vs 8-slot A/B on the already-proven exact-pose camera path.**
-
-## NEXT ONE RUN
-Run:
-`CSGOVR_MASTER3_2A_SLOT_DEPTH_AB_v1.0.5_ONECLICK.zip`
+## FROZEN BASELINE
+Use exactly:
+`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
 SHA256:
-`2045FD7B13CC95A5F4FE7A145C729BA597C014DE35678F64C11EE19E4E2F25D9`
+`5E4092F2407D8C2C9C8E6C9B1CC11826099534D088F1F9E078921A72ACFFF6B2`
 
-Static verification: 20/20 PASS.
+Evidence:
+`CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`
 
-The transport contains 8 physical pair slots but starts with producer limit 2, reproducing the old behavior. Halfway through the same run only the active producer slot limit switches to 8.
+Baseline visual truth: **VR + full HMD 6DoF works.** Tearing remains, but it is not part of the next causal question.
 
-Matched A/B phases:
-1. A 2-slot STILL
-2. A 2-slot FAST YAW
-3. A 2-slot REVERSAL
-4. B 8-slot STILL
-5. B 8-slot FAST YAW
-6. B 8-slot REVERSAL
-7. B 8-slot PITCH+ROLL
-8. B 8-slot MICRO MOTION
-9. B 8-slot CENTER STILL
+## CURRENT MISSING FACT
+Does enabling the normal viewmodel render path by itself (`drawViewModel=1`) survive the first HLAE stereo render when absolutely everything else remains identical to M3.2B GOLDEN?
 
-Compare visually especially phase 2 vs 5 and phase 3 vs 6. Analyzer compares per-phase dropDelta, staleMs and eyeGapMs.
+## PREFLIGHT
+MISSING FACT: `drawViewModel=1` alone survives or kills the first stereo render on M3.2B GOLDEN.
+WHY NOT COLD: static/source evidence cannot prove this runtime boundary.
+PASS: stable real-game stereo/6DoF continues after recording starts with viewmodel enabled and no hand DLL.
+FAIL: the run dies/freezes at the same first HLAE stereo-render boundary.
+BASELINE MUST HOLD: exact M3.2B transport, Quest projection, origin, HMD rotation/translation and runner behavior remain unchanged.
 
-Everything else stays fixed: exact Quest matrix, native `client+0x003A5280`, proven HMD rotation, exact render-pose submit, same-pair L/R policy. HMD translation/hands/weapon remain excluded.
+## NEXT ONE MUTATION — B
+Start from exact GOLDEN and change only:
+- `CSGOVRLEFT drawViewModel 0 -> 1`
+- `CSGOVRRIGHT drawViewModel 0 -> 1`
 
-## DECISION
-If 8-slot phases materially reduce drop growth/stale bursts and feel smoother: freeze 8-slot transport and resume MASTER3.2B positional 6DoF.
-If 8 slots do not help: next blocker is host upload/pacing, not camera ownership. Do not reopen camera/projection.
+Explicitly exclude:
+- `hand_probe.dll`
+- `BuildTransformations` hook
+- controller IPC
+- controller pose
+- viewmodel transform mutation
+- projection changes
+- camera/origin/6DoF changes
+- transport redesign
+
+## AFTER B
+If B PASS:
+- C = add **PASSIVE** `C_BaseAnimating::BuildTransformations` vtable index 184 observation only.
+- no controller IPC.
+- no transform mutation.
+
+If C PASS:
+- D = add controller IPC only.
+
+If D PASS:
+- E = mutate the viewmodel transform / establish weapon ownership.
+
+If B FAIL:
+- the failure is localized to viewmodel reintroduction itself; do not load the hand probe and do not reopen camera/projection.
+
+## AUTOMATION POLICY
+A single one-click package may run A/B/C as **separate auto-closed sessions** and return one combined ZIP, provided each session has an independent baseline check and verdict. Several facts per user action are welcome; several mutations per process are not.
+
+## SEPARATE QUALITY LANE
+Tearing / cadence remains open. Keep it separate from the viewmodel ownership experiment unless it prevents the causal verdict.
+
+## DO NOT REPEAT
+- MASTER1 transport proof
+- MASTER2 Quest projection proof
+- MASTER3.1 origin ownership
+- MASTER3.2A HMD rotation ownership
+- MASTER3.2B basic positional 6DoF
+- old T0/G2.5 transport architecture debate
+- slot-depth as the default explanation for M34; M33 already reached real pairs with slot8/controller-capable lineage
