@@ -1,6 +1,6 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after MASTER 3.2A real Quest HMD rotation PASS from result `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_20260825_172017.zip`.
+Snapshot: 2026-08-25 after MASTER 3.2A HMD rotation PASS, user report of slight image shake during head turns, and invalid Observatory v1.0.3 build `CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_184330.zip`.
 
 ## CLOSED GATES
 MASTER 1 = PASS.
@@ -8,78 +8,66 @@ MASTER 2 = PASS.
 MASTER 3.1 native camera-origin ownership = PASS.
 MASTER 3.2A real Quest HMD rotation = PASS.
 
-Do not repeat transport, Quest projection, +32 origin ownership, or rotation-only proof.
+Do not repeat transport, Quest projection, +32 origin ownership, or rotation ownership.
 A2 remains parked until MASTER4 PERF numerically FAILS.
 
-## MASTER 3.2A PASS
-Result SHA256:
-`BC21C70411C60564620D13C580AFF925EE789231D61059E2269C99FE76DBF539`
+## CURRENT BLOCKER
+User reports the picture is almost normal VR but shakes slightly while turning the head.
 
-Runtime/analyzer evidence:
-- native RenderView guard PASS at `client.dll+0x003A5280`
-- exact Quest matrix retained
-- HMD pose publisher PASS
-- one pose latched on LEFT and reused RIGHT
-- `HMD_ROT_BASE_ANCHOR` PASS
-- `HMD_ROT_HANDSHAKE engineRotationActive=1`
-- LEFT/RIGHT HMD rotation apply PASS
-- angular range PASS
-- M1 same-HLAE pair proof retained
-- OpenXR GAME projection used `pose=ROT_LIVE_ANCHOR_POS`
-- pair transport remained distinct with zero drops/capture failures in the proof window
+Leading timing hypothesis from the successful 172017 run: GAME pairs are often roughly 19–33 ms stale while HMD pose updates faster than GAME pair production. The old host can therefore submit a newer orientation than the orientation used to render the displayed pair.
 
-Measured minimum proof range:
-- pitch `6.081 deg`
-- yaw `18.126 deg`
-- roll `2.863 deg`
+## OBSERVATORY v1.0.3 RESULT — INVALID / BUILD INFRASTRUCTURE
+Result: `CSGOVR_MASTER32A_POSE_COHERENCE_RESULT_20260825_184330.zip`.
 
-Later live span reached roughly pitch `22.218`, yaw `51.577`, roll `21.683` degrees.
+Raw status:
+- `MASTER32A_VERDICT=INVALID_PRE_CAUSAL`
+- `CAUSAL_ATTEMPTED=False`
+- `HOST_SHA256=MISSING`
 
-User visual observation: **"almost normal VR"**. This matches the telemetry and closes M3.2A positively.
+Exact compiler error:
+`xr_host.cpp:176:47: error: use of undeclared identifier 'g_lastPairConsumeAgeMs'`
 
-Detailed record:
-`results/MASTER32A_HMD_ROTATION_20260825_172017_PASS.md`
+The `XR_HOST.log` packaged in that result is stale contamination from an older `MASTER3.2B v1.1.0 FULL 6DOF` host and is not evidence for v1.0.3.
 
-## CURRENT GATE
-**MASTER 3.2B — real Quest HMD POSITION ONLY, retaining the proven rotation path.**
-
-Only one new causal variable is added: relative HMD head-center position.
-
-## PREPARED M3.2B v1.1.0
-Package:
-`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.0_LIVE_ONECLICK.zip`
+## NEXT ONE STEP
+Run:
+`CSGOVR_MASTER3_2A_POSE_COHERENCE_OBSERVATORY_v1.0.4_BUILD_ISOLATION_FIX_ONECLICK.zip`
 
 SHA256:
-`BB4EB0259880AFB71307B4AFA407BD7DF29A69008EBBB4F6EA9A9B95BD632994`
+`310830529F5BC33251A5EF3D56489140336241D935E47E0E2F28F4954CC7DE1D`
 
-Static verification: 26/26 PASS. Project-defined use-before-declaration audit: zero issues in `xr_host.cpp` and `eye_transport.c`.
+Static verification: 19/19 PASS.
 
-Causal design:
-1. retain M3.2A relative quaternion unchanged;
-2. host computes stereo eye midpoint at the GAME anchor and at current `xrLocateViews`;
-3. current-center minus anchor-center is rotated by inverse anchor HMD orientation, yielding anchor-local OpenXR translation;
-4. publish translation in meters through unused shared-header reserved fields, keeping the M1 header ABI at 332 bytes;
-5. x86 eye DLL latches one complete pose on LEFT and reuses it on RIGHT;
-6. map physical +X right / +Y up / -Z forward into base game camera forward/right/up;
-7. scale meters by `39.37007874015748` Source units per meter;
-8. add only that translation to the live game camera center;
-9. retain proven HMD rotation and rebuild IPD around the translated/rotated head center;
-10. after producer full-pose handshake, OpenXR submits the matching full live per-eye pose as `POSE_LIVE`.
+v1.0.4 fixes infrastructure only around the Observatory and keeps the same single causal test:
+- moves transport telemetry globals before `observe_host_phase()`;
+- unique current log `host_poseobs_v104.log`;
+- kills all stale `csgovr_*xr_host*` processes before launch;
+- requires exact v1.0.4 host banner before startup PASS;
+- records current host PID/SHA identity in the result.
 
-Excluded:
-hands, controller aim, weapon, muzzle, culling, A2/GPU fast path, MASTER4.
+## SINGLE ACTIVE CHANGE
+Each complete LEFT/RIGHT GAME pair carries the exact HMD pose sequence that rendered it. OpenXR submits that historical orientation as `ROT_RENDER_LATCHED_ANCHOR_POS` instead of a newer pose sampled at submit time.
 
-## RUN
-Use only:
-`00_RUN_MASTER32B_HMD_6DOF.bat`
+HMD position remains disabled. Rotation camera ownership remains frozen PASS.
 
-During the explicit LIVE window keep the mouse still and lean the headset/head left/right, forward/back and up/down. Rotation should remain as good as the M3.2A PASS.
+## NINE PASSIVE PHASES IN ONE RUN
+1. STILL baseline
+2. SLOW yaw
+3. FAST yaw
+4. PITCH
+5. ROLL
+6. DIAGONAL yaw+pitch
+7. direction REVERSAL
+8. MICRO motion
+9. CENTER still
+
+Per phase collect renderPoseSeq/currentPoseSeq, sequence gap, render-to-current angular gap, staleMs, consumeAgeMs, eyeGapMs, drops, capture failures, pose lookup misses.
 
 ## PASS
-Full pose publication + both-eye 6DoF application + positional range proof + retained M1 pair proof + OpenXR `pose=POSE_LIVE`, and user sees natural positional head movement with coherent depth parallax.
+Exact pose lookup survives all phases with no capture failures/lookup misses and user reports visibly less jitter while correct head rotation remains.
 
 ## FAIL
-Valid positional telemetry/application exists but final headset translation is wrong in sign, scale, axis, or coherence. If so, adapt only that mapping/scale. Do not reopen camera ownership or rotation.
+Exact render-pose association is proven but jitter remains materially unchanged. Then use phase metrics to choose the next timing/cadence correction only. Do not reopen camera ownership.
 
 ## AFTER PASS
-MASTER3 HMD camera ownership is closed as real 6DoF. Next bounded lane is controller/weapon ownership, not broad renderer reverse.
+Freeze exact render-pose policy and resume MASTER 3.2B HMD positional 6DoF on top of the smooth rotation path.
