@@ -1,6 +1,6 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after MASTER 3.1 camera-origin PASS and MASTER 3.2A v1.0.0 build-invalid attempt.
+Snapshot: 2026-08-25 after MASTER 3.1 camera-origin PASS and MASTER 3.2A v1.0.1 pre-causal DIAG-policy invalid run `092309`.
 
 ## CLOSED GATES
 MASTER 1 = PASS.
@@ -22,46 +22,53 @@ Cold re-analysis of `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` se
 ## CURRENT GATE
 **MASTER 3.2A — real Quest HMD ROTATION ONLY on the winning native camera seam.**
 
-## v1.0.0 RESULT — INVALID / BUILD INFRASTRUCTURE
-The first M3.2A live attempt never reached runtime.
+## v1.0.1 RESULT — INVALID / PRE-CAUSAL T0 DIAG POLICY
+Result: `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_20260825_092309.zip`
+SHA256: `DE97379040CECCE21FCC7771A2497D2639BDF1F24556AEAF847AA0FD0A95C2D4`
 
-Passed:
-- frozen target/HLAE preflight
-- Quest matrix staging/hash
-- M3.2A source contract
+Build succeeded. Meta OpenXR repeatedly reached `XR SESSION RUNNING`, but the runner aborted before CS:GO launch because no pre-game `layerCount=1 source=DIAG` token appeared inside the fixed wait window.
 
-Build failed in `xr_host.cpp`:
+Raw status:
+- `CAUSAL_ATTEMPTED=False`
+- `XR_SESSION_PASS=True`
+- `XR_DIAG_PASS=False`
+- no GAME pair
+- no injection
+- no HMD pose/application telemetry
 
-```text
-xr_host.cpp:154:9: error: use of undeclared identifier 'log_line'
-```
+This is not HMD-rotation FAIL.
 
-Root cause: `publish_relative_hmd_orientation()` called `log_line()` before its declaration.
+Cross-check: successful run `085119` also began with several `layerCount=0 source=DIAG` frames and only later reached the DIAG projection layer once Meta focus/visibility stabilized. MASTER1 already proved DIAG and GAME projection, so requiring DIAG to re-pass before every later MASTER3 experiment is unnecessary.
 
-This is not HMD-rotation FAIL. Detailed record:
-`results/MASTER32A_HMD_ROTATION_20260825_091002_INVALID_BUILD_LOG_LINE.md`
+Detailed record:
+`results/MASTER32A_HMD_ROTATION_20260825_092309_INVALID_T0_DIAG_POLICY.md`
 
 ## NEXT ONE STEP
 Run:
-`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.1_COMPILE_ORDER_FIX_ONECLICK.zip`
+`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.2_GAME_GATE_FIRST_ONECLICK.zip`
 
 SHA256:
-`0FFCE550F64460571BAEEDEC320364CC4DAA652F154A1C5E5D7C20FA503967F3`
+`425EB626DCDBF6BA5AE1D46B25335651AAA4FB992D09EF82AE64C96474EE4F2B`
 
-v1.0.1 changes compile order only:
-- adds `static void log_line(const char *fmt, ...);` before the HMD pose publisher;
-- cleans runner labels;
-- removes the ambiguous legacy MASTER31 BAT;
-- cold static audit reports zero remaining project-defined use-before-declaration issues in `xr_host.cpp` and `eye_transport.c`.
+v1.0.2 is runner-policy only. C/C++ causal source is byte-identical to v1.0.1.
 
-HMD causal architecture is unchanged:
+Changes:
+- `XR SESSION RUNNING` remains mandatory;
+- imported M1 DIAG is best-effort/non-blocking;
+- CS:GO is launched after XR session readiness even if the pre-game DIAG token is late;
+- after HLAE `record start`, runner waits up to 45 s for the actual M3.2A pipeline:
+  `PAIR PROOF -> XR GAME POSE ANCHOR -> HMD_POSE_PUBLISH -> HMD_ROT_BASE_ANCHOR -> HMD_ROT_EYE LEFT+RIGHT -> ROT_LIVE_ANCHOR_POS`;
+- only then does the runner ask for physical head movement;
+- HMD angular proof window is 18 s.
+
+HMD causal architecture remains unchanged:
 - relative Quest quaternion `inverse(anchor) * current`;
 - one pose latched on LEFT and reused by RIGHT;
 - OpenXR -> Source basis conversion;
 - native local `CViewSetup.angles` application at `client+0x003A5280`;
 - per-eye IPD rebuilt around rotated head-right;
 - caller-owned view untouched;
-- after producer handshake host submits live orientation + anchor position using `ROT_LIVE_ANCHOR_POS`;
+- host submits live orientation + anchor position after producer handshake using `ROT_LIVE_ANCHOR_POS`;
 - HMD translation, hands, weapon, culling, A2, MASTER4 excluded.
 
 ## PASS
