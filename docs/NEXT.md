@@ -1,16 +1,34 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after `CSGOVR_XR_TRANSPORT_RESULT_20260825_044816.zip`.
+Snapshot: 2026-08-25 after invalid MASTER2 v0.8.0 runner result `CSGOVR_QUEST_COHERENCE_RESULT_20260825_051205.zip`.
 
 ## CURRENT GATE
 **MASTER 2 — exact Quest 3 asymmetric matrix-only causal raster proof.**
 
-MASTER 1 is PASS. The live CPU pair transport reached Meta OpenXR with coherent distinct LEFT/RIGHT pairs. Do not reopen transport architecture now.
+MASTER 1 remains PASS. Do not reopen transport architecture.
+
+The v0.8.0 MASTER2 run is **INVALID / NO SCIENTIFIC VERDICT**, not a projection FAIL:
+- OpenXR diagnostic BLUE/ORANGE was visible;
+- NetCon confirms `Host_NewGame on map de_dust2`;
+- HLAE LEFT/RIGHT streams were created;
+- runner aborted before any `mirv_streams record start` causal phase;
+- `PATH_PROOF_PASS=False`, `XR_SESSION_PASS=True`, `XR_GAME_LAYER_PASS=False`.
+
+Root cause is runner-only: PowerShell `Inject-Transport` leaked injector stdout together with the intended eye-log path, so `$eyeLog` could become `Object[]` and the path-proof stage tested the wrong object.
+
+Detailed record: `results/MASTER2_QUEST_MATRIX_20260825_051205_INVALID.md`.
 
 ## NEXT ONE STEP
-Run `CSGOVR_MASTER2_QUEST_MATRIX_v0.8.0_ONECLICK.zip` on the frozen target and return `CSGOVR_QUEST_COHERENCE_RESULT_*.zip`.
+Run `CSGOVR_MASTER2_QUEST_MATRIX_v0.8.1_RUNNER_SCALAR_LOG_FIX_ONECLICK.zip` on the frozen target and return `CSGOVR_QUEST_COHERENCE_RESULT_*.zip`.
 
-The package is **PREPARED**, not runtime-proven.
+v0.8.1 is a **runner-only hotfix**:
+- capture injector stdout internally;
+- save `INJECTOR_OUTPUT.txt`;
+- return exactly one scalar `eye_patch.log` path;
+- delete stale same-PID eye log before injection;
+- require a fresh literal eye-log path before runtime path-proof.
+
+C/C++ transport, Quest matrix values, HLAE schedule, projection carrier, and causal protocol are unchanged.
 
 ## PREFLIGHT — exactly 5 lines
 **MISSING FACT:** applies the exact asymmetric Quest 3 matrix to real frozen-retail CS:GO raster through `CViewSetup +0x68/+0x6C`.
@@ -28,7 +46,7 @@ The package is **PREPARED**, not runtime-proven.
 
 ## REQUIRED RUN PROTOCOL
 1. Runner stages one `QUEST_MATRIX.ini`.
-2. Injected DLL must log the absolute file path it actually opened, SHA256 of those actual bytes, and parsed LEFT/RIGHT M00/M02/M11/M12.
+2. Injected DLL logs the absolute file path it actually opened, SHA256 of those actual bytes, and parsed LEFT/RIGHT M00/M02/M11/M12.
 3. Runner compares DLL path/hash/values to its staged copy. Any mismatch is HARD FAIL before causal capture.
 4. Run one continuous symmetric sequence: `BASE_A -> QUEST_MATRIX -> BASE_B(reset)`.
 5. Select fixed N=2 LEFT and N=2 RIGHT captures per phase.
@@ -48,7 +66,7 @@ The package is **PREPARED**, not runtime-proven.
 - no MASTER 3 or MASTER 4 work
 
 ## A2 POLICY
-GPU-sharing A2 is parked. It may open only if the later MASTER 4 120-second CPU performance gate numerically FAILS. It is not a transport prerequisite anymore.
+GPU-sharing A2 is parked. It may open only if the later MASTER 4 120-second CPU performance gate numerically FAILS.
 
 ## AFTER MASTER 2 PASS
-Only then open MASTER 3, starting with the bounded early native `CViewSetup +0xB8` origin ownership probe at `client.dll + 0x003A5280`. No broad reverse.
+Only then open MASTER 3, starting with the bounded early native `CViewSetup +0xB8` origin ownership probe at `client.dll +0x003A5280`. No broad reverse.
