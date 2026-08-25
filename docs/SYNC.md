@@ -1,6 +1,6 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, and MASTER 3.1 camera-origin authority PASS from live run `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` plus cold raster re-analysis.
+Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, MASTER 3.1 camera-origin authority PASS, and the first MASTER 3.2A HMD-rotation build attempt.
 
 ## AUTHORITY / CURRENT PROGRAM
 Execution order remains strict:
@@ -24,48 +24,52 @@ Retain exact Quest 3 asymmetric projection through `CViewSetup +0x68/+0x6C`. Do 
 ## MASTER 3.1 — PASS: NATIVE ORIGIN AUTHORITY
 Live result: `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip`.
 
-Runtime proof:
-- XR session/game layer active;
-- exact Quest matrix path/hash proof PASS;
-- exact native RenderView guard PASS at `client.dll+0x003A5280`;
-- local full `CViewSetup 0x198`, caller-owned write=0;
-- `EARLY_ORIGIN_APPLY` LEFT and RIGHT applied exact +32 camera-right translation with tiny vector error;
-- same-HLAE L/R pair proof retained, drops=0.
+Runtime + cold raster proof established that `client.dll+0x003A5280` with a local full `CViewSetup` is a surviving camera seam for origin. The old automatic BASE_B reset metric was contaminated by a later camera rotation, but depth-dependent parallax remained decisive: far-scene compensation reduces far residual to ~1.6–2.5 px while near geometry retains ~86–89 px extra displacement in the preregistered direction.
 
-The bundled analyzer reported FAIL/INVALID because BASE_B did not visually reset to BASE_A and SHIFT/BASE_B same-eye captures were unstable. Cold log+raster review found the cause: the camera itself rotated materially during the causal window. This contaminates the reset-control metric but does not erase the causal translation evidence.
+Do not repeat M3.1.
 
-Cold image evidence:
-- BASE_A A0->A1 median feature drift about -0.5 px for both eyes;
-- camera-right vector entering SHIFT changes only ~1.436 deg;
-- rotational contribution predicted from Quest M00 and 960 px width is ~10.9 px;
-- actual BASE_A->SHIFT motion is ~-114 to -116 px in both eyes;
-- far-only homography explains far features to ~1.6-2.5 px residual;
-- near geometry retains ~-86 to -89 px residual after that far-scene rotation/homography compensation.
+## MASTER 3.2A v1.0.0 — INVALID / BUILD INFRASTRUCTURE
+The first HMD-rotation attempt passed target/HLAE/matrix/source-contract preflight but failed while compiling the x64 OpenXR host.
 
-This is depth-dependent parallax in the preregistered direction. Therefore `client.dll+0x003A5280` with `CViewSetup.origin +0xB8` is retained as the winning early native camera seam. Do not repeat M3.1.
+Exact compiler error:
 
-## PREPARED MASTER 3.2A — HMD ROTATION ONLY
+```text
+xr_host.cpp:154:9: error: use of undeclared identifier 'log_line'
+```
+
+Root cause: the new `publish_relative_hmd_orientation()` helper called `log_line()` before the logger declaration/definition.
+
+No HMD runtime work occurred. This is **not** HMD rotation FAIL.
+
+Detailed record:
+`results/MASTER32A_HMD_ROTATION_20260825_091002_INVALID_BUILD_LOG_LINE.md`
+
+## PREPARED MASTER 3.2A v1.0.1 — COMPILE ORDER FIX
 Package:
-`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.0_LIVE_ONECLICK.zip`
-SHA256 `C6E924E27C86E853960EBFB5498E8252BBED2DBE9A878660ABF237F32A9F84CE`.
-Static verification: 25/25 PASS.
+`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.1_COMPILE_ORDER_FIX_ONECLICK.zip`
 
-Single new variable: relative Quest HMD orientation.
+SHA256:
+`0FFCE550F64460571BAEEDEC320364CC4DAA652F154A1C5E5D7C20FA503967F3`
 
-Architecture:
-- x64 host publishes relative OpenXR HMD quaternion through unused shared-header reserved fields, preserving M1 ABI size 332;
-- first gameplay pose is anchor;
-- x86 eye DLL latches one pose for LEFT+RIGHT;
-- OpenXR-to-Source basis mapping: Source X=-XR Z, Source Y=-XR X, Source Z=+XR Y;
-- native local `CViewSetup` angles are composed from frozen base game camera + relative HMD rotation;
-- per-eye origin is recentered and IPD re-applied around the newly rotated head-right vector;
-- producer signals engine rotation active;
-- host then submits live eye ORIENTATION with anchor eye POSITION, avoiding double rotation while keeping translation intentionally disabled;
-- exact Quest matrix and M1 transport remain retained;
-- pass3 remains untouched.
+Delta from v1.0.0 is infrastructure only:
+- forward-declare `log_line()` before the pose publisher;
+- clean runner labels;
+- remove ambiguous legacy `00_RUN_MASTER31.bat`;
+- project-defined use-before-declaration audit: zero remaining issues in `xr_host.cpp` and `eye_transport.c`;
+- static verification: 13/13 PASS.
+
+The M3.2A causal design is unchanged:
+- x64 host publishes relative Quest HMD quaternion in unused shared-header reserved fields, keeping the M1 332-byte ABI;
+- one pose latched on LEFT and reused by RIGHT;
+- OpenXR-to-Source basis mapping retained;
+- native local `CViewSetup.angles` composed at `client.dll+0x003A5280`;
+- per-eye origin recentered and IPD re-applied around rotated head-right;
+- producer handshake enables host `ROT_LIVE_ANCHOR_POS` submission: live orientation with anchored position;
+- Quest matrix and M1 pair transport retained;
+- pass3 untouched.
 
 Excluded:
-- HMD translation;
+- HMD positional translation;
 - hands/controllers;
 - weapon/aim/muzzle;
 - culling;
@@ -76,4 +80,4 @@ Excluded:
 **MASTER 3.2A — Quest HMD rotation-only proof.**
 
 ## NEXT
-Run `00_RUN_MASTER32A_HMD_ROTATION.bat`. During the short LIVE window, wear Quest and turn the HEAD left/right then up/down, without moving the mouse. Return `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_*.zip` plus the headset observation. Only coherent rotation PASS opens M3.2B translation-only.
+Run only `00_RUN_MASTER32A_HMD_ROTATION.bat` from v1.0.1. During LIVE, do not move the mouse; turn the headset left/right and up/down. Return `CSGOVR_MASTER32A_HMD_ROTATION_RESULT_*.zip` plus headset observation. Only coherent rotation PASS opens M3.2B translation-only.
