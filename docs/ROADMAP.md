@@ -1,77 +1,72 @@
 # CSGOVR — ROADMAP
 
-Snapshot: 2026-08-24 final cross-branch reconciliation.
+Snapshot: **2026-08-25 late sync after M34 rollback.**
 
-## 1. T0 / G2.5 GPU XR transport certification — CURRENT
-Protected baseline: exact v0.5.5 GOLDEN, BASE projection/origin/camera.
+## 1. Current gate — viewmodel reintroduction on M3.2B GOLDEN
+Protected runtime baseline:
+`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
-Goal:
-- use exact pinned HLAE `afx_interop` replacement eye render targets;
-- pass1 LEFT + pass2 RIGHT from one HLAE cycle share one `pairSeq`;
-- wait for GPU completion before publication;
-- external x64 Meta OpenXR host creates D3D11 on runtime adapter LUID `00000000:000118D1`;
-- import/open GPU eye resources, acquire/wait/copy/release both XR swapchains, one `xrEndFrame` per coherent pair;
-- no CPU readback production path unless GPU interop is concretely blocked.
+Goal: restore viewmodel/hand functionality without destabilizing the already-working world-camera path.
 
-Success freezes transport and moves immediately to G3/T1.
+Serial sequence:
+1. A — exact GOLDEN control.
+2. B — `drawViewModel=1` only, no hand DLL.
+3. C — only after B PASS, passive `C_BaseAnimating::BuildTransformations` observation.
+4. D — only after C PASS, controller IPC.
+5. E — only after D PASS, viewmodel transform mutation / weapon ownership.
 
-## 2. G3 / T1 Quest asymmetric projection
-Queued, not falsified.
+Do not combine B/C/D/E in one process.
 
-Use repository byte-locked projection child and exact retained P00:
-- custom projection `+0x68/+0x6C`
-- correct LEFT/RIGHT M02 sign
-- engine zNear/zFar retained
-- Source-native scalar FOV `110°`
-- preserve v0.5.5 eye-origin behavior and pass3 monitor
+## 2. Preserve closed world-camera gates
+Do not reopen without contradictory evidence:
+- MASTER1 transport
+- MASTER2 Quest asymmetric projection
+- MASTER3.1 native origin ownership at `client+0x003A5280`
+- MASTER3.2A HMD rotation
+- MASTER3.2B positional HMD translation / full 6DoF
 
-Do not add head pose, new origin ownership or culling surgery in the same first T1 build.
+The current GOLDEN already gives user-confirmed VR + full HMD 6DoF.
 
-## 3. Conditional clipping/culling classification
-Only if exact P00 is applied and peripheral geometry still clips:
-- aspect `0.9254939479` and FOV150 remain diagnostic controls only
-- if a real culling ownership blocker survives, continue from existing concrete evidence:
-  - `client+0x003A16A6`
-  - `client+0x003A01E4`
-  - `client+0x0086E9C0`
-  - CSimpleWorldView `+0x00BF4434/+0x003B0870`
+## 3. Tearing / cadence quality lane
+Tearing remains open but is a separate quality/performance problem.
 
-Do not reopen `client+0x0525BA60` both-eye reuse.
+Retain useful cadence evidence from pose-coherence work:
+- exact render-pose association
+- pair proof
+- two-slot starvation finding (`droppedPairs=179`)
+- stale bursts / eye-gap spikes
+- later M33 real pairs on slot8/controller-capable lineage
 
-## 4. True eye origin / parallax, only if visible after T1
-Late DoRenderView origin shift is already a failed authority point. GOLDEN + WORLD_X_PAIR independently prove origin/parallax behavior exists. If T1 still lacks correct depth, target the concrete earlier lifetime/overwrite boundary rather than restarting broad ownership search.
+Only optimize host pacing/transport cadence when it does not contaminate the current viewmodel ownership test, or when tearing itself prevents a verdict.
 
-## 5. Quantitative capture truth
-Before pixel-difference conclusions:
-- same-cycle L/R
-- repeated same-eye stability
-- deterministic/frozen scene
+## 4. Weapon/controller integration
+After passive viewmodel observation is stable:
+- add controller IPC
+- establish visible viewmodel root ownership
+- only then decide weapon aim / muzzle / ballistics policy
 
-Sequential captures are not a general quantitative oracle because prior temporal drift can dominate.
+Keep world-camera ownership separate from weapon ownership.
 
-## 6. Head pose
-Integrate HMD rotation/translation only after transport + projection + eye-origin behavior are coherent.
+## 5. HUD / comfort
+After weapon/viewmodel path is stable:
+- HUD placement
+- viewmodel near/far handling
+- comfort options
+- menu/gameplay transitions
 
-## 7. Weapon/controller separation
-After world camera is stable:
-- preserve world view
-- independently drive viewmodel/controller pose
-- prove visible root ownership before ballistics/muzzle policy
-
-## 8. HUD / comfort
-Treat HUD and viewmodel near/far separately from world projection. Native Valve `vr_projection_znear_multiplier=0.3` is a later comfort/reference policy, not the first projection proof.
-
-## 9. Regression / release
-- frozen client/HLAE hashes
-- `-insecure`
-- pass3 monitor intact
-- coherent pairSeq, mixedPairCount=0
-- XR acquire/wait/copy/release stable
+## 6. Performance / regression / release
+Measure before redesigning:
+- stable headset FPS
+- dropped/mixed pair behavior
+- stale/cadence metrics
 - no black/freeze
-- exact Quest P00 retained
-- no eye-specific geometry loss
-- menu/gameplay transitions stable
-- reversible one-click restore
+- exact Quest projection retained
+- HMD 6DoF retained
+- no eye-specific geometry corruption
+- reversible one-click setup/restore
+
+## Historical architecture lanes
+Older T0/G2.5 GPU-vs-CPU transport finalist work, queued G3/T1 projection work and M3.2A slot-depth A/B are retained as historical evidence in the dated docs and `research/RESULT_INDEX.md`. They are not the operational CURRENT gate.
 
 ## Decision rule
 After each RESULT: KEEP if distance to a playable VR build shrinks; ADAPT if stronger evidence gives a shorter route; STOP a line when falsified or when another branch closes it.
