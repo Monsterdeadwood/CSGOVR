@@ -1,6 +1,6 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, MASTER 3.1 camera-origin PASS, and MASTER 3.2A v1.0.1 pre-causal DIAG-policy invalid result.
+Snapshot: 2026-08-25 after MASTER 1 PASS, MASTER 2 PASS, MASTER 3.1 native origin PASS, and MASTER 3.2A real Quest HMD rotation PASS.
 
 ## AUTHORITY / CURRENT PROGRAM
 Execution order remains strict:
@@ -16,83 +16,107 @@ Frozen baseline:
 - `-insecure`, local/offline only
 
 ## MASTER 1 — PASS
-Retain complete-pair CPU transport to Meta OpenXR. Do not reopen. M1 already proved both DIAG projection and real GAME projection.
+Retain complete-pair CPU transport to Meta OpenXR. Do not reopen.
 
 ## MASTER 2 — PASS
 Retain exact Quest asymmetric projection through `CViewSetup +0x68/+0x6C`. Do not rerun.
 
 ## MASTER 3.1 — PASS
-Live result `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` plus cold raster re-analysis proved native camera-origin authority at `client.dll+0x003A5280` using a full local `CViewSetup`. The contaminated BASE_B reset metric does not overturn the depth-dependent parallax proof.
+Result `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` plus cold depth-parallax analysis proved native camera-origin authority at `client.dll+0x003A5280` using a local full `CViewSetup`.
 
 Winning seam:
 - native RenderView `client+0x003A5280`
 - local `CViewSetup 0x198`
-- `origin +0xB8` proven surviving
-- `angles +0xC4` current bounded control target
+- origin `+0xB8` proven surviving
+- angles `+0xC4` proven usable by M3.2A
 
 Do not repeat M3.1.
 
-## MASTER 3.2A v1.0.0 — INVALID / BUILD INFRASTRUCTURE
-The first HMD-rotation attempt failed compiling the x64 host because `publish_relative_hmd_orientation()` called `log_line()` before declaration. No runtime verdict.
-
-## MASTER 3.2A v1.0.1 — INVALID / PRE-CAUSAL T0 DIAG POLICY
+## MASTER 3.2A — PASS: REAL QUEST HMD ROTATION
 Result:
-`CSGOVR_MASTER32A_HMD_ROTATION_RESULT_20260825_092309.zip`
-SHA256 `DE97379040CECCE21FCC7771A2497D2639BDF1F24556AEAF847AA0FD0A95C2D4`.
+`CSGOVR_MASTER32A_HMD_ROTATION_RESULT_20260825_172017.zip`
 
-What passed:
-- frozen target/HLAE/source-contract preflight
-- Quest matrix staging/hash
-- x86 DLL/injector build
-- x64 host build
-- shared-memory ABI `332`
-- XR instance and D3D11 device
-- Quest stereo view config and swapchain-format setup
-- Meta OpenXR reached `XR SESSION RUNNING` repeatedly
+SHA256:
+`BC21C70411C60564620D13C580AFF925EE789231D61059E2269C99FE76DBF539`
 
-What did not occur:
-- CS:GO launch
-- injection
-- GAME pair
-- HMD pose publication/application
-- M3.2A causal live
+Raw status:
+- `CAUSAL_ATTEMPTED=True`
+- `XR_SESSION_PASS=True`
+- `XR_DIAG_PASS=True`
+- `QUEST_MATRIX_PATH_PROOF_PASS=True`
+- `NATIVE_RENDERVIEW_GUARD_PASS=True`
+- `HMD_ROTATION_APPLY_PASS=True`
+- `M1_TRANSPORT_RETAINED=True`
+- `SAME_HLAE_PAIR_PASS=True`
+- `XR_GAME_LAYER_PASS=True`
+- `ANALYZER_EXIT=0`
 
-The runner aborted because the optional pre-game DIAG projection layer did not appear during its fixed wait window. Raw initial frames were `layerCount=0 source=DIAG pose=NONE`, with Meta state cycling through visibility/focus/stop states.
+Analyzer:
+- `MASTER32A_INSTRUMENT=PASS`
+- HMD pose publisher PASS
+- rotation base anchor PASS
+- engine rotation handshake PASS
+- LEFT/RIGHT HMD apply PASS
+- angular range PASS
+- M1 pair proof PASS
+- OpenXR `source=GAME pose=ROT_LIVE_ANCHOR_POS` PASS
 
-Cross-check against successful `085119`: that proven host also began with several `layerCount=0 source=DIAG` frames, then later reached `layerCount=1 source=DIAG` once Meta focus stabilized. Therefore 092309 is a runner-policy timing invalid, not evidence against the HMD rotation path.
+Minimum automated angular range:
+- pitch `6.081 deg`
+- yaw `18.126 deg`
+- roll `2.863 deg`
+
+Later live telemetry expanded to approximately pitch `22.218`, yaw `51.577`, roll `21.683` degrees.
+
+The host published live relative quaternions while the x86 eye DLL applied the same latched pose to LEFT and RIGHT. Native eye recenter/IPD remained coherent. OpenXR submitted live orientation with anchored position, matching the intentional rotation-only render camera.
+
+User visual observation: **almost normal VR**.
+
+Scientific verdict: **PASS**. Do not repeat rotation-only proof.
 
 Detailed record:
-`results/MASTER32A_HMD_ROTATION_20260825_092309_INVALID_T0_DIAG_POLICY.md`.
+`results/MASTER32A_HMD_ROTATION_20260825_172017_PASS.md`
 
-## PREPARED MASTER 3.2A v1.0.2 — GAME GATE FIRST
+## PREPARED MASTER 3.2B v1.1.0 — HMD POSITION ONLY
 Package:
-`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.2_GAME_GATE_FIRST_ONECLICK.zip`
-SHA256 `425EB626DCDBF6BA5AE1D46B25335651AAA4FB992D09EF82AE64C96474EE4F2B`.
+`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.0_LIVE_ONECLICK.zip`
 
-C/C++ causal source is byte-identical to v1.0.1. Only runner policy changes:
-- XR SESSION RUNNING remains mandatory;
-- M1 DIAG becomes best-effort/non-blocking;
-- proceed to CS:GO after session readiness;
-- after HLAE recording starts, wait for actual M3.2A pipeline readiness:
-  `PAIR PROOF -> XR GAME POSE ANCHOR -> HMD_POSE_PUBLISH -> HMD_ROT_BASE_ANCHOR -> HMD_ROT_EYE LEFT+RIGHT -> ROT_LIVE_ANCHOR_POS`;
-- only after pipeline readiness prompt physical head rotation;
-- 18 s angular proof window.
+SHA256:
+`BB4EB0259880AFB71307B4AFA407BD7DF29A69008EBBB4F6EA9A9B95BD632994`
 
-Causal architecture remains:
-- host relative quaternion `inverse(anchor) * current`;
-- one pose latched LEFT and reused RIGHT;
-- OpenXR-to-Source basis conversion;
-- local `CViewSetup.angles` at native RenderView;
-- rotated per-eye IPD around head-right;
-- live OpenXR orientation with anchored position after producer handshake;
-- Quest matrix and M1 transport retained;
-- pass3 untouched.
+Static verification: 26/26 PASS.
+Project-defined use-before-declaration audit: zero issues in host and eye translation units.
+
+Only new causal variable: HMD head-center positional translation.
+
+Host path:
+- retain proven relative quaternion
+- average live LEFT/RIGHT eye positions to current head center
+- average anchor LEFT/RIGHT eye positions to anchor head center
+- subtract centers
+- rotate delta by inverse anchor orientation to anchor-local OpenXR basis
+- publish relPos meters in existing header reserved fields without changing 332-byte ABI
+
+x86 camera path:
+- latch one complete HMD pose on LEFT and reuse RIGHT
+- retain proven rotation composition
+- convert physical +X right, +Y up, -Z forward using the base game camera forward/right/up vectors
+- scale by `39.37007874015748` Source units/meter
+- add translation to the live game camera center
+- rebuild stereo IPD around translated/rotated center
+- caller-owned `CViewSetup` untouched
+
+OpenXR coherence:
+- before producer full-pose handshake: use anchor
+- after handshake: submit matching full live per-eye pose as `POSE_LIVE`
 
 Excluded:
-HMD translation, hands, weapon/aim/muzzle, culling, A2/GPU replay, MASTER4.
+hands/controllers, weapon/aim/muzzle, culling, A2/GPU replay, MASTER4.
 
 ## CURRENT GATE
-**MASTER 3.2A — Quest HMD rotation-only proof.**
+**MASTER 3.2B — Quest HMD positional translation only, with M3.2A rotation frozen PASS.**
 
 ## NEXT
-Run only `00_RUN_MASTER32A_HMD_ROTATION.bat` from v1.0.2. Do not move the mouse when the runner explicitly says `PIPELINE READY`; then turn the headset left/right and up/down. Return the result ZIP plus headset observation. Only coherent rotation PASS opens M3.2B translation-only.
+Run only `00_RUN_MASTER32B_HMD_6DOF.bat`. During the explicit LIVE window keep mouse still and lean head left/right, forward/back, up/down. Return the result ZIP plus visual observation.
+
+If M3.2B passes, MASTER3 HMD camera is real 6DoF and the next bounded work is controller/weapon ownership. If it fails with valid position telemetry, adjust only sign/axis/scale or pose coherence. Do not reopen origin authority or rotation.
