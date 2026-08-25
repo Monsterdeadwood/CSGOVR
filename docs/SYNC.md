@@ -1,6 +1,6 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: 2026-08-25 after live MASTER 1 transport result.
+Snapshot: 2026-08-25 after live MASTER 1 PASS and invalid MASTER 2 v0.8.0 runner result.
 
 ## AUTHORITY / CURRENT PROGRAM
 Current execution order is strict:
@@ -15,11 +15,9 @@ Frozen baseline:
 - full `CViewSetup = 0x198`
 - `-insecure`, local/offline only
 
-## LATEST RESULT
-`CSGOVR_XR_TRANSPORT_RESULT_20260825_044816.zip`
+## MASTER 1 — PASS
+Accepted result: `CSGOVR_XR_TRANSPORT_RESULT_20260825_044816.zip`
 SHA256 `FE51FA49B0108FC31E70E4D2F16C25F9BD160CDA7B654841AD64E19B61FB99E7`
-
-**MASTER 1 = PASS.**
 
 Raw runtime evidence:
 - `PAIR PROOF PASS id=1 gen=1 pairProof=1 equal=0`
@@ -32,9 +30,35 @@ Raw runtime evidence:
 - first-pair timing: leftCaptureUs=4459, rightCaptureUs=2451, consumeAgeMs=27.518, eyeGapMs=13.498
 - headset observation: a strange CS:GO image was visible in VR briefly
 
-The result runner's earlier `No complete LEFT/RIGHT pair` summary is a timing false-negative. Later raw `XR_HOST.log` evidence supersedes it. Later staleMs growth begins only after intentional `mirv_streams record end`.
+The result runner's earlier `No complete LEFT/RIGHT pair` summary is a timing/polling false-negative. Later raw `XR_HOST.log` evidence supersedes it.
 
 Detailed record: `results/MASTER1_XR_TRANSPORT_20260825_044816.md`.
+
+## MASTER 2 v0.8.0 — INVALID / NO SCIENTIFIC VERDICT
+Result: `CSGOVR_QUEST_COHERENCE_RESULT_20260825_051205.zip`.
+
+Observed:
+- Quest remained on BLUE LEFT / ORANGE RIGHT diagnostic;
+- NetCon confirms `Host_NewGame on map de_dust2`;
+- HLAE streams `CSGOVRLEFT` / `CSGOVRRIGHT` were created;
+- causal capture never reached `mirv_streams record start`;
+- `PATH_PROOF_PASS=False`, `XR_SESSION_PASS=True`, `XR_GAME_LAYER_PASS=False`.
+
+This is not evidence against the Quest matrix. The run aborted in runner plumbing before the causal phase.
+
+Root cause:
+PowerShell `Inject-Transport` leaked injector stdout together with the intended `eye_patch.log` return value, allowing `$eyeLog` to become `Object[]`. The next path-proof stage therefore tested the wrong object/path. The same mechanism explains why the earlier MASTER1 runner summary could false-fail while raw host telemetry later proved coherent pairs.
+
+Detailed record: `results/MASTER2_QUEST_MATRIX_20260825_051205_INVALID.md`.
+
+Prepared retry:
+`CSGOVR_MASTER2_QUEST_MATRIX_v0.8.1_RUNNER_SCALAR_LOG_FIX_ONECLICK.zip`
+- runner-only fix;
+- captures injector stdout to `INJECTOR_OUTPUT.txt`;
+- returns exactly one scalar eye-log path;
+- deletes stale same-PID eye log before injection;
+- requires a fresh literal eye-log path before path proof;
+- C/C++ transport, exact matrix, HLAE schedule, projection carrier and causal protocol unchanged.
 
 ## PROVEN / RETAIN
 - two real HLAE world-eye streams
@@ -42,7 +66,7 @@ Detailed record: `results/MASTER1_XR_TRANSPORT_20260825_044816.md`.
 - custom projection carrier `CViewSetup +0x68 / +0x6C`
 - retail semantics for `M00/M02/M11/M12`
 - HLAE post-eye DoRenderView capture boundary
-- CPU D3D9 readback / complete-pair shared-ring transport now LIVE-proven end-to-end to Meta OpenXR for MASTER 1
+- CPU D3D9 readback / complete-pair shared-ring transport LIVE-proven end-to-end to Meta OpenXR for MASTER 1
 - HLAE DoRenderView `+0x22340`, copy ctor `+0x14BA0`
 - native RenderView `client+0x3A5280`
 - pre-eye reader `client+0x3A16A6`
@@ -70,8 +94,6 @@ Required protocol:
 4. symmetric `BASE_A -> QUEST_MATRIX -> BASE_B(reset)`;
 5. causal raster review must match opposite horizontal L/R off-center and downward vertical displacement.
 
-Prepared current child: `CSGOVR_MASTER2_QUEST_MATRIX_v0.8.0_ONECLICK.zip` (package hash recorded with the delivered artifact; PREPARED until executed).
-
 ## FALSIFIED / DO NOT REOPEN
 - full CViewSetup 0x14C
 - raw Khronos column-major memcpy into Source VMatrix
@@ -83,7 +105,7 @@ Prepared current child: `CSGOVR_MASTER2_QUEST_MATRIX_v0.8.0_ONECLICK.zip` (packa
 - static package/build as runtime proof
 
 ## CURRENT POLICY FOR A2
-A2 GPU-sharing is **not** the current gate. Under the current MASTER 4 contract, A2 opens only if the later 120-second CPU performance gate numerically FAILS. Do not open A2 before then.
+A2 GPU-sharing is **not** the current gate. Under the current MASTER 4 contract, A2 opens only if the later 120-second CPU performance gate numerically FAILS.
 
 ## NEXT
-Run the prepared MASTER 2 matrix-only package on the frozen target, return its RESULT ZIP, issue one PASS/FAIL causal verdict, and only then consider MASTER 3.
+Run MASTER2 v0.8.1 on the frozen target, return its RESULT ZIP, issue one PASS/FAIL causal verdict, and only then consider MASTER 3.
