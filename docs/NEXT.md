@@ -1,119 +1,54 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-24 final cross-branch reconciliation.
+Snapshot: 2026-08-25 after `CSGOVR_XR_TRANSPORT_RESULT_20260825_044816.zip`.
 
 ## CURRENT GATE
-**T0 / G2.5 — GPU XR TRANSPORT CERTIFICATION.**
+**MASTER 2 — exact Quest 3 asymmetric matrix-only causal raster proof.**
 
-G3 Quest projection remains queued immediately after T0 and is not falsified.
+MASTER 1 is PASS. The live CPU pair transport reached Meta OpenXR with coherent distinct LEFT/RIGHT pairs. Do not reopen transport architecture now.
 
-## NEXT ONE STEP — FINALIST A FIRST
-Build/run a **transport-only** exact-v0.5.5 child:
-- preserve pass1 LEFT / pass2 RIGHT / pass3 monitor
-- preserve BASE projection, origin and camera
-- same HLAE cycle -> one `pairSeq`
-- GPU-complete before pair publication
-- external x64 host uses D3D11 on OpenXR adapter LUID `00000000:000118D1`
-- acquire/wait/copy/release both XR eye swapchains
-- one `xrEndFrame` per coherent pair
-- `mixedPairCount = 0`
+## NEXT ONE STEP
+Run `CSGOVR_MASTER2_QUEST_MATRIX_v0.8.0_ONECLICK.zip` on the frozen target and return `CSGOVR_QUEST_COHERENCE_RESULT_*.zip`.
 
-## CRITICAL AfxInterop PROTOCOL GUARD
-Pinned HLAE exact source proves shared-target and GPU-wait primitives exist, but protocol generations differ.
-
-Older `DrawingThreadPrepareDraw` path:
-- `PrepareDrawReply_*`
-- receives replacement shared handles
-
-Server major v6/v7:
-- bypasses that older replacement-target exchange
-- uses newer `HandleDrawingMessage` flow
-
-Therefore FINALIST A must explicitly use/log either:
-1. a verified-compatible AfxInterop protocol/host mode that actually exercises the shared replacement-target path; or
-2. a minimal transplant of the proven shared-target + `D3DQUERYTYPE_EVENT` fence primitives into the v0.5.5 pass discriminator.
-
-Do not assume modern v6/v7 equals the old handshake.
-
-Provenance: `research/HLAE_INTEROP_FINDINGS.md`.
+The package is **PREPARED**, not runtime-proven.
 
 ## PREFLIGHT — exactly 5 lines
-**MISSING FACT:** whether exact v0.5.5 pass1/pass2 can reach Meta OpenXR as one coherent GPU pair through an actually verified compatible shared-resource path, without CPU readback.
-**WHY NOT COLD:** exact HLAE source proves sharing/fence capability and protocol differences, but only runtime proves the selected path, resource import, synchronization, pair sequencing and XR submit.
-**PASS:** one pairSeq contains same-cycle LEFT/RIGHT, GPU completion precedes publish, both XR copies/submits succeed, headset is non-black/coherent, actual protocol/path is logged, and v0.5.5 geometry plus monitor remain unchanged.
-**FAIL:** protocol mismatch, shared-resource/import failure, L/R sequence mixing, GPU sync failure, XR acquire/wait/copy/release failure, black/freeze, or GOLDEN regression.
-**BASELINE MUST HOLD:** frozen client hash, `-insecure`, HLAE 2.191.1/b976, full `0x198` eye copies, pass1 LEFT/pass2 RIGHT/pass3 monitor, BASE projection/origin/camera, reversible restore.
+**MISSING FACT:** applies the exact asymmetric Quest 3 matrix to real frozen-retail CS:GO raster through `CViewSetup +0x68/+0x6C`.
+**WHY NOT COLD:** static/source evidence proves carrier semantics, but only executed raster comparison can prove this exact runtime path and mutation.
+**PASS:** runtime path/hash/value proof passes, same-eye repeats and BASE reset are <1% MAE, exact matrix is logged on both eyes, and QUEST raster shifts in the preregistered opposite-horizontal/downward direction.
+**FAIL:** wrong file/path/hash/values, unstable instrument, BASE reset drift >=1%, missing applied-matrix log, or raster change that does not match the preregistered direction/order.
+**BASELINE MUST HOLD:** frozen client SHA, HLAE 2.191.1, full `CViewSetup 0x198`, pass1 LEFT/pass2 RIGHT/pass3 monitor, `-insecure` local run, no new FOV/aspect/near/far/origin/head-pose mutation.
 
-## Mandatory T0 fields
-- exact game/HLAE/source hashes
-- actual AfxInterop protocol mode or minimal-transplant id
-- interop active state
-- eye RT size/format/shared-handle state
-- pairSeq timeline / pass->eye mapping
-- GPU wait/completion status
-- x64 D3D11 adapter LUID / feature level
-- OpenSharedResource/import result
-- per-eye acquire/wait/copy/release counts/errors
-- `xrEndFrame` count
-- mixedPairCount / droppedPairCount
-- pass3 monitor regression
-- headset verdict
-- same-cycle L/R capture/reference if available
-- restore result
+## EXACT MATRIX
+- M00 = `0.9027383311`
+- M11 = `0.8354788620`
+- M12 = `-0.1931874395`
+- LEFT M02 = `-0.2425126314`
+- RIGHT M02 = `+0.2425126314`
 
-## Explicit exclusions in T0
-- no Quest P00 mutation
-- no new eye origin
-- no HMD pose mutation
-- no culling mutation
-- no viewmodel/weapon/HUD mutation
-- no FOV/aspect diagnostic phases
-- no CPU `GetRenderTargetData -> SYSTEMMEM` as PRIMARY while GPU path remains viable
+## REQUIRED RUN PROTOCOL
+1. Runner stages one `QUEST_MATRIX.ini`.
+2. Injected DLL must log the absolute file path it actually opened, SHA256 of those actual bytes, and parsed LEFT/RIGHT M00/M02/M11/M12.
+3. Runner compares DLL path/hash/values to its staged copy. Any mismatch is HARD FAIL before causal capture.
+4. Run one continuous symmetric sequence: `BASE_A -> QUEST_MATRIX -> BASE_B(reset)`.
+5. Select fixed N=2 LEFT and N=2 RIGHT captures per phase.
+6. Validate same-eye repeat first. If >=1% normalized MAE, the instrument is invalid and no semantic verdict is allowed.
+7. BASE_A vs BASE_B must converge <1% MAE.
+8. QUEST must causally change raster in both eyes.
+9. Final semantic review must match the preregistered direction: horizontal off-center opposite sign LEFT/RIGHT, vertical displacement downward in both eyes, correct order of magnitude.
 
-## FINALIST B — PREPARED CPU FALLBACK
-`CSGOVR_XR_TRANSPORT_v0.7.1_SYNC_PAIR_PROOF`
-- SHA256 `DFEA881888C83812A5B9EE3A7049F79D32935240F2C612DE4ABDF4F9A98834A3`
-- PREPARED / STATIC-AUDITED / NOT LIVE-PROVEN
-- manifest `runtime/children/v0.7.1_xr_transport/README.md`
-- supersedes v0.7.0 before LIVE
+## EXPLICIT EXCLUSIONS
+- no FOV variant
+- no aspect variant
+- no near/far variant
+- no new origin / HMD pose mutation
+- no culling
+- no weapon/HUD integration
+- no A2 GPU-sharing
+- no MASTER 3 or MASTER 4 work
 
-Activate B only if A reaches a **concrete** GPU interop/shared-resource/protocol blocker or as a bounded compatibility control. Do not repeat the research that built B.
+## A2 POLICY
+GPU-sharing A2 is parked. It may open only if the later MASTER 4 120-second CPU performance gate numerically FAILS. It is not a transport prerequisite anymore.
 
-Retained B hardening:
-- same `CAfxStreams*` for pair
-- LEFT count `0->1`, RIGHT `1->2`
-- READY only after complete pair
-- tokens `DISTINCT PAIR PROOF` / `PAIR PROOF PASS`
-- fixed-width `pack(4)` ABI
-- Reset generation invalidation
-- RGB-only X8R8G8B8 hashing
-- live v0.5.5 camera input
-- two-slot pair ring
-
-## Capture fallback
-If same-cycle image evidence is noisy, reuse v0.6.1 deterministic freeze/capture. It achieved within-phase MAE around `0.0000..0.0026 / 255`.
-
-Require same-eye same-state drift `<1%` before quantitative L/R claims. Keep `mat_queue_mode 0`; remove actor/bot motion.
-
-## After T0 PASS
-Freeze transport, then immediately run **G3/T1**:
-- repo byte-locked Quest projection child
-- exact P00 LEFT/RIGHT
-- engine zNear/zFar retained
-- Source-native scalar FOV `110°`
-- same coherent pair machinery
-
-Native SourceVR scale retained for later eye policy: `39.3700787 inches/meter`; measured Quest half-IPD ≈ `1.27520 Source units`.
-
-## Conditional only after G3
-- aspect `0.9254939479` / FOV150 are diagnostics only after visible post-P00 clipping
-- visible culling -> `+0x3A16A6` / CSimpleWorldView lineage
-- visible origin/parallax -> reconcile GOLDEN/WORLD_X_PAIR first; narrow candidate is shared-CView mutation before NORMAL `GetMatricesForView`, not blind copy-ctor hook
-- no broad archaeology
-
-## Prepared G3 assets
-- `experiments/quest_projection_child/eye_patch_quest_projection.c`
-- `experiments/quest_projection_child/QUEST_PROJECTION_MINIMAL.patch`
-- `tools/verify_quest_projection_child.py`
-- `.github/workflows/evidence-integrity.yml`
-- `CSGOVR_G3_QUEST_COHERENCE_BATCH_v1.0.1_SYNCED_ONE_CLICK.zip`, SHA256 `595DA174AC39BA334F725DC1D130089F7F7C98D2BC4878F87B12F113BC0EAB70`, UNRUN/NOT BASELINE
+## AFTER MASTER 2 PASS
+Only then open MASTER 3, starting with the bounded early native `CViewSetup +0xB8` origin ownership probe at `client.dll + 0x003A5280`. No broad reverse.
