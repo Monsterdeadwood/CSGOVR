@@ -1,79 +1,70 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after MASTER 3.1 v0.9.2 pre-causal XR-invalid run `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_071816.zip`.
+Snapshot: 2026-08-25 after fresh live `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_085119.zip` and cold causal re-analysis.
 
-## CURRENT GATE
-**MASTER 3.1 — one bounded early native origin ownership probe.**
-
+## CLOSED GATES
 MASTER 1 = PASS.
 MASTER 2 = PASS.
-Do not repeat transport or Quest projection.
-Do not open MASTER 3.2 until 3.1 runtime causal PASS.
+MASTER 3.1 camera-origin ownership = PASS.
+
+Do not repeat transport, Quest projection, or the +32 origin ownership probe.
 A2 remains parked until MASTER4 PERF numerically FAILS.
 
-## INVALID v0.9.2 RESULT
-v0.9.2 built successfully, but the run stopped before CS:GO launch and before any causal origin work.
+## MASTER 3.1 PASS — WHY THE PACKAGED AUTO-ANALYZER WAS TOO CONSERVATIVE
+The live run reached the actual causal section and proved:
+- exact frozen client/HLAE guards PASS;
+- exact Quest matrix path/hash PASS;
+- native RenderView guard PASS at `client.dll+0x003A5280`;
+- local full `CViewSetup 0x198`, caller-owned view untouched;
+- `+32 Source units` camera-RIGHT origin mutation applied to LEFT and RIGHT with vector error about 3e-5 / 2e-5;
+- M1 distinct same-HLAE pairs and GAME OpenXR layer remained live.
 
-Passed before abort:
-- frozen target/hash preflight
-- exact HLAE package preflight
-- x86 DLL/injector + x64 OpenXR host build
-- Meta OpenXR manifest selection
-- XR instance and D3D11 device creation
-- Quest view configuration and swapchain-format setup
+The bundled analyzer marked the result INVALID because the user/game camera rotated substantially during SHIFT/RESET, so BASE_B could not match BASE_A. That invalidates the reset-control metric, not the origin carrier.
 
-Blocking raw observation:
-- `XR SESSION STATE=1`
-- `running=0`
-- no `XR SESSION RUNNING`
-- no diagnostic projection submission
-- no game launch
-- no injection / `EARLY_ORIGIN_APPLY`
-- no HLAE phase BMPs
+Cold image re-analysis separates nuisance rotation from translation:
+- BASE_A same-eye median feature drift is about -0.5 px;
+- camera-right vector changes only about 1.436 degrees entering SHIFT;
+- with Quest M00=0.902738 at 960 px width, that angular change accounts for only about 10.9 px of rotational motion;
+- observed BASE_A -> SHIFT motion is about -114 to -116 px in BOTH eyes;
+- a homography fitted only to far-scene features leaves far residual about 1.6-2.5 px but near geometry retains about -86 to -89 px residual.
 
-Scientific verdict: **INVALID / PRE-CAUSAL XR AVAILABILITY**, not origin FAIL. The analyzer's missing-runtime failures are downstream noise because the causal section was never attempted.
+That strong depth-dependent residual is the preregistered signature of true camera translation. Therefore the missing fact is closed positively: native early RenderView origin survives to final stereo raster.
 
-Detailed record: `results/MASTER31_EARLY_ORIGIN_20260825_071816_INVALID_XR_SESSION.md`.
+## CURRENT GATE
+**MASTER 3.2A — real Quest HMD ROTATION ONLY on the winning native camera seam.**
 
-## NEXT ONE STEP
-Run `CSGOVR_MASTER3_1_EARLY_ORIGIN_v0.9.3_XR_SESSION_RESILIENCE_ONECLICK.zip`.
-SHA256 `C4846D8E02039FF47F8ACE8BF976FEE2983656AC8BEA57AF1A70B4A2158729FB`.
+Prepared package:
+`CSGOVR_MASTER3_2A_HMD_ROTATION_v1.0.0_LIVE_ONECLICK.zip`
+SHA256 `C6E924E27C86E853960EBFB5498E8252BBED2DBE9A878660ABF237F32A9F84CE`.
+Static verification: 25/25 PASS.
 
-v0.9.3 is runner/T0 resilience only:
-1. probe/start official Meta `OVRService` where available;
-2. start official Meta/Oculus desktop client if installed and not already running;
-3. optionally send WAKEUP/MENU through already-authorized ADB only;
-4. wait up to 180 s for `XR SESSION RUNNING` with automatic assist retries;
-5. if T0 still fails, report `INVALID_PRE_CAUSAL` and skip the M3.1 raster analyzer.
+## M3.2A SINGLE CHANGE
+Feed relative Quest HMD orientation into native `client.dll+0x003A5280` local `CViewSetup`.
 
-The C/C++ causal source is byte-identical to v0.9.2.
+Implementation contract:
+- x64 host publishes `inverse(anchor) * current` HMD quaternion through unused `CSGOVR_XR_HEADER.reserved[]`, preserving the 332-byte M1 shared-memory ABI;
+- one pose is latched on LEFT and reused by RIGHT;
+- OpenXR -> Source basis: Source X=-XR Z, Source Y=-XR X, Source Z=+XR Y;
+- native hook composes HMD orientation onto a frozen base game camera orientation;
+- per-eye IPD is rebuilt around the newly rotated head-right vector;
+- after engine rotation handshake, OpenXR submits LIVE eye orientation with ANCHOR eye position to avoid double rotation while deliberately excluding HMD translation;
+- exact Quest asymmetric projection remains continuously enabled;
+- pass3 monitor remains untouched;
+- local/offline `-insecure` only.
 
-## CAUSAL CONTRACT UNCHANGED
-Only one variable changes:
-`CViewSetup.origin +0xB8` at native `client.dll+0x003A5280` by `+32 Source units` along camera RIGHT.
-
-Retain:
-- full local `CViewSetup 0x198` copy;
-- caller-owned view untouched;
-- exact Quest matrix continuously enabled;
-- M1 same-HLAE L/R pair transport;
-- one continuous `BASE_A -> ORIGIN_SHIFT -> BASE_B` live stream;
-- pass3 untouched;
-- `-insecure`, local/offline.
-
-Excluded:
-- HMD pose / xrLocateViews camera application;
-- angle mutation;
-- hands / weapon / muzzle;
-- culling;
-- A2 GPU sharing;
-- MASTER 4.
+Excluded from M3.2A:
+- HMD positional translation;
+- hands/controllers;
+- weapon/aim/muzzle;
+- culling fixes;
+- GPU fast path/A2;
+- MASTER4.
 
 ## PASS
-Shift is logged at the native early RenderView for both eyes and the final same-eye raster moves in the preregistered direction, with BASE reset returning coherently.
+Telemetry proves both-eye native HMD rotation, sufficient angular range, retained M1 pair proof, and `XR pose=ROT_LIVE_ANCHOR_POS`; user confirms turning head left/right/up/down turns the world once and coherently, without doubled rotation.
 
 ## FAIL
-A valid instrument proves the early native origin mutation was applied but the final raster does not respond in the expected way.
+Valid HMD pose and native angle-application telemetry exists but the final headset world does not follow coherently.
 
 ## AFTER PASS
-Open MASTER 3.2 and feed real Quest HMD pose into the winning seam. No broad reverse.
+Open M3.2B positional HMD translation only on the same seam. Do not add hands or weapon until head 6DoF is closed.
