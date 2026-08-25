@@ -1,6 +1,6 @@
 # CSGOVR — NEXT
 
-Snapshot: 2026-08-25 after MASTER 3.1 v0.9.1 invalid HLAE vtable-guard run `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_070439.zip`.
+Snapshot: 2026-08-25 after MASTER 3.1 v0.9.2 pre-causal XR-invalid run `CSGOVR_MASTER31_EARLY_ORIGIN_RESULT_20260825_071816.zip`.
 
 ## CURRENT GATE
 **MASTER 3.1 — one bounded early native origin ownership probe.**
@@ -11,37 +11,42 @@ Do not repeat transport or Quest projection.
 Do not open MASTER 3.2 until 3.1 runtime causal PASS.
 A2 remains parked until MASTER4 PERF numerically FAILS.
 
-## INVALID v0.9.1 RESULT
-v0.9.1 built successfully and reached injection, but aborted before any causal origin mutation.
+## INVALID v0.9.2 RESULT
+v0.9.2 built successfully, but the run stopped before CS:GO launch and before any causal origin work.
 
 Passed before abort:
-- frozen client hash
-- exact HLAE 2.191.1
+- frozen target/hash preflight
+- exact HLAE package preflight
 - x86 DLL/injector + x64 OpenXR host build
-- OpenXR diagnostic layer
-- de_dust2 load
-- exact `-insecure`
-- exact Quest matrix runtime path/hash/value proof
+- Meta OpenXR manifest selection
+- XR instance and D3D11 device creation
+- Quest view configuration and swapchain-format setup
 
-Blocking runtime observation:
-- native RenderView target = `client+0x003A5280`
-- `CViewRender.slot6` remained native target
-- `CCSViewRender.slot6 = AfxHookSource+0x0009A160`
+Blocking raw observation:
+- `XR SESSION STATE=1`
+- `running=0`
+- no `XR SESSION RUNNING`
+- no diagnostic projection submission
+- no game launch
+- no injection / `EARLY_ORIGIN_APPLY`
+- no HLAE phase BMPs
 
-v0.9.1 incorrectly required both slot6 values to remain native after HLAE launch. Exact HLAE source proves HLAE intentionally detours the CCSViewRender RenderView vtable through `AfxDetourPtr` / `touring_CCSViewRender_RenderView`.
+Scientific verdict: **INVALID / PRE-CAUSAL XR AVAILABILITY**, not origin FAIL. The analyzer's missing-runtime failures are downstream noise because the causal section was never attempted.
 
-Scientific verdict: **INVALID / guard incompatibility**, not origin FAIL. No `EARLY_ORIGIN_APPLY` or causal raster existed.
-
-Detailed record: `results/MASTER31_EARLY_ORIGIN_20260825_070439_INVALID_HLAE_VTABLE_GUARD.md`.
+Detailed record: `results/MASTER31_EARLY_ORIGIN_20260825_071816_INVALID_XR_SESSION.md`.
 
 ## NEXT ONE STEP
-Run `CSGOVR_MASTER3_1_EARLY_ORIGIN_v0.9.2_HLAE_VTABLE_GUARD_FIX_ONECLICK.zip`.
-SHA256 `7FBA01E24138A56EB6596ED0BA8DADCE692DE12B2FDF85D01EB64286E4B964F8`.
+Run `CSGOVR_MASTER3_1_EARLY_ORIGIN_v0.9.3_XR_SESSION_RESILIENCE_ONECLICK.zip`.
+SHA256 `C4846D8E02039FF47F8ACE8BF976FEE2983656AC8BEA57AF1A70B4A2158729FB`.
 
-v0.9.2 changes only the guard:
-1. require `CViewRender.slot6 == client+0x003A5280`;
-2. require `CCSViewRender.slot6 == exact AfxHookSource+0x0009A160`;
-3. retain exact AfxHookSource SHA256 gate in the runner.
+v0.9.3 is runner/T0 resilience only:
+1. probe/start official Meta `OVRService` where available;
+2. start official Meta/Oculus desktop client if installed and not already running;
+3. optionally send WAKEUP/MENU through already-authorized ADB only;
+4. wait up to 180 s for `XR SESSION RUNNING` with automatic assist retries;
+5. if T0 still fails, report `INVALID_PRE_CAUSAL` and skip the M3.1 raster analyzer.
+
+The C/C++ causal source is byte-identical to v0.9.2.
 
 ## CAUSAL CONTRACT UNCHANGED
 Only one variable changes:
