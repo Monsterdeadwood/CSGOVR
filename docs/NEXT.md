@@ -1,9 +1,10 @@
 # CSGOVR — NEXT
 
-Snapshot: **2026-08-25 late sync after M34 rollback.**
+Snapshot: **2026-08-27 sync through FRESH_EPOCH_FIRE_DELTA result 14:30 and T14 external result 14:38.**
 
-## FROZEN BASELINE
-Use exactly:
+## BASELINES — DO NOT CONFLATE
+
+### World / HMD rollback GOLDEN
 `CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
 SHA256:
@@ -12,59 +13,88 @@ SHA256:
 Evidence:
 `CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`
 
-Baseline visual truth: **VR + full HMD 6DoF works.** Tearing remains, but it is not part of the next causal question.
+Truth: VR + full HMD 6DoF works. Tearing is a separate quality issue.
 
-## CURRENT MISSING FACT
-Does enabling the normal viewmodel render path by itself (`drawViewModel=1`) survive the first HLAE stereo render when absolutely everything else remains identical to M3.2B GOLDEN?
+### Latest weapon/fire runtime authority
+`CSGOVR_WEAPON_FRESH_EPOCH_FIRE_DELTA_RESULT_20260827_143029.zip`
 
-## PREFLIGHT
-MISSING FACT: `drawViewModel=1` alone survives or kills the first stereo render on M3.2B GOLDEN.
-WHY NOT COLD: static/source evidence cannot prove this runtime boundary.
-PASS: stable real-game stereo/6DoF continues after recording starts with viewmodel enabled and no hand DLL.
-FAIL: the run dies/freezes at the same first HLAE stereo-render boundary.
-BASELINE MUST HOLD: exact M3.2B transport, Quest projection, origin, HMD rotation/translation and runner behavior remain unchanged.
+Runtime instrumentation verdict: PASS.
+- exact slot250 hand-follow active
+- client/server FX_FireBullets active
+- angle redirects `229/231`
+- origin redirects `0/0`
+- freshness contract PASS, max applied sample age `78 ms`
+- stock Weapon_ShootPosition retained
+- game stable at snapshot
 
-## NEXT ONE MUTATION — B
-Start from exact GOLDEN and change only:
-- `CSGOVRLEFT drawViewModel 0 -> 1`
-- `CSGOVRRIGHT drawViewModel 0 -> 1`
+Do **not** replace the world GOLDEN with this weapon result; they prove different layers.
 
-Explicitly exclude:
-- `hand_probe.dll`
-- `BuildTransformations` hook
-- controller IPC
-- controller pose
-- viewmodel transform mutation
-- projection changes
-- camera/origin/6DoF changes
-- transport redesign
+## CURRENT WEAPON MISSING FACT
+Does the exact executed v1.7 fire-delta path place real impacts on the intended barrel/controller axis to user-visible accuracy, now that the retail `GetFinalAimAngle` relation is preserved and stale-pose reuse is closed?
 
-## AFTER B
-If B PASS:
-- C = add **PASSIVE** `C_BaseAnimating::BuildTransformations` vtable index 184 observation only.
-- no controller IPC.
-- no transform mutation.
+The automatic v1.7 RESULT closes hook activity, freshness and client/server coherence. It does not substitute for a direct visual barrel-axis verdict unless that exact run has been explicitly visually confirmed.
 
-If C PASS:
-- D = add controller IPC only.
+## WHY THE OLD NEXT IS SUPERSEDED
+The previous A/B/C/D/E gate (`drawViewModel -> BuildTransformations -> controller IPC -> mutation`) was the correct rollback plan after M34, but later exact-retail work already resolved the real viewmodel owner:
+- `CPredictedViewModel::CalcViewModelView = client+0x003420E0`
+- runtime slot `250`
+- hand-follow PASS on the stock viewmodel route
 
-If D PASS:
-- E = mutate the viewmodel transform / establish weapon ownership.
+Do not go back to M34 isolation unless new contradictory evidence invalidates slot250 lineage.
 
-If B FAIL:
-- the failure is localized to viewmodel reintroduction itself; do not load the hand probe and do not reopen camera/projection.
+## CURRENT SAFE WEAPON CHAIN
+Preserve exactly:
 
-## AUTOMATION POLICY
-A single one-click package may run A/B/C as **separate auto-closed sessions** and return one combined ZIP, provided each session has an independent baseline check and verdict. Several facts per user action are welcome; several mutations per process are not.
+`M3.2B world/HMD foundation`
+`-> stock viewmodel draw`
+`-> exact CPredictedViewModel::CalcViewModelView slot250 hand-follow`
+`-> original retail GetFinalAimAngle`
+`-> fresh RIGHT-Touch eye-basis delta`
+`-> exact client/server FX_FireBullets vAngles only`
+`-> stock Weapon_ShootPosition vOrigin`
 
-## SEPARATE QUALITY LANE
-Tearing / cadence remains open. Keep it separate from the viewmodel ownership experiment unless it prevents the causal verdict.
+## HARD STOPS
+Do not:
+- mutate `[ESP+4] vOrigin` without a separately proven gameplay-space owner
+- call render-space `GetAttachment/SetupBones` from CalcViewModelView for fire origin
+- patch v1.6 FINAL MUZZLE MATRIX forward
+- return to dynamic vtable search `0..239`
+- use DrawModel mutation as the active weapon-control route
+- reopen transport / Quest projection / world origin / HMD 6DoF
 
-## DO NOT REPEAT
-- MASTER1 transport proof
-- MASTER2 Quest projection proof
-- MASTER3.1 origin ownership
-- MASTER3.2A HMD rotation ownership
-- MASTER3.2B basic positional 6DoF
-- old T0/G2.5 transport architecture debate
-- slot-depth as the default explanation for M34; M33 already reached real pairs with slot8/controller-capable lineage
+## IF BARREL AXIS IS STILL VISUALLY WRONG
+Stay COLD first.
+
+Primary cold question:
+**what fixed/local orientation relationship remains between the stock weapon/barrel basis, stock EyeAngles, original GetFinalAimAngle and the slot250 controller-owned viewmodel basis?**
+
+Prefer exact retail callgraph/dataflow/ABI and already-proven fire seam over another broad LIVE probe. A correction must preserve the original retail fire-angle semantics and current origin/audio/render baseline.
+
+Prepared cold artifacts are not evidence until executed:
+- `CSGOVR_FX_FIRE_ABI_SLOT_CLOSURE_v1.0.0_COLD_ONLY_ONECLICK.zip`
+- `CSGOVR_COLD_SLOT249_251_LAG_OWNER_v3.1.1.zip`
+
+## SEPARATE QUALITY / PVS LANE
+Latest evidence:
+`CSGOVR_T14_EXTERNAL_RESULT_20260827_143839.zip`
+
+T14 scientific verdict is **FAIL / ACTIVE_DURATION_NOT_REACHED**, despite healthy transport counters and zero dropped/mixed pairs in the collected stage. Do not call the PVS hypothesis proven.
+
+Prepared later tool:
+`CSGOVR_T15_PACING_CLEAN_AB_v1.3.0_120S_ONECLICK.zip`
+
+Class: **UNRUN / prepared** unless a later executed RESULT exists.
+
+Keep pacing/PVS intrusive work separate from weapon/fire causality.
+
+## LIVE PREFLIGHT CONTRACT
+Before any future LIVE/build/injection/capture, write exactly five lines:
+`MISSING FACT / WHY NOT COLD / PASS / FAIL / BASELINE MUST HOLD`.
+
+One PRIMARY FACT per LIVE, broad compatible passive SECONDARY HARVEST allowed.
+
+## STOP RULE
+No cosmetic vNext. REUSE -> ADAPT -> FIX -> EXTEND.
+
+Current detailed handoff:
+`research/CROSS_TAB_SYNC_20260827.md`
