@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "project": "CSGOVR",
+  "claims": [
+    {"id":"CSGO-WEAPON-BARREL-AXIS","status":"ACTIVE","summary":"close exact user-visible barrel-axis correctness while preserving the v1.7 angle-only fire chain","aliases":["weapon barrel axis correctness"],"fingerprints":["barrel axis correctness"],"evidence_ids":["CSGO-EV-FRESH-EPOCH"]},
+    {"id":"CSGO-PACING-PVS","status":"ACTIVE","summary":"close the independent pacing and PVS quality lane without weapon mutation","aliases":["pacing PVS"],"fingerprints":["pacing PVS quality"],"evidence_ids":["CSGO-EV-T14"]},
+    {"id":"CSGO-WORLD-HMD-6DOF","status":"PROVEN","summary":"world transport Quest projection native origin HMD rotation and positional 6DoF","aliases":["MASTER3.2B full HMD 6DoF"],"fingerprints":["world HMD 6DoF"],"evidence_ids":["CSGO-EV-MASTER32B"]},
+    {"id":"CSGO-FIRE-ABI","status":"PROVEN","summary":"exact client and server FX FireBullets ABI with angle-only mutation policy","aliases":["FX FireBullets ABI"],"fingerprints":["FireBullets ABI"],"evidence_ids":["CSGO-EV-FRESH-EPOCH"]},
+    {"id":"CSGO-MUZZLE-MATRIX-V16","status":"FALSIFIED","summary":"v1.6 render-space muzzle matrix as the integration path for fire origin and direction","aliases":["v1.6 muzzle matrix"],"fingerprints":["muzzle matrix v1.6"],"evidence_ids":[]},
+    {"id":"CSGO-T0-GPU-TRANSPORT-WORKSTREAM","status":"SUPERSEDED","summary":"T0 GPU transport certification as the current project gate","aliases":["T0 G2.5 transport current gate"],"fingerprints":["T0 GPU transport gate"],"evidence_ids":[]}
+  ],
+  "evidence": [
+    {"id":"CSGO-EV-MASTER32B","class":"RESULT","ref":"CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip"},
+    {"id":"CSGO-EV-FRESH-EPOCH","class":"RESULT","ref":"CSGOVR_WEAPON_FRESH_EPOCH_FIRE_DELTA_RESULT_20260827_143029.zip"},
+    {"id":"CSGO-EV-T14","class":"RESULT","ref":"CSGOVR_T14_EXTERNAL_RESULT_20260827_143839.zip"}
+  ]
+}
