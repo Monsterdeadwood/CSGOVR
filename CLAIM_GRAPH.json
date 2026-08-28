@@ -2,8 +2,9 @@
   "schema_version": 1,
   "project": "CSGOVR",
   "claims": [
-    {"id":"CSGO-SERVER-CURRENT-CMD-OWNER","status":"ACTIVE","summary":"close or kill exact frozen server current CUserCmd ownership so native aim provenance can reduce from four hooks to three without weakening fail-closed identity","aliases":["server current command owner 4 hooks to 3","server current CUserCmd ownership"],"fingerprints":["server current CUserCmd owner"],"evidence_ids":["CSGO-EV-NATIVE-AIM-20260828","CSGO-EV-SYNC-20260828"]},
-    {"id":"CSGO-PACING-PVS","status":"ACTIVE","summary":"close the independent pacing and PVS quality lane without weapon mutation","aliases":["pacing PVS"],"fingerprints":["pacing PVS quality"],"evidence_ids":["CSGO-EV-T14"]},
+    {"id":"CSGO-THREE-HOOK-CONTRACT-REDTEAM","status":"ACTIVE","summary":"red-team the exact three-hook native CUserCmd aim contract before any LIVE integration build","aliases":["three hook contract red team","3 hook pre-live audit"],"fingerprints":["three hook integration contract red team"],"state_anchor":"Red-team the exact three-hook implementation contract before LIVE","evidence_ids":["CSGO-EV-SERVER-CURRENTCMD-CLOSURE-20260828","CSGO-EV-SYNC-20260828"]},
+    {"id":"CSGO-PACING-PVS","status":"ACTIVE","summary":"close the independent pacing and PVS quality lane without weapon mutation","aliases":["pacing PVS"],"fingerprints":["pacing PVS quality"],"state_anchor":"Pacing/PVS remains independent","evidence_ids":["CSGO-EV-T14"]},
+    {"id":"CSGO-SERVER-CURRENT-CMD-OWNER","status":"PROVEN","summary":"exact frozen server current CUserCmd ownership at player+0x1034 with StartCommand set and RunCommand finish clear","aliases":["server current command owner 4 hooks to 3","server current CUserCmd ownership"],"fingerprints":["server current CUserCmd owner"],"evidence_ids":["CSGO-EV-NATIVE-AIM-20260828","CSGO-EV-SERVER-CURRENTCMD-CLOSURE-20260828","CSGO-EV-SYNC-20260828"]},
     {"id":"CSGO-WEAPON-BARREL-AXIS","status":"SUPERSEDED","summary":"weapon barrel-axis correctness as the current gameplay-fire mainline","aliases":["weapon barrel axis correctness current gate"],"fingerprints":["barrel axis current mainline"],"evidence_ids":["CSGO-EV-NATIVE-AIM-20260828","CSGO-EV-SYNC-20260828"]},
     {"id":"CSGO-WORLD-HMD-6DOF","status":"PROVEN","summary":"world transport Quest projection native origin HMD rotation and positional 6DoF","aliases":["MASTER3.2B full HMD 6DoF"],"fingerprints":["world HMD 6DoF"],"evidence_ids":["CSGO-EV-MASTER32B"]},
     {"id":"CSGO-FIRE-ABI","status":"PROVEN","summary":"correct frozen client and server FX FireBullets ABI while preferred gameplay fire remains stock under native CUserCmd aim","aliases":["FX FireBullets ABI"],"fingerprints":["FireBullets ABI"],"evidence_ids":["CSGO-EV-NATIVE-AIM-20260828"]},
@@ -15,6 +16,7 @@
     {"id":"CSGO-EV-FRESH-EPOCH","class":"HISTORICAL_RESULT","ref":"CSGOVR_WEAPON_FRESH_EPOCH_FIRE_DELTA_RESULT_20260827_143029.zip"},
     {"id":"CSGO-EV-T14","class":"RESULT","ref":"CSGOVR_T14_EXTERNAL_RESULT_20260827_143839.zip"},
     {"id":"CSGO-EV-NATIVE-AIM-20260828","class":"RETAIL_COLD_EVIDENCE","ref":"research/NATIVE_AIM_EVIDENCE_20260828.md","repo_path":"research/NATIVE_AIM_EVIDENCE_20260828.md"},
-    {"id":"CSGO-EV-SYNC-20260828","class":"CANONICAL_STATE","ref":"docs/SYNC.md 2026-08-28 native aim convergence","repo_path":"docs/SYNC.md"}
+    {"id":"CSGO-EV-SERVER-CURRENTCMD-CLOSURE-20260828","class":"RETAIL_COLD_CONVERGENCE","ref":"research/SERVER_CURRENTCMD_CLOSURE_20260828.md","repo_path":"research/SERVER_CURRENTCMD_CLOSURE_20260828.md"},
+    {"id":"CSGO-EV-SYNC-20260828","class":"CANONICAL_STATE","ref":"docs/SYNC.md 2026-08-28 convergence through server current-CUserCmd closure","repo_path":"docs/SYNC.md"}
   ]
 }
