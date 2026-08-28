@@ -70,6 +70,8 @@ Claim states:
 - `QUEUED` / `PARKED` = retained but not the current mutation lane.
 - `PROVEN` / `FALSIFIED` / `SUPERSEDED` = closed for ordinary experiment reuse.
 
+Every active claim must carry a short `state_anchor` string that appears verbatim in the canonical STATE/SYNC. If STATE advances to a new gate and the graph does not, CI must fail instead of silently preserving the previous active claim.
+
 Do not silently revive a closed claim. Either create a genuinely different claim or add `REOPEN_RATIONALE.md` containing both:
 
 ```text
@@ -83,6 +85,26 @@ For every added or modified `RESULT_DELTA` / `EVIDENCE_DELTA`, register a unique
 EVIDENCE_ID: <project evidence id>
 CLAIM_ID: <owning claim id>
 ```
+
+## Research document identity
+For every added or modified `research/*.md`, declare near the top:
+
+```text
+RESEARCH_DOC_CLASS: <EVIDENCE|CONVERGENCE|NOTE|ARCHIVE|INDEX|DESIGN|SYNC>
+```
+
+`EVIDENCE` and `CONVERGENCE` are authoritative research documents. They must also declare registered `EVIDENCE_ID` and `CLAIM_ID`, with the evidence linked from that claim in `CLAIM_GRAPH.json`.
+
+An authoritative research document may not silently outrun canonical state. It must satisfy at least one of these conditions:
+- canonical STATE/SYNC already names that document;
+- the canonical STATE/SYNC file is updated in the same change-set;
+- the document is explicitly listed in `pending_evidence_refs` and belongs to a `PENDING` claim.
+
+Pending evidence blocks new LIVE work when `block_live_when_pending=true`. File naming is never evidence classification: a document called `notes.md`, `reconciliation.md`, or anything else is governed by its explicit class and graph identity.
+
+`ARCHIVE` may name `SUPERSEDED_BY: <repo path>`; CI verifies the target exists. This is the preferred treatment for an intermediate research memo whose scientific conclusion was later replaced by a stronger closure.
+
+This rule is forward-only for changed documents; old research archaeology is not bulk-rewritten merely to satisfy the schema.
 
 ## CURRENT Issue synchronization
 `RESEARCH_CONTRACT.yaml` declares `current_issue_number`. CI verifies that the configured Issue is open, starts with `CURRENT:`, names the canonical STATE/SYNC path, contains every active `CLAIM_ID`, and is the only open Issue claiming `CURRENT:`.
