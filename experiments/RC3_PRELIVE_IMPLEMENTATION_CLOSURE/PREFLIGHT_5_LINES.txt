@@ -1,0 +1,5 @@
+MISSING FACT: whether exact RC3 package/source implements the full fail-closed ring/session/hook-install contract, not just ticket intent.
+WHY NOT COLD: N/A; this is the remaining COLD gate and exact RC3 ZIP/source bytes are not accessible in GitHub/Library from this tab.
+PASS: exact RC3 source proves full identity, stale-session invalidation, float canonical/reject rules, stock reject paths, behavioral atomic three-hook activation, relocation-aware guard, forbidden mutations absent, and SAFE161 protected lineage while package identity matches.
+FAIL: any invariant is absent or ambiguous, package identity differs, source/manifest is missing, or ticket intent does not match the exact implementation.
+BASELINE MUST HOLD: no game launch, injection, build, patch, DLL install, or source mutation; audit reads package/source only and writes a separate result ZIP.
