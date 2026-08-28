@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "project": "CSGOVR",
+  "canonical_state": "docs/SYNC.md",
+  "workflow": "docs/WORKFLOW.md",
+  "active_gate_anchor": "CURRENT GATES",
+  "protected_baseline_anchor": "CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip",
+  "evidence_globs": [
+    "research/*EVIDENCE*.md",
+    "research/*SYNC*.md",
+    "docs/*EVIDENCE*.md"
+  ],
+  "pending_evidence_refs": [],
+  "block_live_when_pending": true
+}
