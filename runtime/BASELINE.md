@@ -2,7 +2,7 @@
 
 Canonical current state: `docs/SYNC.md`.
 
-This file defines **rollback / ancestry roles only**. It must not define an independent CURRENT gate.
+This file defines **rollback / ancestry roles only**. It does not independently authorize LIVE work.
 
 ## Layer A — world / HMD rollback authority
 
@@ -16,14 +16,12 @@ Evidence:
 
 User visual verdict: **VR + full HMD 6DoF works.**
 
-Protected meaning:
-- Quest stereo transport/projection is closed;
-- native camera origin is closed;
-- HMD yaw/pitch/roll is closed;
-- positional 6DoF is closed;
+Protected world/HMD meaning:
+- Quest stereo transport/projection closed;
+- native camera origin closed;
+- HMD yaw/pitch/roll closed;
+- positional 6DoF closed;
 - tearing/cadence remains a separate quality issue.
-
-M3.2B is the rollback authority for world/HMD correctness. Weapon experiments do not replace it.
 
 ## Layer B — weapon / aim visual integration ancestor
 
@@ -32,46 +30,46 @@ M3.2B is the rollback authority for world/HMD correctness. Weapon experiments do
 Retained user-visible properties:
 - distant textures/objects remained present;
 - shot audio remained present;
-- exact slot250 stock arms/viewmodel hand-follow lineage is retained.
+- exact slot250 stock arms/viewmodel hand-follow lineage retained.
 
-This is the preferred visual/render ancestor for RC3 weapon/aim integration because the later RC2 parent regressed the far world.
+This is the preferred visual/render ancestor for RC3. RC2 is not a baseline because it regressed the far world and never activated native aim.
 
 ## Layer C — historical renderer ancestry
 
 `CSGOVR_HLAE_EYE_PATCH_v0.5.5_FULL_CVIEWSETUP_FIX`
 
-Canonical historical result:
+Historical result:
 `CSGOVR_HLAE_EYE_PATCH_RESULT_20260821_015737.zip`
 
 Generated package SHA256:
 `20D382A537CF97AA432CA0BA94DE279EB12764B4724793C217722538BCB78A6D`
 
-This remains useful provenance for the original HLAE eye scheduling/full-`CViewSetup` lineage, but it is **not the current integration baseline and does not authorize projection work**.
+This remains provenance only, not a current mutation gate.
 
-Retained historical facts:
-- pass1 LEFT, pass2 RIGHT, pass3 monitor;
-- full `CViewSetup` size `0x198`;
-- HLAE `CAfxStreams::DoRenderView` seam `+0x00022340`;
-- full-object copy constructor `+0x00014BA0`;
-- original recovered source remains under `runtime/golden_v0.5.5/src/`.
+## Current COLD gate
 
-## Current active runtime claim
+`CLAIM_ID = CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
+
+The exact RC3 package must close the fail-closed provenance/session/hook-install implementation contract before LIVE.
+
+## Queued runtime candidate
 
 `CLAIM_ID = CSGO-RC3-SAFE161-3HOOK-RUNTIME`
 
-Current package/ticket:
+Ticket:
 `experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md`
 
+Package:
 `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip`
 
-RC3 is not a new baseline until an executed RESULT and required user-visible verdict promote it.
+RC3 remains prepared but is not a baseline and is not LIVE-authorized until the COLD implementation gate passes.
 
 ## Separate quality lane
 
 `CLAIM_ID = CSGO-PACING-PVS`
 
-Do not mix PVS/culling mutation into the RC3 weapon/aim causal run.
+Do not mix PVS/culling mutation into the RC3 implementation closure or weapon/aim causal run.
 
 ## Baseline law
 
-A prepared package never replaces a baseline. A machine counter never overrides a contradictory visual baseline verdict. Promotion requires the exact acceptance law in `docs/SYNC.md`.
+A prepared package never replaces a baseline. Architecture proof does not automatically prove one concrete implementation. User-visible causal regression overrides healthy plumbing counters for visual promotion.

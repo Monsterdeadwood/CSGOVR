@@ -1,52 +1,51 @@
 # CSGOVR
 
-Native VR research for frozen legacy **CS:GO x86** using HLAE/OpenXR and exact retail evidence.
+Native VR research for frozen legacy **CS:GO x86**.
 
 ## Canonical truth
 
-**Read `docs/SYNC.md` first.** It is the current synchronized project truth. `RESEARCH_CONTRACT.yaml` and `CLAIM_GRAPH.json` are the machine-readable gate/evidence registry.
+**Read `docs/SYNC.md` first.**
 
-Do not infer the current gate from old package names, historical experiment files, or dated handoffs.
+Machine control plane:
+- `RESEARCH_CONTRACT.yaml`
+- `CLAIM_GRAPH.json`
 
-## Current status
+Do not infer the current gate from old package names or historical handoffs.
 
-Weapon / native aim:
-- `CLAIM_ID = CSGO-RC3-SAFE161-3HOOK-RUNTIME`
-- current candidate: `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip`
-- RC2 three-hook LIVE is **FAIL / DO NOT PROMOTE**; native aim never installed because its exact runtime guard compared a relocation-sensitive `A1 imm32` against preferred-image bytes under ASLR
-- the three-hook `CUserCmd::aimdirection` architecture remains COLD-proven
-- RC3 returns to the user-verified SAFE161 visual ancestor and uses the relocation-aware guard
+## Current lanes
+
+Primary weapon/aim COLD gate:
+`CLAIM_ID = CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
 
 Separate quality lane:
-- `CLAIM_ID = CSGO-PACING-PVS`
-- do not combine PVS/culling mutation with weapon/aim mutation
+`CLAIM_ID = CSGO-PACING-PVS`
+
+Prepared runtime candidate after COLD PASS:
+`CSGO-RC3-SAFE161-3HOOK-RUNTIME` (QUEUED).
+
+## Why RC3 is not authorized for LIVE yet
+
+The three-hook **ownership/dataflow architecture is COLD-proven**, including native `CUserCmd::aimdirection`, client/server current-command ownership and the six approved server final-aim caller/register cases.
+
+What remains is narrower: prove the **exact RC3 package implementation** really contains the required fail-closed ring/session/hook-install/reject behavior. The RC3 ticket reports a structural package audit, but accessible GitHub/Library evidence exposes the ticket and SHA sidecar rather than the exact RC3 source/package bytes needed for an independent implementation audit.
+
+See `docs/SYNC.md` for the ten exact COLD items. Do not create RC4 and do not run RC3 from this tab before that gate closes.
 
 ## Baseline hierarchy
 
-### World / HMD rollback authority
+World/HMD rollback authority:
 `CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
-SHA256 `5E4092F2407D8C2C9C8E6C9B1CC11826099534D088F1F9E078921A72ACFFF6B2`
-
-Evidence: `CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`.
-
-User visual verdict: **VR + full HMD 6DoF works.** Tearing remains a separate cadence/quality defect.
-
-### Weapon / aim visual integration ancestor
+Weapon/aim visual ancestor:
 `CSGOVR_WEAPON_SAFE_POSTCALC_AIM_v1.6.1_ONECLICK`
 
-Retained user visual evidence:
-- distant textures/objects remained present;
-- shot sound remained present;
-- exact slot250 RIGHT-hand/viewmodel path is retained.
+RC2 three-hook LIVE is **FAIL / DO NOT PROMOTE**. Its native aim never installed due to the ASLR-sensitive old guard, and its visual parent regressed distant world content.
 
-This SAFE161 ancestor does not replace M3.2B as world/HMD rollback authority.
+## Retained gameplay architecture
 
-## Current retained gameplay architecture
+`RIGHT AIM -> CUserCmd::aimdirection -> stock prediction/transport -> authoritative server CUserCmd -> player AimDirection -> approved final-aim semantics -> native AimPunch -> stock spread/inaccuracy -> stock Weapon_ShootPosition -> stock FX_FireBullets`
 
-`RIGHT AIM -> CUserCmd::aimdirection -> stock prediction/command transport -> authoritative server CUserCmd -> player AimDirection -> approved final-aim pointer branch -> native AimPunch -> stock spread/inaccuracy -> stock Weapon_ShootPosition -> stock FX_FireBullets`
-
-Keep semantic owners separate:
+Semantic owners remain separate:
 `HEAD != HAND_GRIP != HAND_AIM != WEAPON != FIRE_AIM != FIRE_ORIGIN`.
 
 ## Start here
@@ -54,12 +53,10 @@ Keep semantic owners separate:
 1. `docs/SYNC.md`
 2. `RESEARCH_CONTRACT.yaml`
 3. `CLAIM_GRAPH.json`
-4. `experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md`
-5. `research/RC2_3HOOK_RUNTIME_FAIL_20260828.md`
-6. `research/SERVER_CURRENTCMD_CLOSURE_20260828.md`
-7. `research/NATIVE_AIM_EVIDENCE_20260828.md`
-8. `docs/FALSIFIED.md` and historical ledgers only as needed
+4. Issue #4 (`CURRENT:`)
+5. `experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md` as the **queued** runtime ticket
+6. `research/RC2_3HOOK_RUNTIME_FAIL_20260828.md`
+7. `research/SERVER_CURRENTCMD_CLOSURE_20260828.md`
+8. `research/NATIVE_AIM_EVIDENCE_20260828.md`
 
-Prepared package is never a RESULT. User-visible causal verdict outranks healthy plumbing counters for visual acceptance.
-
-**PARALLELIZE EVIDENCE — SERIALIZE MUTATION.**
+Prepared package is never a RESULT. Architecture proof is not automatically exact implementation proof.

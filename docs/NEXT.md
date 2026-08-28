@@ -1,18 +1,35 @@
 # CSGOVR — NEXT
 
-## Canonical routing
+Canonical state: `docs/SYNC.md`.
 
-Current state: `docs/SYNC.md`.
+## Active machine claims
 
-Active machine claims:
-- `CSGO-RC3-SAFE161-3HOOK-RUNTIME`
+- `CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
 - `CSGO-PACING-PVS`
 
-Do not use older v1.7/barrel-axis or T0 transport notes as the current gate.
+Queued after COLD PASS:
+- `CSGO-RC3-SAFE161-3HOOK-RUNTIME`
 
-## Primary next experiment
+## Primary next work
 
-`experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md`
+**COLD only. Do not launch the game from this gate.**
+
+MISSING FACT:
+whether the exact prepared RC3 package/source implements the complete fail-closed three-hook command-provenance contract, rather than merely describing it in the LIVE ticket.
+
+Required exact-package checks are canonical in `docs/SYNC.md` and include:
+- full ring/session/command/local-player identity;
+- publication/consumption ordering;
+- reconnect/map/session stale-entry invalidation;
+- NaN/Inf rejection and signed-zero canonicalization for bitwise aim identity;
+- no `IN_ATTACK`-only stamping hole;
+- stock fallback on every rejected pointer path;
+- behaviorally fail-closed partial hook installation;
+- relocation-aware `A1` guard;
+- forbidden RunCommand/TLS/FX/PVS/render-fire mutations absent;
+- SAFE161 protected renderer/HMD lineage unchanged.
+
+## RC3 remains the runtime candidate
 
 Package:
 `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip`
@@ -20,25 +37,11 @@ Package:
 SHA256:
 `B988DEB8DEE490CFB6964ADA004DF69F454AF48A689BDD60E2A67CCE5B72C2FB`
 
-Why RC3 exists:
-- RC2 LIVE failed before native aim installed;
-- the failing runtime guard compared a relocation-sensitive `A1 imm32` operand against preferred-image bytes under ASLR;
-- that root cause is COLD closed;
-- RC2 also regressed the visible far world, so it is not the visual ancestor;
-- RC3 returns to the user-verified SAFE161 visual lineage and changes only the three-hook command-owned native aim integration plus relocation-aware guard.
+Ticket:
+`experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md`
 
-## Exact LIVE preflight
-
-MISSING FACT: whether the user-verified SAFE161 visual baseline remains intact while the relocation-aware three-hook CUserCmd native-aim path actually activates and owns authoritative shot direction.
-WHY NOT COLD: the ASLR guard, currentCmd owner, register map and hook topology are cold-verifiable, but actual hook installation, prediction/network consumption, authoritative impacts and far-world visual stability require execution and the user's eyes.
-PASS: SAFE161 far textures/objects and shot audio remain stable; three hooks activate with RunCommand/TLS absent; client publish/client gate/server currentCmd gate occur; impacts follow RIGHT Touch while stock Weapon_ShootPosition, recoil, spread and ammo remain normal.
-FAIL: any far-world/texture disappearance, native aim inactive, center-screen authoritative fire, unauthorized pointer grant, currentCmd/ring mismatch, crash/audio regression, or stock recoil/spread/origin/ammo semantics change.
-BASELINE MUST HOLD: exact frozen hashes; SAFE161 user-verified textures/audio; M3.2B HMD 6DoF/Quest stereo; exact slot250 RIGHT-hand follow; stock Weapon_ShootPosition/recoil/spread/ammo; no attachment/DrawModel/FX/global-pointer mutation.
+Do not create RC4. If exact implementation closure PASSes, promote this same RC3 runtime claim to ACTIVE and use its existing five-line LIVE preflight.
 
 ## Separate lane
 
-`CSGO-PACING-PVS` remains independent. Do not add PVS/culling mutation to RC3. If RC3 on SAFE161 still loses distant content, return to the T14/T15 quality lane as a separate causal experiment.
-
-## Stop
-
-Do not create RC4 before RC3 produces a RESULT or a newly discovered specific COLD blocker. Machine plumbing alone does not promote RC3; the user-visible far-world/audio and impact-direction verdicts are mandatory.
+`CSGO-PACING-PVS` remains independent. No PVS/culling mutation belongs in the implementation closure or RC3 weapon LIVE.
