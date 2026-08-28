@@ -1,15 +1,15 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "project": "CSGOVR",
   "canonical_state": "docs/SYNC.md",
   "workflow": "docs/WORKFLOW.md",
+  "current_issue_number": 4,
   "active_gate_anchor": "CURRENT GATES",
   "protected_baseline_anchor": "CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip",
   "claim_graph": "CLAIM_GRAPH.json",
-  "active_claim_ids": ["CSGO-WEAPON-BARREL-AXIS", "CSGO-PACING-PVS"],
+  "active_claim_ids": ["CSGO-SERVER-CURRENT-CMD-OWNER", "CSGO-PACING-PVS"],
   "evidence_globs": ["research/*EVIDENCE*.md", "research/*SYNC*.md", "docs/*EVIDENCE*.md"],
   "pending_evidence_refs": [],
   "block_live_when_pending": true,
-  "require_claim_id_for_changed_experiments": true,
-  "require_headers_for_new_evidence_delta": true
+  "require_headers_for_changed_evidence_delta": true
 }
