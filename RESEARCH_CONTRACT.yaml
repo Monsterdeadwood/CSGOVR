@@ -9,7 +9,8 @@
   "claim_graph": "CLAIM_GRAPH.json",
   "active_claim_ids": ["CSGO-SERVER-CURRENT-CMD-OWNER", "CSGO-PACING-PVS"],
   "evidence_globs": ["research/*EVIDENCE*.md", "research/*SYNC*.md", "docs/*EVIDENCE*.md"],
-  "pending_evidence_refs": [],
+  "pending_evidence_refs": ["research/CURRENTCMD_COLD_RECONCILIATION_20260828.md"],
   "block_live_when_pending": true,
-  "require_headers_for_changed_evidence_delta": true
+  "require_headers_for_changed_evidence_delta": true,
+  "require_research_doc_identity_for_changes": true
 }
