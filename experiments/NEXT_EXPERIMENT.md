@@ -2,41 +2,36 @@
 
 Canonical state: `docs/SYNC.md`.
 
-`CLAIM_ID = CSGO-RC3-SAFE161-3HOOK-RUNTIME`
+`CLAIM_ID = CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
 
-Authoritative ticket:
-`experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md`
+Class: **COLD / READ-ONLY PACKAGE-SOURCE AUDIT**.
 
-Package:
+## Primary fact
+
+Does the exact prepared RC3 package/source implement the complete fail-closed command-provenance and three-hook installation contract required by the already COLD-proven architecture?
+
+This does not reopen native `CUserCmd::aimdirection`, current-command ownership, the six approved caller/register cases, FX ABI, or the three-hook architecture itself.
+
+## Required PASS surface
+
+The exact RC3 implementation must prove all items listed under `CURRENT GATE - RC3 PRE-LIVE IMPLEMENTATION CLOSURE` in `docs/SYNC.md`, including session/ring identity and invalidation, stock rejects, behavioral hook-install atomicity, relocation-aware guard, forbidden mutations absent and SAFE161 protected lineage unchanged.
+
+## Available package identity
+
+Prepared RC3:
 `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip`
 
 SHA256:
 `B988DEB8DEE490CFB6964ADA004DF69F454AF48A689BDD60E2A67CCE5B72C2FB`
 
-## Why this replaced T0/v1.7-era NEXT files
+The accessible Library currently exposes the exact SHA sidecar, while GitHub exposes the RC3 LIVE ticket, but neither surface currently exposes the exact RC3 package source/ZIP bytes for independent audit.
 
-World/HMD transport, Quest projection, camera origin, HMD rotation and positional 6DoF are already closed. The native fire architecture later advanced through exact `CUserCmd::aimdirection` ownership and frozen server current-command closure.
+## Decision
 
-RC2 three-hook LIVE then failed before native aim installed because its runtime exact guard compared a relocation-sensitive `A1 imm32` operand against preferred-image bytes under ASLR. RC2 is **FAIL / DO NOT PROMOTE** and its visual ancestor is rejected because the user reported disappearing distant world content.
+PASS -> `CSGO-RC3-SAFE161-3HOOK-RUNTIME` becomes ACTIVE and the existing RC3 LIVE ticket is used unchanged.
 
-RC3 returns to the user-verified SAFE161 visual/render ancestor and keeps:
-- exactly three native-aim hooks;
-- RunCommand/TLS absent;
-- stock `FX_FireBullets`;
-- stock `Weapon_ShootPosition`;
-- stock recoil/spread/ammo;
-- no PVS mutation.
+FAIL -> fix only the exact missing implementation invariant and re-audit. Do not create a different gameplay architecture.
 
-The only integration repair is the relocation-aware runtime guard plus the already COLD-proven three-hook `CUserCmd` aim path.
+## Stop
 
-## Exact preflight
-
-MISSING FACT: whether the user-verified SAFE161 visual baseline remains intact while the relocation-aware three-hook CUserCmd native-aim path actually activates and owns authoritative shot direction.
-WHY NOT COLD: the ASLR guard, currentCmd owner, register map and hook topology are cold-verifiable, but actual hook installation, prediction/network consumption, authoritative impacts and far-world visual stability require execution and the user's eyes.
-PASS: SAFE161 far textures/objects and shot audio remain stable; three hooks activate with RunCommand/TLS absent; client publish/client gate/server currentCmd gate occur; impacts follow RIGHT Touch while stock Weapon_ShootPosition, recoil, spread and ammo remain normal.
-FAIL: any far-world/texture disappearance, native aim inactive, center-screen authoritative fire, unauthorized pointer grant, currentCmd/ring mismatch, crash/audio regression, or stock recoil/spread/origin/ammo semantics change.
-BASELINE MUST HOLD: exact frozen hashes; SAFE161 user-verified textures/audio; M3.2B HMD 6DoF/Quest stereo; exact slot250 RIGHT-hand follow; stock Weapon_ShootPosition/recoil/spread/ammo; no attachment/DrawModel/FX/global-pointer mutation.
-
-## Stop rule
-
-Do not create another weapon LIVE package before RC3 is executed or a concrete new COLD blocker is found. `CSGO-PACING-PVS` is a separate lane and must not be folded into this experiment.
+No new weapon LIVE while this claim is ACTIVE. No RC4. No PVS mutation in this lane.
