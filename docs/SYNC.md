@@ -1,57 +1,39 @@
 # CSGOVR — STATE SYNC
 
-Snapshot: **2026-08-28 convergence through frozen native `CUserCmd::aimdirection` evidence.**
+Snapshot: **2026-08-28 after frozen server current-CUserCmd closure.**
 
-Primary evidence delta:
-`research/NATIVE_AIM_EVIDENCE_20260828.md`
+Primary evidence:
+- `research/NATIVE_AIM_EVIDENCE_20260828.md`
+- `research/SERVER_CURRENTCMD_CLOSURE_20260828.md`
 
 ## FROZEN TARGET
 - legacy CS:GO x86, AppID `4465480`, BuildID `22100934`
 - frozen `client.dll` SHA256 `183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03`
 - frozen `server.dll` SHA256 `699757BB5C8DDB71193F68DABA22F59F697491DDBD768BC8656AC2CE435C4DB8`
 - HLAE 2.191.1
-- pass1 LEFT / pass2 RIGHT / pass3 monitor lineage retained
-- full `CViewSetup = 0x198`
-- `-insecure`, local/offline only
+- local/offline `-insecure` target only
 
 ## WORLD / HMD GOLDEN — UNCHANGED
 `CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
 
-SHA256:
-`5E4092F2407D8C2C9C8E6C9B1CC11826099534D088F1F9E078921A72ACFFF6B2`
+SHA256 `5E4092F2407D8C2C9C8E6C9B1CC11826099534D088F1F9E078921A72ACFFF6B2`
 
-Evidence:
-`CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`
+Evidence `CSGOVR_MASTER32B_HMD_6DOF_RESULT_20260825_183719.zip`.
 
-User visual verdict: **VR + full HMD 6DoF works.**
+User visual verdict: VR + full HMD 6DoF works. Tearing remains a separate quality defect.
 
-Tearing remains a quality defect.
+Do not reopen world transport/projection/origin/HMD ownership while solving weapon aim.
 
-## CLOSED WORLD / HMD
-- MASTER1 transport = PASS
-- MASTER2 Quest projection = PASS
-- MASTER3.1 native origin authority at `client+0x003A5280` = PASS
-- MASTER3.2A HMD rotation = PASS
-- MASTER3.2B positional translation / full 6DoF = PASS
-
-Do not reopen these while solving weapon aim.
-
-## VIEWMODEL / HAND SYNC
-Exact retail owner:
+## VIEWMODEL / HAND
 - `CBaseViewModel::CalcViewModelView = client+0x001B7F80`
 - `CPredictedViewModel::CalcViewModelView = client+0x003420E0`
 - runtime slot `250`
+- RIGHT Touch hand-follow through stock arms/viewmodel = PASS
 
-RIGHT Touch hand-follow through the stock arms/viewmodel path = PASS.
-Dynamic slot scan `0..239` = STOPPED.
-DrawModel transform mutation = STOPPED as the active route.
+Visual weapon ownership stays separate from gameplay fire ownership.
 
-Visual ownership remains separate from gameplay fire ownership.
-
-## FIRE ABI — CORRECTED 2026-08-28
-The prior Aug 27 ABI labels are superseded.
-
-Frozen caller producer + callee consumer analysis closes:
+## CORRECTED FX ABI
+Frozen retail ABI:
 
 ```text
 ECX       = iPlayerIndex
@@ -60,143 +42,146 @@ EDX       = weapon object
 [ESP+08]  = vOrigin
 [ESP+0C]  = vAngles
 cleanup   = 0x2C
-client/server symmetric
 ```
 
-FALSIFIED:
-- `EDX = item definition index`
-- `[ESP+04] = vOrigin`
-- `[ESP+08] = vAngles`
-- one proof FX callsite represents all fire producers
-- freshness alone proves FX ownership
+Old Aug-27 ABI labels are FALSIFIED. `client+0x003F6989` is the network `C_TEFireBullets` consumer, so global FX mutation is not the preferred architecture. Corrected FX remains fallback/oracle only.
 
-`client+0x003F6989` is the network `C_TEFireBullets` consumer call, not a unique local weapon producer. A global FX mutation can therefore double-apply a locally-originated authoritative shot after the network fire event returns to the client.
-
-Corrected FX + exact local weapon ownership remains only an emergency fallback/oracle.
-
-## NATIVE CUserCmd AIM — CURRENT MAINLINE
-Frozen retail contains:
-
-```text
-CUserCmd::aimdirection
-+0x18
-+0x1C
-+0x20
-```
-
-Frozen transport is proven:
-
-```text
-CLIENT CUserCmd aimdirection
-    -> WriteUsercmd
-    -> network
-    -> SERVER ReadUsercmd
-    -> SERVER CUserCmd +18/+1C/+20
-```
-
-Server command processing then copies:
-
-```text
-CUserCmd +18/+1C/+20
-    -> player +14AC/+14B0/+14B4
-```
-
-The same player aim vector is consumed by the approved pointer-input final-aim path before stock fire, then combined with native aim punch.
-
-Preferred gameplay chain:
+## NATIVE AIM MAINLINE
+Frozen retail proves `CUserCmd::aimdirection` at `+0x18/+0x1C/+0x20` and stock transport:
 
 ```text
 RIGHT AIM
-    -> CUserCmd::aimdirection
-    -> native client prediction
-    -> native network
-    -> native server command
-    -> native final aim
-    -> native AimPunch
-    -> stock spread/inaccuracy
-    -> stock Weapon_ShootPosition
-    -> stock FX_FireBullets
+ -> CUserCmd::aimdirection
+ -> WriteUsercmd/network/ReadUsercmd
+ -> server current CUserCmd
+ -> player AimDirection +14AC/+14B0/+14B4
+ -> approved pointer final-aim branch
+ -> native AimPunch
+ -> stock spread/inaccuracy
+ -> stock Weapon_ShootPosition
+ -> stock FX_FireBullets
 ```
 
-`FX_MUTATION_REQUIRED=NO` for the preferred architecture.
+`FX_MUTATION_REQUIRED=NO`.
 
-## CLIENT PREDICTION OWNER
-Corrected frozen RVA:
+`IN_ATTACK` is not VR aim provenance. Aim ownership and fire action remain distinct semantics inside the same command.
+
+## CLIENT CURRENT COMMAND OWNER — RETAIL_PROVEN
 
 ```text
 CPrediction::RunCommand = client+0x00343BF0
+client+0x00343C0F  player+0x3348 = current CUserCmd*
+client+0x00343E73  player+0x3348 = NULL
 ```
 
-The earlier `client+0x00342BF0` value is FALSIFIED.
+## SERVER CURRENT COMMAND OWNER — RETAIL_PROVEN 2026-08-28
+Result: `CSGOVR_FX_FIRE_OWNERSHIP_CLOSURE_RESULT_20260828_201156.zip`.
 
-Frozen command lifetime:
+Frozen `RunCommand = server+0x00339890` establishes:
 
 ```text
-client+0x00343C0F
-player+0x3348 = current CUserCmd*
-
-client+0x00343E73
-player+0x3348 = NULL
+ESI = player
+EDI = CUserCmd*
 ```
 
-This exact current-command pointer is the client prediction identity gate.
-
-## POINTER-SEMANTICS CENSUS
-Machine COLD self-test:
+At its StartCommand call:
 
 ```text
-NATIVE_AIM_STATIC_SELFTEST=PASS
-CLIENT_POINTER_CALLERS=14
-SERVER_POINTER_CALLERS=8
-CLIENT_GAMEPLAY_AIM_ALLOW=6
-SERVER_GAMEPLAY_AIM_ALLOW=6
+server+00339A16  EDI = [EBP+0C]   ; cmd
+server+00339A1C  push EDI
+server+00339A1D  push ESI         ; player
+server+00339A35  call [CPlayerMove vtable +0x10]
 ```
 
-Server allowlist:
+Recovered CPlayerMove vtable slot 4 resolves to `server+0x00339210`.
+
+Exact callee:
 
 ```text
-58F88B  grenade final aim
-5A7A34  bullet
-5A8037  bullet
-5B0349  M3
-5B37BB  NOVA/Sawedoff
-5BC61B  XM1014
+server+00339213  EDX = [EBP+08]   ; player
+server+00339216  ECX = [EBP+0C]   ; CUserCmd*
+server+0033921F  [EDX+0x1034] = ECX
 ```
 
-Server rejects:
+Therefore:
+
+```text
+player+0x1034 = current CUserCmd*
+```
+
+Same RunCommand clears it at:
+
+```text
+server+00339E63  [player+0x1034] = NULL
+```
+
+Independent frozen reader at `server+0x0033AC6F` reads `player+0x1034` and NULL-checks it.
+
+Evidence class: **RETAIL_PROVEN**.
+
+## SERVER POINTER GAMEPLAY MAP — RETAIL_PROVEN
+
+```text
+58F88B  grenade        player = ESI
+5A7A34  bullet A       player = EBX
+5A8037  bullet B       player = EDI
+5B0349  M3             player = EDI
+5B37BB  NOVA/Sawedoff  player = EDI
+5BC61B  XM1014         player = EDI
+```
+
+Hard rejects:
 
 ```text
 216DCA  use / interaction trace
 49F492  motion-controller recoil scaling
 ```
 
-Rule:
+Global pointer/Hydra spoofing and whole-command motion-controller mode remain forbidden.
+
+## CURRENT PREFERRED IMPLEMENTATION — THREE HOOKS
+
+The former server RunCommand detour/TLS capability token is no longer needed as an identity carrier.
 
 ```text
-POINTER SEMANTICS
-ONLY FOR APPROVED FINAL WEAPON/GRENADE AIM CONSUMERS
+HOOK 1 CLIENT CheckSplitScreenMimic
+  after original stock input completion:
+  compute normalized RIGHT-AIM direction
+  write cmd+18/+1C/+20
+  publish exact provenance ring
+
+HOOK 2 CLIENT IsInputDeviceAPointer
+  approved client gameplay caller
+  + local player
+  + player+0x3348 currentCmd
+  + exact ring identity
+  => TRUE
+
+HOOK 3 SERVER IsInputDeviceAPointer
+  exact approved return RVA
+  + exact caller-specific player register
+  + currentCmd = *(player+0x1034)
+  + currentCmd != NULL
+  + exact ring identity
+  + derived server player index == ring.localPlayerIndex
+  => TRUE
 ```
 
-Global pointer/Hydra mode and whole-command input-device spoof are STOPPED because they alter unrelated semantics, including recoil scaling.
+Everything else delegates to the original helper. `FX_FireBullets` remains stock.
 
-## OWNERSHIP MODEL
-Keep these authorities separate:
+Classification:
 
 ```text
-HEAD        = HMD/world camera
-HAND_GRIP   = visual grip space
-HAND_AIM    = controller aim space
-WEAPON      = stock viewmodel / slot250 visual owner
-FIRE_AIM    = CUserCmd::aimdirection
-FIRE_ORIGIN = stock Weapon_ShootPosition
+3_HOOK_ARCHITECTURE = COLD_PROVEN / READY_FOR_INTEGRATION
+4_HOOK_RUNCOMMAND_TLS = SAFE ROLLBACK, NOT PRIMARY
+2_HOOK = NO JUSTIFICATION
+FX HOOK = EMERGENCY FALLBACK / ORACLE ONLY
 ```
 
-Do not route gameplay fire through `weaponGrabRotOffset`, post-Calc viewmodel root, render attachments, or muzzle matrices.
+COLD proof is not a runtime pass. Runtime integration still needs its own preflight and result.
 
-`IN_ATTACK` is not required for VR aim provenance. Aim and fire action may share one `CUserCmd` while remaining separate semantic owners.
-
-## COMMAND PROVENANCE
-Recommended ring identity:
+## COMMAND PROVENANCE CONTRACT
+Recommended ring record:
 
 ```text
 sessionEpoch
@@ -209,91 +194,49 @@ poseSeq
 ```
 
 Rules:
-- verify full identity, never modulo-slot identity alone
+- full identity check, never modulo slot alone
 - canonicalize `-0.0f` to `+0.0f`
-- reject NaN / Inf
-- controller freshness is checked at command creation only
-- a validly published command remains VR-owned despite later network delay
-- remote/bot server commands must fail local-player identity even if command numbers collide
+- reject NaN/Inf
+- controller freshness checked only at command creation
+- a published valid command keeps its aim ownership despite network delay
+- remote/bot commands must fail local-player identity even if command numbers collide
+- NULL currentCmd or unknown/rejected pointer caller always falls back to stock behavior
+
+`FRESHNESS = property of command creation`
+
+`IDENTITY = property of command consumption`
+
+## OWNERSHIP MODEL
 
 ```text
-FRESHNESS = property of command creation
-IDENTITY  = property of command consumption
+HEAD        = HMD/world camera
+HAND_GRIP   = visual grip space
+HAND_AIM    = controller aim space
+WEAPON      = stock viewmodel / slot250
+FIRE_AIM    = CUserCmd::aimdirection
+FIRE_ORIGIN = stock Weapon_ShootPosition
 ```
 
-## CURRENT IMPLEMENTATION SHAPE
-Conservative architecture currently requires four hooks:
+Do not route gameplay fire through `weaponGrabRotOffset`, post-Calc viewmodel root, render attachment matrices, or muzzle matrices.
 
-```text
-1 CLIENT CheckSplitScreenMimic
-  write cmd aimdirection + publish provenance
+## NEXT PRIMARY GATE
+Red-team the exact three-hook implementation contract before LIVE:
+- ring serialization equality across client/server command transport
+- session/reconnect epoch reset
+- exact client/server local-player identity derivation
+- six server return-RVA/register dispatch cases
+- no mutation of rejected pointer semantics
 
-2 CLIENT IsInputDeviceAPointer
-  approved caller + local player + player+0x3348 currentCmd + exact ring
+Only after that COLD audit may a three-hook integration build receive a LIVE preflight.
 
-3 SERVER CPlayerMove::RunCommand
-  local player + exact ring -> temporary command capability token
-
-4 SERVER IsInputDeviceAPointer
-  capability token + approved gameplay caller -> TRUE
-```
-
-`FX_FireBullets` stays stock.
-
-## CURRENT GATES
-### Weapon primary gate
-**COLD close or kill server current-command ownership so the four-hook design can be reduced to three without weakening fail-closed provenance.**
-
-MISSING FACT:
-- exact frozen server current `CUserCmd*` field/owner, if present
-- exact set/clear lifetime around authoritative command execution
-- player-register map at all six approved server pointer-helper consumers
-- whether server pointer helper can locally prove full ring + player ownership without the RunCommand/TLS hook
-
-PASS:
-- frozen server exposes a stable current-command owner at all required consumers
-- exact command and player identity can be reconstructed locally
-- Hook 3/TLS can be removed with no weaker gate
-
-FAIL:
-- no stable current-command owner
-- lifetime does not cover final-aim consumers
-- player/currentCmd recovery is ambiguous
-- any reduction becomes probabilistic or broadens pointer semantics
-
-FAIL policy:
-retain the proven four-hook contract. Do not optimize hook count for aesthetics.
-
-### Quality gate — separate
-Pacing/PVS remains independent from weapon/aim work.
-
-`CSGOVR_T14_EXTERNAL_RESULT_20260827_143839.zip` remains useful infrastructure evidence but does not prove the PVS hypothesis.
-
-Prepared/unrun unless a later RESULT exists:
-- `CSGOVR_T15_PACING_CLEAN_AB_v1.3.0_120S_ONECLICK.zip`
-- `CSGOVR_COLD_SLOT249_251_LAG_OWNER_v3.1.1.zip`
-
-## MUZZLE / RENDER-SPACE STOPPED PATHS
-v1.5 muzzle-origin attempt = partial / origin FAIL.
-
-v1.6 FINAL MUZZLE MATRIX = STOPPED integration path:
-- matrix lookup worked
-- textures/audio regressed
-- fire calls diverged
-- game stability regressed
-
-v1.6.1 restored texture/audio stability after removing attachment/matrix origin mutation, but absolute post-Calc root angle remained visually wrong.
-
-Do not patch this line forward.
+## QUALITY LANE — SEPARATE
+Pacing/PVS remains independent. `CSGOVR_T14_EXTERNAL_RESULT_20260827_143839.zip` is useful infrastructure evidence but does not prove the PVS hypothesis.
 
 ## STOP RULE
-Do not reopen world transport/projection/origin/HMD 6DoF.
+Do not reopen world stereo/HMD 6DoF.
 Do not return to v1.6 render-space muzzle matrix.
 Do not mutate fire origin without an independently proven gameplay-space owner.
 Do not return to global FX mutation as preferred architecture.
-Do not combine intrusive pacing/PVS work with weapon/aim mutation.
-Do not create LIVE/build/injection until the current server current-command COLD gate is closed or killed.
-
-Canonical evidence:
-- `research/NATIVE_AIM_EVIDENCE_20260828.md`
-- `research/CROSS_TAB_SYNC_20260827.md` for prior baseline history only
+Do not globally spoof pointer/Hydra semantics.
+Do not combine pacing/PVS experiments with weapon/aim integration.
+Do not reintroduce RunCommand/TLS unless the three-hook integration falsifies a specific ownership invariant.
