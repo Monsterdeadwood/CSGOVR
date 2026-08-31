@@ -1,6 +1,6 @@
 # CSGOVR — EVIDENCE BOUNDARY
 
-Updated: 2026-08-31.
+CONTROL_PLANE_REV: 1
 
 This file defines the hard boundary between locked knowledge and ongoing COLD research across native-aim/replay acceptance and replacement/sidecar renderer lanes.
 
