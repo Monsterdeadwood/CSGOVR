@@ -2,14 +2,16 @@
 
 PROJECT_SYNC_CONTRACT = v1.1
 SOURCE_OF_TRUTH = GLOBAL_STATE.md
-GLOBAL_REVISION = 2
-GLOBAL_TIMESTAMP = 2026-09-08T14:47:31Z
-PREVIOUS_GLOBAL_REVISION = 1
-GLOBAL_REVISION_BASE_MAIN_SHA = 9612dcfac111e9a687f30488bac399b218a2ccc2
+GLOBAL_REVISION = 3
+GLOBAL_TIMESTAMP = 2026-09-08T15:01:45Z
+PREVIOUS_GLOBAL_REVISION = 2
+GLOBAL_REVISION_BASE_MAIN_SHA = cdaefbefc94df9b842c8e27a8adaec73bff8e0ec
 LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 
-## Revision 2 reason
-Revision 1 bootstrapped `GLOBAL_STATE.md` and was validated/promoted by PR #21. Revision 2 removes the bootstrap self-HOLD, records the promoted control plane as canonical, and reconciles the stale pre-promotion META branch reference without changing research claim semantics.
+## Revision 3 reason
+Revision 2 completed the GLOBAL_STATE bootstrap and ownership-recovery pass. Revision 3 adjudicates a newly discovered MAIN_DRIFT conflict: the only registered sibling COLD branch, `cold/r4/sidecar-ownership`, still relied on `R4_MAIN_DRIFT_ACK_20260908.md`, but that ACK compared only through `main=943fb84...` and explicitly predated the accepted RC3 runtime reconciliation. Current main is fifteen commits ahead of that ACK boundary and now contains the RC3 runtime reconciliation, updated claim graph, GLOBAL_STATE control plane, and active far-world/visibility gate. R4 is therefore held for a fresh drift reconcile before any further branch-local conclusion can be used.
+
+No R4 technical finding is falsified or promoted by this revision.
 
 ## PENDING_SYNC
 Ordered set of formal unpromoted HANDOFF / SYNC_PACKET entries:
@@ -37,7 +39,7 @@ CSGO-PACING-PVS        = ACTIVE
 Control lanes are not canonical claim owners:
 ```text
 META CSGO-TAB5-GOVERNANCE = COLD_CONTROL / GLOBAL_STATE_AUTHORITY
-R4   CSGO-R4-SIDECAR-OWNERSHIP = UNBOUND_COLD_LANE
+R4   CSGO-R4-SIDECAR-OWNERSHIP = HOLD / DRIFT_RECONCILE_REQUIRED
 ```
 
 ## CLAIM_GRAPH — current canonical summary
@@ -93,20 +95,22 @@ Protected semantics:
 ## ACTIVE_OWNERSHIP / OWNER_MAP
 ```text
 META:
-  lane               = CSGO-TAB5-GOVERNANCE
+  lane                = CSGO-TAB5-GOVERNANCE
   canonical authority = GLOBAL_STATE.md
   legacy branch       = meta/tab5-governance
   legacy BASE_MAIN_SHA = 943fb84be55e56871769e71505e7b2f1440e11e9
   legacy branch state = STALE_READ_ONLY / DO_NOT_CONTINUE
-  drift resolution    = RECONCILED_BY_GLOBAL_STATE_V1_1
   scope               = CONTROL_ONLY
 
 R4:
-  lane   = CSGO-R4-SIDECAR-OWNERSHIP
-  branch = cold/r4/sidecar-ownership
-  BASE_MAIN_SHA = 9cb401e5e8f1ee78cbc4484eb20d244705bd5dad
-  status = COLD_ACTIVE / MAIN_DRIFT_ACK_20260908
-  scope  = COLD_ONLY
+  lane                 = CSGO-R4-SIDECAR-OWNERSHIP
+  branch               = cold/r4/sidecar-ownership
+  PINNED_BASE           = 9cb401e5e8f1ee78cbc4484eb20d244705bd5dad
+  LAST_ACK_MAIN         = 943fb84be55e56871769e71505e7b2f1440e11e9
+  CURRENT_MAIN_AT_REV3  = cdaefbefc94df9b842c8e27a8adaec73bff8e0ec
+  status               = HOLD / DRIFT_RECONCILE_REQUIRED
+  reason               = accepted RC3 runtime + visibility gate + GLOBAL_STATE changes postdate the branch ACK
+  scope                = COLD_ONLY
 
 ALIGNMENT:
   canonical claim = CSGO-RC3-AIM-ALIGNMENT
@@ -130,20 +134,21 @@ Do not infer technical ROLE IDs from TAB numbers.
 ## DEPENDENCIES
 - AIM alignment work depends on preserving the proven RC3 native CUserCmd execution substrate and stock fire semantics.
 - FAR WORLD work depends on preserving M3.2B rollback authority and keeping visibility mutation independent from aim mutation.
-- R4 sidecar ownership is independent and must not silently become the current renderer mainline.
+- R4 sidecar ownership must reconcile accepted RC3 runtime/visibility state before any R4 conclusion can feed LIVE, integration, or promotion.
 - META depends on newest GLOBAL_STATE, then PENDING_SYNC / ACTIVE_CLAIMS / CLAIM_GRAPH before any local conclusion.
 
 ## CONFLICTS
-### Legacy META branch
-The pre-contract `meta/tab5-governance` branch was based on `943fb84...` and contained a now-false statement that PR #20 was unmerged. That branch is preserved as provenance but is `STALE_READ_ONLY`; it must not be used as a continuation base.
+### R4 stale MAIN_DRIFT ACK
+`docs/COLD/R4_MAIN_DRIFT_ACK_20260908.md` on `cold/r4/sidecar-ownership` compared the branch only through `main=943fb84...` and stated that the 2026-09-07 RC3 runtime reconciliation had not yet been promoted. Current `main` is `cdaefbef...`, fifteen commits ahead of that boundary. The intervening delta includes accepted RC3 runtime reconciliation, current AIM/FAR_WORLD claim changes, `GLOBAL_STATE.md`, `CLAIM_GRAPH.json`, and synchronized control files. The old `NON_OVERLAPPING` verdict is therefore stale and cannot authorize continued R4 work.
 
-### Resolved state-pointer migration
-`RESEARCH_CONTRACT.yaml`, `LATEST_SYNC.md`, legacy `docs/STATE.md`, CURRENT issue #4 and the COLD/LIVE canonical-file protection gate now route through `GLOBAL_STATE.md` under PROJECT_SYNC_CONTRACT v1.1.
+### Legacy META branch
+The pre-contract `meta/tab5-governance` branch remains preserved as provenance only and is `STALE_READ_ONLY`.
 
 No evidence conflict is resolved by silent overwrite. Both old provenance and promoted current facts remain preserved.
 
 ## HOLD / mutation semaphore
 - META may not execute another lane's LIVE.
+- R4 may not continue from its stale drift ACK until a new reconcile is produced against newest main/GLOBAL_REVISION.
 - Do not combine aim/alignment mutation and visibility/PVS mutation in one causal LIVE.
 - Do not execute any LIVE while a relevant formal `PENDING_SYNC` packet is unresolved.
 - Before LIVE, all five lines are mandatory and must be valid:
@@ -156,6 +161,8 @@ No evidence conflict is resolved by silent overwrite. Both old provenance and pr
 
 ## DO_NOT_REPEAT
 - do not continue from `meta/tab5-governance` local state; it is stale provenance only
+- do not treat `R4_MAIN_DRIFT_ACK_20260908.md` as current after RC3/global-state promotion
+- do not infer ALIGNMENT/FAR_WORLD ownership from TAB labels
 - do not reopen M3.2B world/HMD closure without contradictory exact evidence
 - do not call the whole RC3 package PROVEN because native execution passed
 - do not call RC3 native aim inactive; that was the RC2 failure
@@ -169,23 +176,25 @@ No evidence conflict is resolved by silent overwrite. Both old provenance and pr
 
 ## FIRST_MISSING_EDGE — META
 ```text
-RECOVER / VALIDATE CURRENT SIBLING OWNERSHIP FOR THE TWO ACTIVE CLAIMS
+CREATE / VALIDATE CLAIM-SCOPED PENDING SYNC PACKETS FOR THE TWO UNBOUND ACTIVE CLAIMS
 ```
-Reason: both canonical claims are ACTIVE but the canonical registry intentionally does not invent dedicated technical branches. META must read the newest formal sibling RESULT / STATE / HANDOFF, bind only evidence-backed ownership, preserve collisions, and STOP any duplicate branch-local work. If no formal sibling packet exists, keep ownership UNBOUND rather than guessing.
+Reason: ownership recovery found no current formal sibling RESULT / STATE / HANDOFF for `CSGO-RC3-AIM-ALIGNMENT` or `CSGO-PACING-PVS`. Existing library/chat analyses contain candidate evidence but cannot become canonical or establish ownership by implication. The repository already has a compatible pending-evidence mechanism (`PENDING` claim status + registered evidence + `pending_evidence_refs`) that can be adapted to PROJECT_SYNC_CONTRACT v1.1 rather than inventing a parallel format.
 
-Priority after ownership recovery:
+Priority:
 ```text
-1 read formal sibling packets/results for ALIGNMENT and FAR_WORLD
-2 adjudicate against GLOBAL_REVISION 2 + CLAIM_GRAPH
-3 add only true unpromoted HANDOFF/SYNC_PACKET to PENDING_SYNC
-4 assign validation/dependency or STOP duplicate work
-5 promote only through RESULT -> HANDOFF -> VALIDATE -> GLOBAL_STATE
+1 keep ALIGNMENT and FAR_WORLD owners UNBOUND
+2 package only claim-scoped, provenance-preserving candidate conclusions
+3 register each packet as unpromoted pending evidence
+4 validate against exact current RESULT / COLD / sibling provenance
+5 promote, falsify, or discard each packet independently
+6 only then bind ownership if the packet itself proves a current owner
 ```
 
 ## Current governance verdict
 ```text
 GLOBAL_STATE_BOOTSTRAP = CANONICAL
-GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 2
-RESEARCH_CONTINUATION  = COLD_ALLOWED_SUBJECT_TO_GLOBAL_SYNC
-LIVE_FROM_META         = FORBIDDEN
+GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 3
+R4_SIDECAR            = HOLD / DRIFT_RECONCILE_REQUIRED
+RESEARCH_CONTINUATION = COLD_ALLOWED_SUBJECT_TO_GLOBAL_SYNC
+LIVE_FROM_META        = FORBIDDEN
 ```
