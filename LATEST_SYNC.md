@@ -14,6 +14,9 @@ LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 5. `docs/ACTIVE_CLAIMS.md`
 6. `docs/SYNC.md`
 
+## Generic continuation gate
+On `думайте дальше` / generic continuation, first resolve the current claim status and owner from canonical state. `ACTIVE` -> continue only this lane's FIRST_MISSING_EDGE; `PENDING` -> ingest/validate first; `HOLD/BLOCKED` -> work only the named blocker; `CLOSED/PROVEN/FALSIFIED/SUPERSEDED/DO_NOT_REPEAT` -> STOP that PRIMARY_FACT; `UNBOUND` -> COLD only; contradiction/owner collision -> adjudicate before mutation. A continuation prompt never authorizes reopening a closed fact, taking a sibling lane, or starting LIVE/build by itself.
+
 ## Current promoted truth
 - M3.2B world/HMD 6DoF remains protected rollback authority.
 - RC3 native CUserCmd execution is PROVEN only for the observed runtime corridor.
