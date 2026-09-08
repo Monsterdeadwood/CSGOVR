@@ -2,20 +2,14 @@
 
 PROJECT_SYNC_CONTRACT = v1.1
 SOURCE_OF_TRUTH = GLOBAL_STATE.md
-GLOBAL_REVISION = 1
-GLOBAL_TIMESTAMP = 2026-09-08T14:32:27Z
-SOURCE_MAIN_SHA = ecf9fdda4ffd8679eb3bcab36f80df6fff943dc1
+GLOBAL_REVISION = 2
+GLOBAL_TIMESTAMP = 2026-09-08T14:47:31Z
+PREVIOUS_GLOBAL_REVISION = 1
+GLOBAL_REVISION_BASE_MAIN_SHA = 9612dcfac111e9a687f30488bac399b218a2ccc2
 LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 
-## Migration boundary
-This is the initial GLOBAL_STATE bootstrap. It is derived only from the already-promoted current `main` state at `SOURCE_MAIN_SHA`, using:
-- `docs/SYNC.md`
-- `CLAIM_GRAPH.json`
-- `RESEARCH_CONTRACT.yaml`
-- `LATEST_SYNC.md`
-- `research/RC3_RUNTIME_RECONCILE_20260907.md`
-
-No branch-local COLD conclusion is silently promoted by this migration.
+## Revision 2 reason
+Revision 1 bootstrapped `GLOBAL_STATE.md` and was validated/promoted by PR #21. Revision 2 removes the bootstrap self-HOLD, records the promoted control plane as canonical, and reconciles the stale pre-promotion META branch reference without changing research claim semantics.
 
 ## PENDING_SYNC
 Ordered set of formal unpromoted HANDOFF / SYNC_PACKET entries:
@@ -24,7 +18,7 @@ Ordered set of formal unpromoted HANDOFF / SYNC_PACKET entries:
 []
 ```
 
-At migration time no formal unpromoted packet is registered in canonical `main`. Library/chat-only analyses remain `BRANCH_LOCAL` or `CANDIDATE` until packetized, validated, and promoted.
+No formal unpromoted packet is registered in canonical state at this revision. Library/chat-only analyses remain `BRANCH_LOCAL` or `CANDIDATE` until packetized, validated, and promoted.
 
 ## ACTIVE_CLAIMS
 ```text
@@ -42,7 +36,7 @@ CSGO-PACING-PVS        = ACTIVE
 
 Control lanes are not canonical claim owners:
 ```text
-META CSGO-TAB5-GOVERNANCE = COLD_CONTROL
+META CSGO-TAB5-GOVERNANCE = COLD_CONTROL / GLOBAL_STATE_AUTHORITY
 R4   CSGO-R4-SIDECAR-OWNERSHIP = UNBOUND_COLD_LANE
 ```
 
@@ -99,12 +93,13 @@ Protected semantics:
 ## ACTIVE_OWNERSHIP / OWNER_MAP
 ```text
 META:
-  lane   = CSGO-TAB5-GOVERNANCE
-  branch = meta/tab5-governance
-  old BASE_MAIN_SHA = 943fb84be55e56871769e71505e7b2f1440e11e9
-  current main      = ecf9fdda4ffd8679eb3bcab36f80df6fff943dc1
-  drift             = RELEVANT / DRIFT_RECONCILE_REQUIRED
-  scope             = CONTROL_ONLY
+  lane               = CSGO-TAB5-GOVERNANCE
+  canonical authority = GLOBAL_STATE.md
+  legacy branch       = meta/tab5-governance
+  legacy BASE_MAIN_SHA = 943fb84be55e56871769e71505e7b2f1440e11e9
+  legacy branch state = STALE_READ_ONLY / DO_NOT_CONTINUE
+  drift resolution    = RECONCILED_BY_GLOBAL_STATE_V1_1
+  scope               = CONTROL_ONLY
 
 R4:
   lane   = CSGO-R4-SIDECAR-OWNERSHIP
@@ -139,11 +134,11 @@ Do not infer technical ROLE IDs from TAB numbers.
 - META depends on newest GLOBAL_STATE, then PENDING_SYNC / ACTIVE_CLAIMS / CLAIM_GRAPH before any local conclusion.
 
 ## CONFLICTS
-### META branch vs current main
-`meta/tab5-governance` was written against pre-promotion main `943fb84...` and stated PR #20 was unmerged. Current `main` is `ecf9fdda...`; PR #20 is merged. The local META branch is therefore stale on that point and must reconcile before further governance work.
+### Legacy META branch
+The pre-contract `meta/tab5-governance` branch was based on `943fb84...` and contained a now-false statement that PR #20 was unmerged. That branch is preserved as provenance but is `STALE_READ_ONLY`; it must not be used as a continuation base.
 
-### Legacy state pointers
-Before this migration, `RESEARCH_CONTRACT.yaml` and `docs/STATE.md` still named `docs/SYNC.md` as canonical state. Under PROJECT_SYNC_CONTRACT v1.1 those pointers must be migrated to `GLOBAL_STATE.md`; `docs/SYNC.md` remains evidence/state snapshot material subordinate to the global revision.
+### Resolved state-pointer migration
+`RESEARCH_CONTRACT.yaml`, `LATEST_SYNC.md`, legacy `docs/STATE.md`, CURRENT issue #4 and the COLD/LIVE canonical-file protection gate now route through `GLOBAL_STATE.md` under PROJECT_SYNC_CONTRACT v1.1.
 
 No evidence conflict is resolved by silent overwrite. Both old provenance and promoted current facts remain preserved.
 
@@ -160,6 +155,7 @@ No evidence conflict is resolved by silent overwrite. Both old provenance and pr
 - If the fact is obtainable from existing RESULT / COLD / sibling evidence, `NO_LIVE`.
 
 ## DO_NOT_REPEAT
+- do not continue from `meta/tab5-governance` local state; it is stale provenance only
 - do not reopen M3.2B world/HMD closure without contradictory exact evidence
 - do not call the whole RC3 package PROVEN because native execution passed
 - do not call RC3 native aim inactive; that was the RC2 failure
@@ -173,23 +169,23 @@ No evidence conflict is resolved by silent overwrite. Both old provenance and pr
 
 ## FIRST_MISSING_EDGE — META
 ```text
-BOOTSTRAP / VALIDATE / PROMOTE PROJECT_SYNC_CONTRACT v1.1 GLOBAL_STATE
+RECOVER / VALIDATE CURRENT SIBLING OWNERSHIP FOR THE TWO ACTIVE CLAIMS
 ```
-Reason: the new contract names `GLOBAL_STATE.md` as source of truth, but current `main` had no such file. Until this migration is validated/promoted, a strict cycle cannot honestly record `GLOBAL_REVISION_AT_START` and therefore must not continue branch research from stale local state.
+Reason: both canonical claims are ACTIVE but the canonical registry intentionally does not invent dedicated technical branches. META must read the newest formal sibling RESULT / STATE / HANDOFF, bind only evidence-backed ownership, preserve collisions, and STOP any duplicate branch-local work. If no formal sibling packet exists, keep ownership UNBOUND rather than guessing.
 
-After promotion, META's recurring task is:
+Priority after ownership recovery:
 ```text
-READ newest GLOBAL_STATE
--> record GLOBAL_REVISION_AT_START
--> read PENDING_SYNC / ACTIVE_CLAIMS / CLAIM_GRAPH
--> reconcile sibling RESULT / STATE / HANDOFF
--> resolve drift / conflicts
--> select highest-value uncovered FIRST_MISSING_EDGE
+1 read formal sibling packets/results for ALIGNMENT and FAR_WORLD
+2 adjudicate against GLOBAL_REVISION 2 + CLAIM_GRAPH
+3 add only true unpromoted HANDOFF/SYNC_PACKET to PENDING_SYNC
+4 assign validation/dependency or STOP duplicate work
+5 promote only through RESULT -> HANDOFF -> VALIDATE -> GLOBAL_STATE
 ```
 
 ## Current governance verdict
 ```text
-GLOBAL_STATE_BOOTSTRAP = PROPOSED
-RESEARCH_CONTINUATION  = HOLD UNTIL GLOBAL_STATE PROMOTION
-LIVE                   = FORBIDDEN FROM META
+GLOBAL_STATE_BOOTSTRAP = CANONICAL
+GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 2
+RESEARCH_CONTINUATION  = COLD_ALLOWED_SUBJECT_TO_GLOBAL_SYNC
+LIVE_FROM_META         = FORBIDDEN
 ```
