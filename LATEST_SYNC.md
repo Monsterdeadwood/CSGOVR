@@ -1,17 +1,25 @@
 # CSGOVR — LATEST SYNC
 
-Mandatory read order for any new or resumed chat/role:
-1. `docs/EVIDENCE_BOUNDARY.md` — evidence class, promotion scope and locked-vs-COLD boundary.
-2. `docs/BRANCH_PROMOTION_POLICY.md` — choose `main`, `cold/*`, `live/*` or `promote/*` before writing.
-3. `docs/ACTIVE_CLAIMS.md` — reuse the existing role/claim branch and inspect its pinned `BASE_MAIN_SHA`; do not duplicate research.
-4. `docs/PORTFOLIO_SYNC_20260831.md` — cross-chat convergence view.
-5. The assigned role's exact `STATE/NEXT/EVIDENCE/RESULT` lineage.
-6. The exact source/RESULT corpus for the active CLAIM_ID.
+SYNC_EPOCH = 2026-09-08
+BRANCH = `meta/tab5-governance`
+ROLE = META / TAB5 MASTER MERGER + REDTEAM + MUTATION SEMAPHORE
+STATE = COLD / CONTROL-PLANE
 
-COLD material may narrow UNKNOWN/NEXT but may not silently rewrite M3.2B/SAFE161 or another protected runtime baseline, executed PASS/FAIL, FALSIFIED closure or another role's proven claim.
+Mandatory read order:
+1. `docs/META/TAB5_GOVERNANCE_SYNC_20260907.md`
+2. `state/rc3-safe161-runtime-gate` result/reconcile state where branch-cross-reference is needed
+3. `promote/rc3-runtime-reconcile-20260908` / draft PR #20 for the unmerged canonical RC3 delta
+4. `CLAIM_GRAPH.json` on current canonical main
+5. `docs/ACTIVE_CLAIMS.md`
+6. role/tab-specific STATE/EVIDENCE/RESULT for the fact being arbitrated
 
-COLD and LIVE branches are never wholesale-merged into `main`; accepted facts return only through a fresh claim-scoped `promote/*` branch.
+Operational tab map:
+- TAB1 AIM
+- TAB2 FAR WORLD / VISIBILITY
+- TAB3 ALIGNMENT / BALLISTICS
+- TAB4 PACING / XR TRANSPORT
+- TAB5 META governance / merger / STOP
 
-Before LIVE/promotion, compare the COLD branch's pinned `BASE_MAIN_SHA` to current `main`; relevant drift requires reconciliation, not blind rebasing.
+Do not infer R-role IDs from TAB numbers. The current RC3 RESULT must remain split into native execution PROVEN, all-up integration FALSIFIED, alignment OPEN and far-world causality OPEN.
 
-Do not collapse R2 native-aim/replay acceptance and R4 sidecar renderer research into one state.
+META does not execute another lane's LIVE and does not wholesale-merge COLD/state branches into main.
