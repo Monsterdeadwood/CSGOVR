@@ -31,7 +31,7 @@ CSGO-RC3-AIM-ALIGNMENT = ACTIVE
 CSGO-PACING-PVS        = PENDING
 ```
 
-## CURRENT GATES
+## CURRENT GATES - RC3 AIM ALIGNMENT + FAR-WORLD VISIBILITY
 ### AIM ALIGNMENT
 Identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, preserving stock fire origin, recoil, spread/inaccuracy and FX.
 
