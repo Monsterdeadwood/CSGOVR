@@ -32,6 +32,10 @@ CSGO-RC3-AIM-ALIGNMENT = ACTIVE
 CSGO-PACING-PVS        = ACTIVE
 ```
 
+## CURRENT GATES - RC3 AIM ALIGNMENT + FAR-WORLD VISIBILITY
+- `CSGO-RC3-AIM-ALIGNMENT`: identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, while preserving stock fire semantics.
+- `CSGO-PACING-PVS`: isolate the exact far-world/distant-texture causality independently of weapon/aim mutation; PVS is not assumed to be the root cause without causal isolation.
+
 Control lanes are not canonical claim owners:
 ```text
 META CSGO-TAB5-GOVERNANCE = COLD_CONTROL
@@ -72,7 +76,7 @@ legacy CS:GO x86
 AppID 4465480
 BuildID 22100934
 client.dll SHA256 183D42FAC8A4ECC24DC02EDF5F09122F37FE9E7533CA093A867718B25CFDEB03
-server.dll SHA256 699757BB5C8DDB71193F68DABA22F59F697491DDBD768BC8656AC2CE435C4DB8
+server.dll SHA256 699757BB5C8DDB71193F68DABA22F59F697491DDB768BC8656AC2CE435C4DB8
 HLAE 2.191.1
 local/offline -insecure only
 ```
