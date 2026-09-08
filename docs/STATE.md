@@ -2,38 +2,26 @@
 
 ## Compatibility entrypoint
 
-**Canonical current state is `docs/SYNC.md`.**
+**Canonical current state is `GLOBAL_STATE.md`.**
 
-This file exists only for old links/TAB instructions that expect `docs/STATE.md`. Do not maintain an independent full state narrative here.
+This file exists only for old links/TAB instructions that expect `docs/STATE.md`. Do not maintain an independent full state narrative here and do not let this file override a newer `GLOBAL_REVISION`.
 
 Machine control plane:
+- `GLOBAL_STATE.md`
 - `RESEARCH_CONTRACT.yaml`
 - `CLAIM_GRAPH.json`
 
-## Current machine lanes
+## Current promoted gates
 
-Primary COLD gate:
-`CLAIM_ID = CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
+Active canonical claims are read from `GLOBAL_STATE.md` and `CLAIM_GRAPH.json`.
 
-Separate quality:
-`CLAIM_ID = CSGO-PACING-PVS`
+At the PROJECT_SYNC_CONTRACT v1.1 migration boundary they are:
+```text
+CSGO-RC3-AIM-ALIGNMENT = ACTIVE
+CSGO-PACING-PVS        = ACTIVE
+```
 
-Queued runtime candidate:
-`CSGO-RC3-SAFE161-3HOOK-RUNTIME`.
-
-## Current gate
-
-Before RC3 LIVE, prove the exact RC3 package/source implements the required fail-closed provenance/session/install contract. The ownership/dataflow architecture itself remains COLD-proven; this gate is only exact implementation closure.
-
-See `docs/SYNC.md` for the ten exact PASS items and STOP rule.
-
-RC3 package remains prepared:
-`CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip`
-
-SHA256:
-`B988DEB8DEE490CFB6964ADA004DF69F454AF48A689BDD60E2A67CCE5B72C2FB`
-
-It is **not LIVE-authorized from this state until the COLD gate passes**.
+The old pre-LIVE RC3 implementation gate is superseded by the executed 2026-09-07 RESULT. The all-up RC3 SAFE161 integration baseline is falsified, while native CUserCmd execution is proven only at the actually observed runtime scope.
 
 ## Baseline hierarchy
 
@@ -46,9 +34,12 @@ Weapon/aim visual ancestor:
 ## Hard routing rule
 
 On resume:
-1. read `docs/SYNC.md`;
-2. read `RESEARCH_CONTRACT.yaml` and `CLAIM_GRAPH.json`;
-3. follow only their active claim IDs;
-4. treat this file as a compatibility pointer.
+1. read newest `GLOBAL_STATE.md`;
+2. record `GLOBAL_REVISION_AT_START`;
+3. read `PENDING_SYNC`, active ownership and `CLAIM_GRAPH.json`;
+4. reconcile relevant sibling RESULT / STATE / HANDOFF;
+5. only then follow the current FIRST_MISSING_EDGE.
 
-Prepared package != RESULT. Architecture proof != exact implementation proof.
+`docs/SYNC.md` remains a compatibility/evidence snapshot subordinate to `GLOBAL_STATE.md`.
+
+Prepared package != RESULT. Architecture proof != exact implementation proof. LOCAL_STATE is always lower priority than GLOBAL_STATE.

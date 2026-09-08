@@ -72,7 +72,7 @@ jobs:
           fi
           files="$(git diff --name-only "$range")"
           printf '%s\n' "$files"
-          forbidden='^(LATEST_SYNC\.md|CLAIM_GRAPH\.json|RESEARCH_CONTRACT\.yaml|docs/(PROVEN|FALSIFIED|STATE|SYNC|NEXT|ACTIVE_CLAIMS|EVIDENCE_BOUNDARY|BRANCH_PROMOTION_POLICY)\.md|docs/PORTFOLIO_SYNC_[^/]+\.md)$'
+          forbidden='^(GLOBAL_STATE\.md|LATEST_SYNC\.md|CLAIM_GRAPH\.json|RESEARCH_CONTRACT\.yaml|docs/(PROVEN|FALSIFIED|STATE|SYNC|NEXT|ACTIVE_CLAIMS|EVIDENCE_BOUNDARY|BRANCH_PROMOTION_POLICY)\.md|docs/PORTFOLIO_SYNC_[^/]+\.md)$'
           if grep -Eq "$forbidden" <<<"$files"; then
             echo '::error::COLD/LIVE branch attempted to modify canonical truth/control files. Use docs/COLD shadow notes or a fresh promote/* branch.'
             exit 1
