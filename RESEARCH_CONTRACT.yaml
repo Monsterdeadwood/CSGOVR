@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 2,
   "project": "CSGOVR",
   "project_sync_contract": "v1.1",
   "canonical_state": "GLOBAL_STATE.md",
