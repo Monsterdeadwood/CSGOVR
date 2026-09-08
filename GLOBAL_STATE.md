@@ -2,30 +2,35 @@
 
 PROJECT_SYNC_CONTRACT = v1.1
 SOURCE_OF_TRUTH = GLOBAL_STATE.md
-GLOBAL_REVISION = 3
-GLOBAL_TIMESTAMP = 2026-09-08T15:07:55Z
-PREVIOUS_GLOBAL_REVISION = 2
-GLOBAL_REVISION_BASE_MAIN_SHA = 782577ac5b0edf90b2ae9f60c2b2a24b01b1c2a7
+GLOBAL_REVISION = 4
+GLOBAL_TIMESTAMP = 2026-09-08T15:13:58Z
+PREVIOUS_GLOBAL_REVISION = 3
+GLOBAL_REVISION_BASE_MAIN_SHA = 27ec4162bee5d04d6d77768f51fa1bea680e56d5
 LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 
-## Revision 3 reason
-Revision 2 completed the GLOBAL_STATE bootstrap and ownership-recovery pass. Revision 3 adjudicates a newly discovered MAIN_DRIFT conflict: the only registered sibling COLD branch, `cold/r4/sidecar-ownership`, still relied on `R4_MAIN_DRIFT_ACK_20260908.md`, but that ACK compared only through `main=943fb84...` and explicitly predated the accepted RC3 runtime reconciliation. Current main is seventeen commits ahead of that ACK boundary and now contains the RC3 runtime reconciliation, updated claim graph, GLOBAL_STATE control plane, active far-world/visibility gate, plus a non-semantic add/remove `NOOP` pair that twice triggered required promotion resync.
+## Revision 4 reason
+Revision 3 quarantined stale R4 branch state. Revision 4 creates the first formal PROJECT_SYNC_CONTRACT v1.1 claim-scoped `PENDING_SYNC` packet for the unresolved FAR_WORLD lane without silently promoting Library/chat COLD conclusions.
 
-No R4 technical finding is falsified or promoted by this revision.
+The packet preserves candidate evidence, requests COLD validation, keeps technical ownership UNBOUND, and blocks LIVE while pending. AIM alignment remains causally separate and ACTIVE.
 
 ## PENDING_SYNC
 Ordered set of formal unpromoted HANDOFF / SYNC_PACKET entries:
 
 ```text
-[]
+1. research/FARWORLD_PENDING_SYNC_20260908.md
+   EVIDENCE_ID = CSGO-EV-FARWORLD-PENDING-20260908
+   CLAIM_ID = CSGO-PACING-PVS
+   FACT_STATUS = CANDIDATE / PENDING_VALIDATION
+   OWNER = UNBOUND
+   SOURCE_GLOBAL_REVISION = 3
 ```
 
-No formal unpromoted packet is registered in canonical state at this revision. Library/chat-only analyses remain `BRANCH_LOCAL` or `CANDIDATE` until packetized, validated, and promoted.
+This packet is unpromoted evidence. It must be validated, falsified/rejected, or converged before removal from `PENDING_SYNC`. Its presence blocks LIVE under `RESEARCH_CONTRACT.block_live_when_pending=true`.
 
 ## ACTIVE_CLAIMS
 ```text
 CSGO-RC3-AIM-ALIGNMENT = ACTIVE
-CSGO-PACING-PVS        = ACTIVE
+CSGO-PACING-PVS        = PENDING
 ```
 
 ## CURRENT GATES - RC3 AIM ALIGNMENT + FAR-WORLD VISIBILITY
@@ -34,7 +39,7 @@ CSGO-PACING-PVS        = ACTIVE
 `CSGO-RC3-AIM-ALIGNMENT`: identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, while preserving stock fire semantics.
 
 ### QUALITY / VISIBILITY LANE - SEPARATE FROM AIM
-`CSGO-PACING-PVS`: isolate the exact far-world/distant-texture causality independently of weapon/aim mutation; PVS is not assumed to be the root cause without causal isolation.
+`CSGO-PACING-PVS`: validate the claim-scoped FAR_WORLD packet and isolate the exact far-world/distant-texture causality independently of weapon/aim mutation. PVS, pixel visibility, portal behavior, asymmetric raster, and the proposed visibility envelope remain non-canonical causal candidates until validation.
 
 Control lanes are not canonical claim owners:
 ```text
@@ -64,10 +69,23 @@ R4   CSGO-R4-SIDECAR-OWNERSHIP = HOLD / DRIFT_RECONCILE_REQUIRED
 - `CSGO-WEAPON-BARREL-AXIS` as the old mainline
 - `CSGO-T0-GPU-TRANSPORT-WORKSTREAM` as the current project gate
 
-### UNKNOWN / ACTIVE
+### ACTIVE
 - exact controller -> authoritative-shot angular misalignment owner after proven native execution
-- exact cause of far-world / distant-texture disappearance
+
+### PENDING_VALIDATION
+- exact cause of far-world / distant-texture disappearance through `CSGO-EV-FARWORLD-PENDING-20260908`
+
+### UNKNOWN
 - runtime proof for structurally mapped firearm corridors other than the observed `BULLET_B_EDI` path
+
+## FAR_WORLD packet boundaries
+The pending packet preserves, but does not yet canonize as causal proof:
+- T14 did not meet its own active-duration scientific gate and does not prove PVS causality;
+- simple shared center-PVS / LEFT-world-list / one-global-occlusion models are reported as strongly weakened by COLD evidence and require provenance validation;
+- pixel-visibility identity collision is a plausible effects/history defect but is not ordinary-world geometry proof;
+- portal-open behavior has a competing camera-frustum / area-frustum `CullBox` explanation and is not unique PVS evidence;
+- a conservative CPU visibility envelope (`world FOV 108 deg`, aspect approximately `0.963752996`) is a candidate intervention only, not a proven fix;
+- validation must reconcile exact SAFE161 vs executed RC3 lineage before any LIVE.
 
 ## Protected baseline / invariants
 Frozen target:
@@ -98,7 +116,6 @@ META:
   lane                 = CSGO-TAB5-GOVERNANCE
   canonical authority  = GLOBAL_STATE.md
   legacy branch        = meta/tab5-governance
-  legacy BASE_MAIN_SHA = 943fb84be55e56871769e71505e7b2f1440e11e9
   legacy branch state  = STALE_READ_ONLY / DO_NOT_CONTINUE
   scope                = CONTROL_ONLY
 
@@ -107,18 +124,18 @@ R4:
   branch               = cold/r4/sidecar-ownership
   PINNED_BASE           = 9cb401e5e8f1ee78cbc4484eb20d244705bd5dad
   LAST_ACK_MAIN         = 943fb84be55e56871769e71505e7b2f1440e11e9
-  CURRENT_MAIN_AT_REV3  = 782577ac5b0edf90b2ae9f60c2b2a24b01b1c2a7
   status               = HOLD / DRIFT_RECONCILE_REQUIRED
-  reason               = accepted RC3 runtime + visibility gate + GLOBAL_STATE changes postdate the branch ACK
   scope                = COLD_ONLY
 
 ALIGNMENT:
   canonical claim = CSGO-RC3-AIM-ALIGNMENT
-  dedicated technical owner = UNBOUND in canonical registry
+  dedicated technical owner = UNBOUND
 
 FAR_WORLD:
   canonical claim = CSGO-PACING-PVS
-  dedicated technical owner = UNBOUND in canonical registry
+  status = PENDING_VALIDATION
+  packet = research/FARWORLD_PENDING_SYNC_20260908.md
+  dedicated technical owner = UNBOUND
 ```
 
 Operational TAB labels remain coordination labels only:
@@ -133,28 +150,29 @@ Do not infer technical ROLE IDs from TAB numbers.
 
 ## DEPENDENCIES
 - AIM alignment work depends on preserving the proven RC3 native CUserCmd execution substrate and stock fire semantics.
-- FAR WORLD work depends on preserving M3.2B rollback authority and keeping visibility mutation independent from aim mutation.
-- R4 sidecar ownership must reconcile accepted RC3 runtime/visibility state before any R4 conclusion can feed LIVE, integration, or promotion.
-- META depends on newest GLOBAL_STATE, then PENDING_SYNC / ACTIVE_CLAIMS / CLAIM_GRAPH before any local conclusion.
+- FAR_WORLD validation depends on M3.2B rollback authority, executed RC3 symptom evidence, T14 as an incomplete control, and exact current-lineage SAFE161/RC3 COLD reconciliation.
+- FAR_WORLD validation must not mutate AIM/weapon state.
+- R4 sidecar ownership must reconcile current main before its conclusions can feed integration or promotion.
+- META depends on newest GLOBAL_STATE, PENDING_SYNC, ACTIVE/PENDING claims and CLAIM_GRAPH before any local conclusion.
 
 ## CONFLICTS
-### R4 stale MAIN_DRIFT ACK
-`docs/COLD/R4_MAIN_DRIFT_ACK_20260908.md` on `cold/r4/sidecar-ownership` compared the branch only through `main=943fb84...` and stated that the 2026-09-07 RC3 runtime reconciliation had not yet been promoted. Current `main` is `782577ac...`, seventeen commits ahead of that boundary. The intervening semantic delta includes accepted RC3 runtime reconciliation, current AIM/FAR_WORLD claim changes, `GLOBAL_STATE.md`, `CLAIM_GRAPH.json`, and synchronized control files. The old `NON_OVERLAPPING` verdict is therefore stale and cannot authorize continued R4 work.
+### FAR_WORLD causal ambiguity preserved
+The executed RC3 result proves the symptom, not its owner. Existing COLD material contains competing scopes: ordinary geometry visibility-envelope/portal-frustum candidates and pixel-visibility/effects-history defects. Neither may silently overwrite the other. The pending packet exists specifically to adjudicate provenance and scope.
 
-### Promotion resync events
-Two rev3 promotion attempts were intentionally closed without merge because main advanced during validation/submission. The first drift added an empty `NOOP` file; the second removed that same accidental file. Neither changed research semantics, but both invalidated promotion ancestry under `GLOBAL_WRITE_RULE`. This revision is reconstructed from exact current main.
+### R4 stale MAIN_DRIFT ACK
+R4 remains HOLD until its branch is reconciled against current canonical state.
 
 ### Legacy META branch
-The pre-contract `meta/tab5-governance` branch remains preserved as provenance only and is `STALE_READ_ONLY`.
+The pre-contract `meta/tab5-governance` branch remains `STALE_READ_ONLY` provenance.
 
-No evidence conflict is resolved by silent overwrite. Both old provenance and promoted current facts remain preserved.
+No evidence conflict is resolved by silent overwrite.
 
 ## HOLD / mutation semaphore
 - META may not execute another lane's LIVE.
-- R4 may not continue from its stale drift ACK until a new reconcile is produced against newest main/GLOBAL_REVISION.
+- ALL LIVE is blocked while `PENDING_SYNC` is non-empty under current research contract.
+- R4 may not continue from its stale drift ACK until a new reconcile is produced.
 - Do not combine aim/alignment mutation and visibility/PVS mutation in one causal LIVE.
-- Do not execute any LIVE while a relevant formal `PENDING_SYNC` packet is unresolved.
-- Before LIVE, all five lines are mandatory and must be valid:
+- Before any future LIVE, all five lines remain mandatory:
   - `MISSING FACT =`
   - `WHY NOT COLD =`
   - `PASS =`
@@ -163,41 +181,41 @@ No evidence conflict is resolved by silent overwrite. Both old provenance and pr
 - If the fact is obtainable from existing RESULT / COLD / sibling evidence, `NO_LIVE`.
 
 ## DO_NOT_REPEAT
-- do not continue from `meta/tab5-governance` local state; it is stale provenance only
-- do not treat `R4_MAIN_DRIFT_ACK_20260908.md` as current after RC3/global-state promotion
+- do not treat pending FAR_WORLD candidates as PROVEN
+- do not use `r_portalsopenall` recovery as standalone PVS proof
+- do not use pixel-visibility scope evidence as ordinary-world root proof
+- do not run PVS/occlusion disable experiments before exact current-lineage COLD validation
+- do not mix AIM or weapon mutation into FAR_WORLD validation
 - do not infer ALIGNMENT/FAR_WORLD ownership from TAB labels
+- do not treat stale R4 drift ACK as current
 - do not reopen M3.2B world/HMD closure without contradictory exact evidence
 - do not call the whole RC3 package PROVEN because native execution passed
 - do not call RC3 native aim inactive; that was the RC2 failure
 - do not generalize `BULLET_B_EDI` runtime proof to all firearm corridors
-- do not reintroduce `g_weaponGrabRotOffset` as ballistic correction
-- do not use attachment matrices, DrawModel or render-space muzzle ownership as gameplay-fire provenance
-- do not reintroduce global FX mutation or global pointer-device mutation
-- do not reintroduce RunCommand/TLS without a specifically falsified current invariant
-- do not combine AIM and FAR_WORLD intrusive mutations
-- do not continue superseded pre-LIVE implementation-closure work as if RC3 had never executed
+- do not reintroduce render-space muzzle ownership, global FX/pointer mutation, RunCommand/TLS, or `g_weaponGrabRotOffset` ballistic correction
 
 ## FIRST_MISSING_EDGE — META
 ```text
-CREATE / VALIDATE CLAIM-SCOPED PENDING SYNC PACKETS FOR THE TWO UNBOUND ACTIVE CLAIMS
+VALIDATE CSGO-EV-FARWORLD-PENDING-20260908 BY EXACT CURRENT-LINEAGE COLD RECONCILIATION
 ```
-Reason: ownership recovery found no current formal sibling RESULT / STATE / HANDOFF for `CSGO-RC3-AIM-ALIGNMENT` or `CSGO-PACING-PVS`. Existing library/chat analyses contain candidate evidence but cannot become canonical or establish ownership by implication. The repository already has a compatible pending-evidence mechanism (`PENDING` claim status + registered evidence + `pending_evidence_refs`) that can be adapted to PROJECT_SYNC_CONTRACT v1.1 rather than inventing a parallel format.
 
-Priority:
+Validation order:
 ```text
-1 keep ALIGNMENT and FAR_WORLD owners UNBOUND
-2 package only claim-scoped, provenance-preserving candidate conclusions
-3 register each packet as unpromoted pending evidence
-4 validate against exact current RESULT / COLD / sibling provenance
-5 promote, falsify, or discard each packet independently
-6 only then bind ownership if the packet itself proves a current owner
+1 recover exact SAFE161 vs executed RC3 files/hook changes relevant to CViewSetup, FOV/aspect, frustum, view/split identity, portals, occlusion and ordinary draw membership
+2 validate or reject the claimed COLD provenance for eye-local PVS/world-list/renderables/occlusion identity
+3 separate pixel-visibility/effects history from ordinary-world membership
+4 determine whether late CPU visibility envelope remains a viable exact-current candidate
+5 identify exactly one fact that remains runtime-only, if any
+6 RESULT -> HANDOFF -> VALIDATE -> remove/replace PENDING_SYNC -> GLOBAL_STATE
 ```
 
 ## Current governance verdict
 ```text
 GLOBAL_STATE_BOOTSTRAP = CANONICAL
-GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 3
+GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 4
+FAR_WORLD              = PENDING_VALIDATION / OWNER_UNBOUND
+ALIGNMENT              = ACTIVE / OWNER_UNBOUND
 R4_SIDECAR             = HOLD / DRIFT_RECONCILE_REQUIRED
-RESEARCH_CONTINUATION  = COLD_ALLOWED_SUBJECT_TO_GLOBAL_SYNC
-LIVE_FROM_META         = FORBIDDEN
+LIVE                    = BLOCKED_BY_PENDING_SYNC
+RESEARCH_CONTINUATION   = COLD_ONLY_UNTIL_PENDING_RESOLVED
 ```
