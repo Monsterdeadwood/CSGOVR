@@ -19,14 +19,18 @@ LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 - RC3 relocation-aware three-hook native CUserCmd execution is PROVEN for the actually observed runtime corridor.
 - RC3 as an all-up SAFE161 integration baseline is FALSIFIED because the protected visual baseline failed.
 - observed server runtime corridor was `BULLET_B_EDI`; do not promote all firearm corridors from this RESULT.
-- final controller -> authoritative-shot alignment remains ACTIVE / unresolved owner.
-- far-world/distant-texture disappearance remains ACTIVE / unresolved owner in the separate pacing/PVS/visibility lane.
+- final controller -> authoritative-shot alignment remains ACTIVE with dedicated technical owner UNBOUND.
+- far-world/distant-texture disappearance remains ACTIVE with dedicated technical owner UNBOUND in the separate pacing/PVS/visibility lane.
 - stock `Weapon_ShootPosition`, recoil/AimPunch, spread/inaccuracy and FX semantics remain protected.
 
-## Governance migration
-The prior RC3 reconciliation promotion was merged to `main` at `ecf9fdda4ffd8679eb3bcab36f80df6fff943dc1` on 2026-09-08. The old META branch statement that PR #20 was unmerged is stale and requires drift reconciliation.
+## Governance state
+`GLOBAL_STATE.md` is canonical under PROJECT_SYNC_CONTRACT v1.1. The old `meta/tab5-governance` branch is stale read-only provenance.
 
-This branch bootstraps `GLOBAL_STATE.md` under PROJECT_SYNC_CONTRACT v1.1. No branch-local COLD result is silently promoted by that migration.
+The registered R4 sidecar branch is held for MAIN_DRIFT reconciliation: its last ACK stopped at `main=943fb84...` before the RC3 runtime reconciliation and GLOBAL_STATE control-plane promotions now present on current main. Do not continue R4 from that stale ACK.
+
+Two rev3 promotion attempts were closed without merge because main advanced during validation/submission via an accidental empty `NOOP` add and then its removal. Neither changed research semantics, but both required fresh-base reconstruction under GLOBAL_WRITE_RULE.
+
+No formal unpromoted HANDOFF/SYNC_PACKET is currently registered. Existing Library/chat analyses are candidates only until packetized and validated.
 
 ## Stop rule
 Every cycle starts from the newest `GLOBAL_STATE.md`. Do not continue from stale LOCAL_STATE. Do not repair aim alignment and far-world visibility in the same intrusive LIVE. Do not reintroduce `g_weaponGrabRotOffset` ballistic correction, render-space muzzle/attachment ownership, global FX/pointer mutation, or RC2 relocation-sensitive guarding.
