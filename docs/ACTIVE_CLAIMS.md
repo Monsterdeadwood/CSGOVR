@@ -6,8 +6,13 @@ CONTROL_PLANE_ONLY. This file does **not** own canonical claim status. Canonical
 
 | ROLE | LANE | CANONICAL_BINDING | BRANCH | BASE_MAIN_SHA | STATUS | PRIMARY FACT | SCOPE |
 |---|---|---|---|---|---|---|---|
-| R4 | `CSGO-R4-SIDECAR-OWNERSHIP` | `UNBOUND_COLD_LANE` | `cold/r4/sidecar-ownership` | `9cb401e5e8f1ee78cbc4484eb20d244705bd5dad` | `COLD_ACTIVE / MAIN_DRIFT_ACK_20260908` | classify exact semantics/lifetime/view-dependence/mutation and consumers of recovered renderer/cache fields before sidecar/replacement promotion | COLD_ONLY |
+| R4 | `CSGO-R4-SIDECAR-OWNERSHIP` | `UNBOUND_COLD_LANE` | `cold/r4/sidecar-ownership` | `9cb401e5e8f1ee78cbc4484eb20d244705bd5dad` | `HOLD / DRIFT_RECONCILE_REQUIRED` | classify exact semantics/lifetime/view-dependence/mutation and consumers of recovered renderer/cache fields before sidecar/replacement promotion | COLD_ONLY |
 | META | `CSGO-TAB5-GOVERNANCE` | `GLOBAL_STATE_CONTROL` | `GLOBAL_STATE.md` | `GLOBAL_REVISION` | `COLD_CONTROL` | merge sibling state/evidence/results, enforce evidence scope and mutation semaphore, detect contradictions/collisions, compute FIRST_MISSING_EDGE and STOP repeated/falsified work | CONTROL_ONLY |
+
+## R4 drift conflict
+`cold/r4/sidecar-ownership` last recorded `MAIN_DRIFT_ACK / NON_OVERLAPPING` against `main=943fb84be55e56871769e71505e7b2f1440e11e9`. That ACK explicitly predates canonical promotion of the 2026-09-07 RC3 runtime reconciliation. Current main is seventeen commits ahead of that ACK boundary and includes RC3 runtime reconciliation, active AIM/FAR_WORLD claim changes, `GLOBAL_STATE.md`, `CLAIM_GRAPH.json`, synchronized control-plane files, and a non-semantic add/remove `NOOP` pair.
+
+Therefore the old R4 ACK is stale. The branch remains provenance-preserved but may not feed LIVE, integration or promotion until it performs a new drift reconcile against newest `main` / `GLOBAL_REVISION`.
 
 ## Legacy META branch
 `meta/tab5-governance` is retained as provenance only. It was based on `943fb84be55e56871769e71505e7b2f1440e11e9` and contains pre-promotion assumptions that are stale after RC3 reconciliation and GLOBAL_STATE migration. Do not continue research from that local state.
