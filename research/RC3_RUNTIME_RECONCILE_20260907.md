@@ -1,8 +1,11 @@
 # CSGOVR — RC3 runtime reconciliation
 
-DATE = 2026-09-07
-RESULT = `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_RESULT_20260907_050436.zip`
-PROMOTION_SCOPE = accepted runtime facts only; no wholesale merge of experiment/state branch
+RESEARCH_DOC_CLASS: CONVERGENCE
+EVIDENCE_ID: CSGO-EV-RC3-RUNTIME-20260907
+CLAIM_ID: CSGO-RC3-NATIVE-AIM-EXECUTION
+DATE: 2026-09-07
+RESULT: `CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_RESULT_20260907_050436.zip`
+PROMOTION_SCOPE: accepted runtime facts only; no wholesale merge of experiment/state branch
 
 ## PROVEN from executed RESULT
 - relocation-aware exact guard installed successfully;
