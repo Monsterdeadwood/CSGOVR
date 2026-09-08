@@ -32,10 +32,10 @@ CSGO-PACING-PVS        = PENDING
 ```
 
 ## CURRENT GATES - RC3 AIM ALIGNMENT + FAR-WORLD VISIBILITY
-### AIM ALIGNMENT
+### ALIGNMENT OPEN AFTER EXECUTION PROOF
 Identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, preserving stock fire origin, recoil, spread/inaccuracy and FX.
 
-### FAR_WORLD / VISIBILITY
+### QUALITY / VISIBILITY LANE - SEPARATE FROM AIM
 Identify the exact ordinary-world visibility owner that removes distant renderables. Current COLD target is the late visibility chain:
 
 ```text
