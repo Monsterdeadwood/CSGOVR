@@ -33,8 +33,12 @@ CSGO-PACING-PVS        = ACTIVE
 ```
 
 ## CURRENT GATES - RC3 AIM ALIGNMENT + FAR-WORLD VISIBILITY
-- `CSGO-RC3-AIM-ALIGNMENT`: identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, while preserving stock fire semantics.
-- `CSGO-PACING-PVS`: isolate the exact far-world/distant-texture causality independently of weapon/aim mutation; PVS is not assumed to be the root cause without causal isolation.
+
+### ALIGNMENT OPEN AFTER EXECUTION PROOF
+`CSGO-RC3-AIM-ALIGNMENT`: identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, while preserving stock fire semantics.
+
+### QUALITY / VISIBILITY LANE - SEPARATE FROM AIM
+`CSGO-PACING-PVS`: isolate the exact far-world/distant-texture causality independently of weapon/aim mutation; PVS is not assumed to be the root cause without causal isolation.
 
 Control lanes are not canonical claim owners:
 ```text
