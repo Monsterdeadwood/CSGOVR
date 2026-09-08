@@ -2,16 +2,24 @@
 
 PROJECT_SYNC_CONTRACT = v1.1
 SOURCE_OF_TRUTH = GLOBAL_STATE.md
-GLOBAL_REVISION = 5
-GLOBAL_TIMESTAMP = 2026-09-08T16:13:00Z
-PREVIOUS_GLOBAL_REVISION = 4
-GLOBAL_REVISION_BASE_MAIN_SHA = 66f7d26eddd71fc673c949b587486dc815703ef7
+GLOBAL_REVISION = 6
+GLOBAL_TIMESTAMP = 2026-09-08T16:59:51Z
+PREVIOUS_GLOBAL_REVISION = 5
+GLOBAL_REVISION_BASE_MAIN_SHA = 0da43be3c3c35bd37e2347f61ae864dde619ea9b
 LOCAL_STATE_PRIORITY = LOWER_THAN_GLOBAL
 
-## Revision 5 reason
-Revision 5 records a COLD validation pass over the pending FAR_WORLD packet. No FAR_WORLD cause or fix is promoted. The pass narrows the common-cause search by reconciling SAFE161/RC3 renderer lineage, RC3 native-aim semantic writes, the exact pointer-helper caller census, client `m_AimDirection` consumers, and the recovered CheckSplitScreenMimic publish contract.
+## Revision 6 reason
+Revision 6 synchronizes newly recovered exact RC3 package/result evidence, sibling AIM/visibility convergence and the strongest current numeric architecture without promoting an unexecuted fix.
 
-Result: direct semantic coupling from the RC3 AIM layer into ordinary-world visibility was not found. The leading model is now independent AIM misalignment plus a separate FAR_WORLD visibility defect, while exact byte-level ABI verification of the raw executed RC3 detours remains unavailable in current Library access and therefore unclaimed.
+Changes from revision 5:
+- exact RC3 package and executed RESULT are now accessible from Library;
+- the previous access-only statement that raw RC3 detour ABI could not be inspected is superseded;
+- source/compile/runtime evidence strongly weakens a shared AIM-hook infrastructure root for FAR_WORLD;
+- the ordinary-world ownership chain `late CViewSetup -> frustum -> area CullBox -> renderable membership` is no longer the highest-value missing edge;
+- the strongest visibility candidate is now a deterministic late-eye scalar carrier test at `FOV=108.0`, `aspect=0.963752996169473`, while exact Quest custom projection remains raster owner;
+- gameplay AIM remains a separate command-synchronous RIGHT-AIM vector problem and must not inherit visual grab calibration.
+
+No FAR_WORLD root cause or fix is promoted. No LIVE is authorized.
 
 ## PENDING_SYNC
 ```text
@@ -21,7 +29,11 @@ Result: direct semantic coupling from the RC3 AIM layer into ordinary-world visi
    FACT_STATUS = PENDING_VALIDATION / NARROWED
    OWNER = UNBOUND
    LEADING_MODEL = INDEPENDENT AIM + FAR_WORLD DEFECTS
+   NEXT = deterministic same-scene membership discriminator for 108 / 0.963752996
 ```
+
+Supporting convergence:
+`research/META_NUMERIC_CONVERGENCE_20260908.md`
 
 The packet remains unpromoted evidence. LIVE remains blocked while `PENDING_SYNC` is non-empty.
 
@@ -35,17 +47,38 @@ CSGO-PACING-PVS        = PENDING
 ### ALIGNMENT OPEN AFTER EXECUTION PROOF
 Identify the exact controller -> authoritative-shot angular misalignment owner after proven native CUserCmd execution, preserving stock fire origin, recoil, spread/inaccuracy and FX.
 
-### QUALITY / VISIBILITY LANE - SEPARATE FROM AIM
-Identify the exact ordinary-world visibility owner that removes distant renderables. Current COLD target is the late visibility chain:
-
+Current AIM convergence:
 ```text
-late eye-local CViewSetup
-    -> CPU camera frustum
-    -> area-frustum refinement / CullBox
-    -> ordinary renderable membership
+Rb = SourceAngleMatrix(cmdN.viewangles)
+Rr = OpenXRRelativeAimQuatToSourceMatrix(RIGHT_AIM.relativeQuat)
+Rw = Rb * Rr
+cmdN.aimdirection = normalize(Rw.forward)
 ```
 
-This chain is a target for proof, not a promoted causal result.
+Rules:
+- gameplay aim must not use `g_weaponGrabRotOffset`;
+- no Euler round-trip is required;
+- no AimPunch is baked into the producer vector;
+- stock AimPunch/recoil/spread remain later native owners;
+- stock Weapon_ShootPosition remains fire-origin owner;
+- initial firearm scope remains five conventional bullet corridors; grenade stock.
+
+### QUALITY / VISIBILITY LANE - SEPARATE FROM AIM
+The source ownership chain is now COLD-recovered strongly enough that the next useful fact is numerical membership discrimination, not more owner archaeology.
+
+Current candidate:
+```text
+GPU RASTER OWNER
+  exact asymmetric Quest custom matrix
+
+CPU VISIBILITY CANDIDATE
+  late eye-local CViewSetup copy only
+  +B0 world FOV    = 108.0
+  +E0 world aspect = 0.963752996169473
+  vertical visibility FOV = 110.0
+```
+
+This is a candidate intervention, not a promoted causal result.
 
 ## CLAIM_GRAPH — canonical summary
 ### PROVEN_EXACT_TARGET / promoted
@@ -56,93 +89,138 @@ This chain is a target for proof, not a promoted causal result.
 - `CSGO-RC3-NATIVE-AIM-EXECUTION` for observed runtime scope only:
   - server corridor `BULLET_B_EDI`
   - client PASS callsite `0x006AA5C4`
+- exact Quest custom-projection raster ownership / frozen CViewSetup fields previously promoted in project evidence
 
 ### FALSIFIED
 - `CSGO-RC3-SAFE161-3HOOK-RUNTIME` as an all-up integration baseline
 - `CSGO-RC2-3HOOK-RUNTIME`
 - `CSGO-MUZZLE-MATRIX-V16`
+- simple persistent LEFT->RIGHT ordinary world-list reuse as current root direction
+- one immortal global CPU occlusion view as current root direction
 
 ### SUPERSEDED
 - `CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
 - `CSGO-THREE-HOOK-CONTRACT-REDTEAM`
 - `CSGO-WEAPON-BARREL-AXIS` as old mainline
 - `CSGO-T0-GPU-TRANSPORT-WORKSTREAM` as current gate
+- `RAW_EXECUTED_RC3_DETOUR_ABI = UNVERIFIED_IN_CURRENT_ACCESS` as an access limitation
 
 ### ACTIVE / PENDING
 - `CSGO-RC3-AIM-ALIGNMENT` = ACTIVE
 - `CSGO-PACING-PVS` = PENDING_VALIDATION / NARROWED
 
-## FAR_WORLD COLD validation promoted as scope boundaries
-### SAFE161 negative control
-Recovered lineage records state RC3 preserved from SAFE161:
+## RC3 exact package/result recovery
+Recovered Library artifacts:
 ```text
-HMD 6DoF functions = IDENTICAL
-Quest projection   = IDENTICAL
-D3D hooks          = IDENTICAL
-xr_host.cpp         = BYTE IDENTICAL
-slot250 transform   = SAME
-PVS/culling mutation = NONE
+CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_GUARDFIX_ONECLICK.zip
+CSGOVR_ULTIMATE_SAFE161_NATIVE_AIM_RC3_3HOOK_RESULT_20260907_050436.zip
 ```
-SAFE161 was the stable far-world ancestor. Therefore asymmetric Quest projection or the known asymmetric area-frustum correctness issue alone is insufficient to explain the RC3 regression.
 
-### RC3 client player-aim mutation
-RC3 source audit recovered a persistent client write from current command aim into `player+0x382C/+3830/+3834`. That mutation is rejected for AIM architecture. Frozen xref census, however, does not recover a path from this field into CViewSetup/frustum/PVS/ordinary-world membership. Actual reads classify as pointer-gated or stock player->CUserCmd producer behavior.
+Recovered evidence:
+- `xr_host.cpp` byte-identical to SAFE161 protected lineage;
+- protected HMD/Quest/D3D/SHM render subset unchanged;
+- no recovered PVS/culling mutation;
+- `CheckSplitScreenMimic` source uses expected x86 thiscall->fastcall bridge;
+- client pointer helper ABI is consistent with the intended detour;
+- server helper uses a naked wrapper preserving return address plus ESI/EBX/EDI before cdecl helper call;
+- i686 compile/assembly proof agrees with source form;
+- executed result proves hook bundle activation and authoritative firearm corridor execution.
+
+Exact runtime-built target DLL byte identity is not promoted unless separately retained.
 
 Verdict:
 ```text
-BAD AIM-SIDE EFFECT = YES
-FAR_WORLD CAUSAL EDGE = NOT FOUND
+SHARED SEMANTIC ROOT = STRONGLY WEAKENED
+SHARED INFRASTRUCTURE ROOT = VERY STRONGLY WEAKENED
+INDEPENDENT AIM + FAR_WORLD DEFECTS = LEADING
 ```
 
-### IsInputDeviceAPointer scope
-Frozen direct-call census:
+## FAR_WORLD COLD convergence
+Supported current chain:
 ```text
-client = 14 callers
-server = 8 callers
+late eye-local CViewSetup
+  -> CalcFovY / camera frustum generation
+  -> g_Frustum
+  -> portal/area-frustum refinement
+  -> ClientLeafSystem CullBox
+  -> eye-local/versioned ordinary renderable membership
 ```
-The native-aim allowlist occupies a weapon-final-aim subset. Other callers include viewmodel/reticle/recoil/other final-aim consumers and fall through to original. RC3 also included a grenade route, which is an AIM-scope defect, not a recovered renderer/frustum route.
 
-Verdict:
+Strong boundaries:
+- PVS/world-list/renderables are not supported as one blindly shared LEFT-owned list;
+- hardware occlusion has view identity rather than one immortal global view;
+- pixel visibility remains effects/query scope and is not ordinary-world root proof;
+- `r_portalsopenall` recovery is not unique PVS proof.
+
+### Numeric dual-carrier candidate
+Old monitor-like scalar pair:
 ```text
-POINTER OVERRIDE -> VISIBILITY EDGE = NOT FOUND
+FOV    = 106.260201
+aspect = 1.777778
+vertical scalar FOV ~= 73.739785 deg
 ```
 
-### CheckSplitScreenMimic semantic scope
-Recovered command order:
+Conservative Quest visibility carrier:
 ```text
-original CheckSplitScreenMimic
-    -> RC3 cmd.aimdirection write
-    -> provenance write
-    -> stock command tail / verified CRC
+horizontal bound = +/-54 deg
+vertical bound   = +/-55 deg
+world FOV        = 108.0 deg
+world aspect     = tan(54)/tan(55)
+                 = 0.963752996169473
+vertical FOV     = 110.0 deg
 ```
-No deliberate active split-screen slot, CViewSetup, view identity, frustum or PVS mutation is present in the recovered RC3 semantic contract.
 
-Verdict:
+Interpretation:
 ```text
-DIRECT SPLIT/VIEW MUTATION = NOT FOUND
+GPU projection = exact asymmetric Quest matrix
+CPU visibility = conservative symmetric scalar envelope
 ```
 
-### Raw executed RC3 ABI
-Later audit marked RC3 hook installation transaction as needing hardening. Helper trampoline safety is supported by frozen instruction analysis, but the exact raw executed RC3 ZIP/source is not currently surfaced as a materializable Library artifact. Therefore:
+Do not change:
+- viewmodel FOV;
+- Quest custom projection;
+- eye origins / HMD pose;
+- near/far;
+- portal/PVS/occlusion cvars;
+- game-owned original CViewSetup;
+- monitor pass;
+- Weapon_ShootPosition.
+
+Status: `STRONG COLD CANDIDATE / NOT PROVEN RC3 ROOT / NOT AUTHORIZED LIVE`.
+
+SAFE161 remains a negative control against claiming the mismatch alone as the RC3-specific cause.
+
+## AIM / visual weapon convergence
+Ballistic and visual frames remain distinct:
 ```text
-RAW_EXECUTED_RC3_DETOUR_ABI = UNVERIFIED_IN_CURRENT_ACCESS
+HAND_FRAME != WEAPON_RENDER_FRAME != WEAPON_AIM_FRAME != SHOT_FRAME
 ```
-Do not convert this absence into either PASS or FAIL.
 
-## Current model ranking
+`g_weaponGrabRotOffset` is graphics/model calibration only and must not enter `cmd.aimdirection`.
+
+Visible weapon may use RIGHT AIM orientation plus a stable visual/model-axis correction if required. Dynamic activation-time grab rotation must not define bullet direction.
+
+Optional later Stage-2, only after Stage-1 direction and visibility are separately classified:
 ```text
-1 INDEPENDENT DEFECTS
-  AIM alignment problem + separate FAR_WORLD visibility problem
-  = LEADING
-
-2 SHARED INFRASTRUCTURE ROOT
-  aim-hook layer indirectly corrupts render/view/frustum state
-  = WEAKENED; no semantic edge found; raw ABI remains unverified
-
-3 SHARED SEMANTIC ROOT
-  same gameplay semantic owner directly causes both defects
-  = STRONGLY WEAKENED
+controller ray -> target T
+stock origin O = Weapon_ShootPosition()
+final direction = normalize(T - O)
 ```
+
+This preserves stock fire origin while resolving finite-distance parallax.
+
+## RC4 boundary
+Available package:
+`CSGOVR_SAFE161_NATIVE_AIM_RC4_CLEAN4HOOK_RUNNERFIX_v1.0.2_ONECLICK.zip`
+
+Its declared causal delta:
+- remove persistent client `player+0x382C` mutation;
+- use exact client VectorAngles redirect for five firearm corridors;
+- grenade stock;
+- PVS/culling untouched;
+- stock Weapon_ShootPosition/recoil/spread preserved.
+
+RC4 package existence is not runtime evidence. It remains AIM-side and must not be combined with FAR_WORLD mutation while pending sync exists.
 
 ## Protected baseline / invariants
 Frozen target:
@@ -212,38 +290,49 @@ TAB5 = META governance / merger / STOP
   - `BASELINE MUST HOLD =`
 
 ## DO_NOT_REPEAT
-- do not treat pending FAR_WORLD candidates as PROVEN
+- do not treat `108 / 0.963752996` as a proven fix before membership/causal evidence
 - do not promote `player+0x382C` as FAR_WORLD root without a real visibility edge
+- do not put `g_weaponGrabRotOffset` into gameplay aim
 - do not describe return-address-gated pointer overrides as global pointer spoof
 - do not use `r_portalsopenall` as standalone PVS proof
 - do not use pixel-visibility scope evidence as ordinary-world root proof
-- do not run PVS/occlusion disable experiments before ordinary-world ownership is exhausted COLD
+- do not run broad PVS/occlusion disable experiments
 - do not mix AIM/weapon mutation into FAR_WORLD validation
 - do not reopen M3.2B world/HMD closure without contradictory exact evidence
 - do not generalize `BULLET_B_EDI` runtime proof to all firearm corridors
+- do not promote RC4 by package existence
 
 ## FIRST_MISSING_EDGE — META
 ```text
-PROVE EXACT ORDINARY-WORLD MEMBERSHIP CHAIN AFTER LATE CViewSetup
+DETERMINISTIC SAME-SCENE MEMBERSHIP DISCRIMINATOR
+
+old scalar carrier:
+  FOV=106.260201 / aspect=1.777778
+
+vs candidate visibility carrier:
+  FOV=108.0 / aspect=0.963752996169473
+
+Question:
+  which ordinary CullBox/renderable memberships change
+  for geometry that the exact Quest raster can see?
 ```
 
 Priority:
 ```text
-1 CViewSetup world FOV/aspect -> camera frustum construction
-2 camera frustum -> portal/area frustum refinement
-3 area frustum -> ClientLeafSystem / CullBox ordinary-renderable membership
-4 identify lifetime/cache identity per eye and per frame
-5 reconcile PVS/world-list/occlusion ownership against this chain
-6 only then name exactly one runtime-only discriminating fact, if any
+1 reuse existing frozen same-scene membership/capture corpus
+2 compute/replay both frusta COLD
+3 identify switched ordinary renderables
+4 reconcile those switches with RC3 far-world symptom
+5 only if COLD cannot answer, define exactly one visibility-only runtime discriminator
 ```
-
-Raw RC3 detour ABI verification remains an independent negative control if the exact package becomes available; it is no longer the highest-value blocker for FAR_WORLD COLD progress.
 
 ## Current governance verdict
 ```text
-GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 5
+GLOBAL_REVISION_AT_START_FOR_NEXT_CYCLE = 6
 FAR_WORLD = PENDING_VALIDATION / NARROWED / OWNER_UNBOUND
 ALIGNMENT = ACTIVE / OWNER_UNBOUND
+NUMERIC_VISIBILITY_CANDIDATE = 108.0 / 0.963752996169473
+GAMEPLAY_AIM = COMMAND_SYNCHRONOUS RIGHT_AIM / NO GRAB ROT OFFSET
 LEADING_MODEL = INDEPENDENT_DEFECTS
 R4_SIDECAR = HOLD / DRIFT_RECONCILE_REQUIRED
 LIVE = BLOCKED_BY_PENDING_SYNC
