@@ -1,62 +1,24 @@
-# CSGOVR
+# CS:GO Legacy VR 0.12
 
-Native VR research for frozen legacy **CS:GO x86**.
+**Experimental native OpenXR VR mod for the separate frozen legacy CS:GO x86. Not CS2.**
 
-## Canonical truth
+This repository's former RC3/research files have been removed from the current main tree. **The full F6 source and binary archive are not uploaded to GitHub yet**. The canonical accepted release archive is `csgo 0.12.zip`, SHA256 `ff9be3ff7c1d65d3d14ff0286aba8bf7865cb50aacbc1a1f6c72f070041aa41e`. The complete replacement project and an authenticated Git upload utility are supplied separately in the ChatGPT delivery ZIP; that tool will atomically replace this temporary staging tree with the complete source and release file.
 
-**Read `docs/SYNC.md` first.**
+### Features
 
-Machine control plane:
-- `RESEARCH_CONTRACT.yaml`
-- `CLAIM_GRAPH.json`
+- Native binocular in-game rendering sent to OpenXR.
+- Right-hand tracked-controller aiming and stock recoil/haptics.
+- Local 5v5 match with nine bots, game/buy menus, AUG/AWP optics.
+- 2560 or 2048 pixels per eye (presets).
 
-Do not infer the current gate from old package names or historical handoffs.
+### Installation (after the release ZIP is uploaded)
 
-## Current lanes
+You need a separate copy of [legacy CS:GO on Steam](https://store.steampowered.com/app/4465480/). Download **csgo 0.12.zip** (not GitHub's automatic source ZIP), unpack its single `put me in a game folder` directory beside `csgo.exe`, activate PCVR and launch the mod folder's `RUN.bat`. The mod uses `-insecure` / `sv_lan 1` and only supports local bots. CS2, secure matchmaking and online servers are unsupported.
 
-Primary weapon/aim COLD gate:
-`CLAIM_ID = CSGO-RC3-PRELIVE-IMPLEMENTATION-CLOSURE`
+**This is not yet a published GitHub Release.** Do not circulate a download claim until the exact ZIP has been uploaded and third-party redistribution rights reviewed.
 
-Separate quality lane:
-`CLAIM_ID = CSGO-PACING-PVS`
+The F6 author gave positive feedback after a Meta PCVR session. This does not certify all headsets, weapons or 72 new game FPS. F6F1 is a separate test candidate, not this release. The left game arm is not independently 6DoF tracked.
 
-Prepared runtime candidate after COLD PASS:
-`CSGO-RC3-SAFE161-3HOOK-RUNTIME` (QUEUED).
+[Known issues](KNOWN_ISSUES.md) · [Release notes](RELEASE_NOTES.md) · [Publishing status](PUBLISH_STATUS.md) · [Third-party rights](THIRD_PARTY.md)
 
-## Why RC3 is not authorized for LIVE yet
-
-The three-hook **ownership/dataflow architecture is COLD-proven**, including native `CUserCmd::aimdirection`, client/server current-command ownership and the six approved server final-aim caller/register cases.
-
-What remains is narrower: prove the **exact RC3 package implementation** really contains the required fail-closed ring/session/hook-install/reject behavior. The RC3 ticket reports a structural package audit, but accessible GitHub/Library evidence exposes the ticket and SHA sidecar rather than the exact RC3 source/package bytes needed for an independent implementation audit.
-
-See `docs/SYNC.md` for the ten exact COLD items. Do not create RC4 and do not run RC3 from this tab before that gate closes.
-
-## Baseline hierarchy
-
-World/HMD rollback authority:
-`CSGOVR_MASTER3_2B_HMD_6DOF_v1.1.1_AUTO20_ONECLICK.zip`
-
-Weapon/aim visual ancestor:
-`CSGOVR_WEAPON_SAFE_POSTCALC_AIM_v1.6.1_ONECLICK`
-
-RC2 three-hook LIVE is **FAIL / DO NOT PROMOTE**. Its native aim never installed due to the ASLR-sensitive old guard, and its visual parent regressed distant world content.
-
-## Retained gameplay architecture
-
-`RIGHT AIM -> CUserCmd::aimdirection -> stock prediction/transport -> authoritative server CUserCmd -> player AimDirection -> approved final-aim semantics -> native AimPunch -> stock spread/inaccuracy -> stock Weapon_ShootPosition -> stock FX_FireBullets`
-
-Semantic owners remain separate:
-`HEAD != HAND_GRIP != HAND_AIM != WEAPON != FIRE_AIM != FIRE_ORIGIN`.
-
-## Start here
-
-1. `docs/SYNC.md`
-2. `RESEARCH_CONTRACT.yaml`
-3. `CLAIM_GRAPH.json`
-4. Issue #4 (`CURRENT:`)
-5. `experiments/RC3_SAFE161_3HOOK_GUARDFIX_LIVE_TICKET_20260828.md` as the **queued** runtime ticket
-6. `research/RC2_3HOOK_RUNTIME_FAIL_20260828.md`
-7. `research/SERVER_CURRENTCMD_CLOSURE_20260828.md`
-8. `research/NATIVE_AIM_EVIDENCE_20260828.md`
-
-Prepared package is never a RESULT. Architecture proof is not automatically exact implementation proof.
+Independent community project. Not affiliated with Valve, Steam or Meta.

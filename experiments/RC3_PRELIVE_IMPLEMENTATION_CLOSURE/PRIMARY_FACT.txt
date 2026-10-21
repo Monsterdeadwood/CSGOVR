@@ -1,1 +1,0 @@
-PRIMARY_FACT: whether the exact prepared RC3 package/source implements the complete fail-closed three-hook command provenance, session invalidation, stock-reject and partial-install safety contract required before LIVE.
