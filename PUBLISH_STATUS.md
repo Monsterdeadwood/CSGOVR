@@ -1,11 +1,20 @@
-# Publication status — staged, not live
+# Publication status
 
-**2026-10-22:** Main branch was replaced by this small *honestly labeled landing tree*. Old RC3/research source is absent from the new tree. The normal prior Git commit history is intentionally retained for audit/recovery.
+The complete **0.12 / NOVA-2026.10.21-F6** source and binary package is
+present in this repository tree. The old RC3/research working tree has
+been replaced. Normal Git commit history is retained.
 
-The complete 0.12 F6 repository cannot be transferred from the current session by the available GitHub connector as a local binary ZIP. The user-facing package `CSGOVR_012_GITHUB_REPLACEMENT.zip` contains the full repository including unchanged accepted `repository/release/csgo 0.12.zip`, mirrored original sources and license notices, as well as root `RUN.bat` -> Publish.
+- Installable file: [release/csgo 0.12.zip](release/csgo%200.12.zip?raw=1).
+- Size: **2,342,717 bytes**.
+- SHA256: `ff9be3ff7c1d65d3d14ff0286aba8bf7865cb50aacbc1a1f6c72f070041aa41e`.
+- The package and all **101 extracted files** are unchanged from the supplied release.
+- [Import provenance](release/PROVENANCE.json) and [recorded validation](docs/VALIDATION.md).
 
-Next step: On a Windows PC with Git credentials, unpack that package, run root `RUN.bat`, choose **2. Publish repository to GitHub**. The script checks hashes, clones current main, removes its tracked files in a temporary checkout, copies the complete clean release repository, makes a **normal fast-forward commit** and pushes, without force. It only acts after explicit user confirmation and leaves original local games untouched.
+This import does not publish a GitHub Release or change repository visibility.
+For a release, use tag `v0.12`, the text in [RELEASE_NOTES.md](RELEASE_NOTES.md),
+and attach the exact ZIP above. The draft Reddit text is in
+[docs/REDDIT_POST.md](docs/REDDIT_POST.md).
 
-Then use GitHub **Releases -> Draft a new release**, tag `v0.12`, attach the *exact* `csgo 0.12.zip` and publish only after reviewing third-party redistribution rights. No automated release or public visibility change has been performed.
-
-Expected F6 asset SHA256: `ff9be3ff7c1d65d3d14ff0286aba8bf7865cb50aacbc1a1f6c72f070041aa41e`.
+The supplied notices do not establish a separate license for the bundled
+XR Tape layer binary. That unresolved item and the scope of the other
+notices are recorded in [THIRD_PARTY.md](THIRD_PARTY.md).

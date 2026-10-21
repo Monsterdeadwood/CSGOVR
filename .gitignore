@@ -1,7 +1,7 @@
-**/REPORTS/
-**/LOGS/
-**/CURRENT_SESSION.json
+/_build/
+/REPORTS/
+/runs/
+/RESULTS/
+/CURRENT_SESSION.json
 __pycache__/
 *.pyc
-*.tmp
-*.bak

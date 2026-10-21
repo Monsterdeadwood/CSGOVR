@@ -1,0 +1,18 @@
+{
+  "schema": "csgovr.release-import.v1",
+  "release": "0.12",
+  "build": "NOVA-2026.10.21-F6",
+  "source_kit": "CSGO_VR_0.12_RELEASE_KIT_20261021.zip",
+  "source_kit_sha256": "41d3c8fbc13a0a130569cd289523f099c10a318f6c9117ce8284ce20c62c0607",
+  "release_asset": "csgo 0.12.zip",
+  "release_asset_sha256": "ff9be3ff7c1d65d3d14ff0286aba8bf7865cb50aacbc1a1f6c72f070041aa41e",
+  "release_asset_bytes": 2342717,
+  "extracted_release_file_count": 101,
+  "extracted_release_files_byte_identical": true,
+  "source_path_mapping": "put me in a game folder/<relative path> -> <relative path>",
+  "game_runtime_tested_during_import": false,
+  "binaries_rebuilt_during_import": false,
+  "recorded_validation_source": "Source kit: evidence/TEST_SUMMARY.json",
+  "recorded_validation_sha256": "34bae9ae43d9f51bd45ee7bb134205b5efc5fd2b678c47c4f56869479c8f778c",
+  "recorded_validation_summary": "../docs/VALIDATION.md"
+}

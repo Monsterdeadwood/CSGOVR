@@ -1,9 +1,25 @@
-# CS:GO Legacy VR 0.12 — experimental
+# CS:GO Legacy VR 0.12 - Experimental Release
 
-NOVA-2026.10.21-F6, the originally accepted candidate. Native two-eye OpenXR game-world output, right-hand weapon aiming, recoil/haptics, 5v5 local bots, AUG/AWP optics, 2560 or 2048 per-eye presets and local REPORTS ZIPs.
+Motion controls, right-hand tracking, weapon aiming, recoil and haptics for CS:GO
+Legacy. Launch a local 5v5 match with bots through your selected OpenXR runtime.
 
-Previous limited verification: ~30-second CS:GO + XR simulator session with hand motion, native shots and menus, followed by positive author feedback on Meta PCVR. Selected-window medians in the handoff: ~107.36 source GPU pairs/s, ~69.20 fresh XR uploads/s, ~72.17 xrEndFrame/s. These are different metrics, not a sustained 72-new-frame performance guarantee.
+This build improves frame buffering, reduces repeated Direct3D state changes
+and records fresh VR frames separately from source FPS and XR refresh cadence.
 
-Known limitations: other headset runtimes and all weapons unverified; reports of optics, grenade/audio direction and disappearing enemies are not version-verified. Right controller drives the weapon; not independent two-hand full-body tracking.
+Download **csgo 0.12.zip**, extract its single folder next to **csgo.exe**,
+activate PCVR and open **RUN.bat**. The launcher offers 2560 or 2048 per eye.
 
-**Staging notice:** The actual GitHub Release ZIP has not yet been uploaded. Its expected SHA256 is `ff9be3ff7c1d65d3d14ff0286aba8bf7865cb50aacbc1a1f6c72f070041aa41e`. Full publication instructions in [PUBLISH_STATUS.md](PUBLISH_STATUS.md).
+Requires [the separate CS:GO Steam release](https://store.steampowered.com/app/4465480/).
+The launcher includes `-insecure` and `sv_lan 1`.
+**RECOMMENDED: ALSO ADD `-insecure` IN STEAM LAUNCH OPTIONS.**
+Local matches with bots only; server connections are not available.
+
+The native XR Sim check covered 30 seconds, hand movement, firing and menus.
+The author then played through Meta and approved the result.
+This is an experimental release, and broader headset testing is welcome.
+
+Scope issues, audio/grenade orientation and occasional enemy visibility have
+been reported and still need investigation. Controls and details are in the README.
+
+For bug reports, attach the ZIP from **REPORTS** and include your headset,
+OpenXR runtime, mod version and what happened. Thanks for testing!

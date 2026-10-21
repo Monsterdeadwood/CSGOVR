@@ -1,0 +1,17 @@
+{
+  "project": "NOVA_XR_LAB",
+  "game_directory": "..",
+  "build": "NOVA_FRAME_QUEUE_F6",
+  "ipc_version": 3,
+  "optics_policy": "Native centered projection, rendered symmetric FOV submitted to XR; no injected custom matrix",
+  "handcore_scope": "One weapon spatial state: anatomical XR base, native punch driven display/optic, recoiled firing origin with unpunched input angles. AUG/AWP direct output attachment intake; other guns retain established native muzzle admission.",
+  "host": "Additive Lab hosts: grip position + aim orientation + live calibration; original host preserved",
+  "default_eye_resolution": 2560,
+  "controller_input": "Left trigger E, right grip buy toggle, left grip quiet walk (same as right stick down), A jump, X reload, B weapon cycle, Y press one immediate drop without repeat, left click scores, right click crouch, right stick down walk; native mouse camera blocked throughout VR; right trigger fire; left menu short recenter, hold700ms GameUI toggle; general menu selection unverified",
+  "current_ui_admission": "NATIVE_XR_SIM_30S_AND_GAMEPLAY_PASS",
+  "session_mode": "MATCH_5V5",
+  "release_version": "NOVA-2026.10.21-F6",
+  "weapon_optics": "Always-on AUG/AWP image; native scope mechanics engaged automatically; left grip quiet walk.",
+  "fps_features_default": 2623,
+  "fps_policy": "Palm intake + auxiliary copies + 300m main view + same-ray invisible pixel crop + unchanged released XR content reuse; 0 restores original per-frame behavior"
+}

@@ -1,9 +1,18 @@
-# Third-party redistribution review
+# Third-party components and notices
 
-The accepted F6 distribution includes OpenXR SDK headers with Khronos Apache-2.0 terms, a separately licensed xr-sim diagnostic runtime, and Microsoft Visual C++ runtime files with Microsoft redistribution notices.
+The 0.12 package is preserved as supplied, including these notices:
 
-**Unresolved:** the diagnostic `xr-tape` DLL is bundled, but its upstream `NOTICE.md` only covers third-party OpenXR headers and does not establish a blanket license for the layer binary itself. Verify permission or create a new, retested build without it before making the repository public. Do not quietly remove it and claim unchanged F6 Meta acceptance.
+| Component | Supplied notice |
+| --- | --- |
+| OpenXR headers and loader | `deps/licenses/OpenXR_LICENSE.txt` |
+| XR Sim diagnostic runtime | `diagnostics/xr-sim/LICENSE` |
+| Microsoft runtime DLLs | `licenses/Microsoft_Redist.txt` and `licenses/Microsoft_ThirdPartyNotices.txt` |
+| XR Tape diagnostic layer | `diagnostics/xr-tape/NOTICE.md` |
 
-The overall project license is not established and no MIT/Apache blanket license is asserted for unrelated source. Original CS:GO game executables/assets are not included.
+The XR Tape notice describes the OpenXR headers used by that component.
+It does not assign a license to `xrtape_layer.dll` itself. The supplied
+package contains no separate XR Tape project license; do not describe
+that binary as MIT- or Apache-licensed on the strength of the header notice.
 
-This is an independent community project, not endorsed by Valve/Meta/Khronos.
+No new project-wide license is assigned to the mod's original code by this
+import. The third-party notices retain their own scope.

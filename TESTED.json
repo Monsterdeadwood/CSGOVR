@@ -1,0 +1,69 @@
+{
+  "schema": "nova.f6.tested.v1",
+  "status": "NATIVE_XR_SIM_30S_AND_GAMEPLAY_PASS",
+  "default_features": 2623,
+  "scene_sha256": "a152db4bc61ae7a8ec6d1fee329d6e7ad61d5942a61a835d266894f4150a0718",
+  "sim_host_sha256": "4a919265d8b924f1bc73ee6dd73abd84952a110e16cfb9df6534c51b2f4e0ff5",
+  "host_sha256": "b0ce46466f50591882857b6533386d0cf514cc01f90ee239d5956617fc3d97ea",
+  "native_self_test": {
+    "schema": "nova.sim30.acceptance.v1",
+    "status": "PASS_NATIVE_XR_SIM_30S",
+    "seconds": 30.031,
+    "scene_sha256": "a152db4bc61ae7a8ec6d1fee329d6e7ad61d5942a61a835d266894f4150a0718",
+    "host_sha256": "4a919265d8b924f1bc73ee6dd73abd84952a110e16cfb9df6534c51b2f4e0ff5",
+    "default_features": 2623,
+    "source_pair_issue_fps": 57.607139289400955,
+    "new_xr_pair_uploads_fps": 52.81209416935833,
+    "xr_cadence_hz": 71.95897572508409,
+    "hand_motion": true,
+    "native_shots": 8,
+    "buy_and_gameui_open_close": true,
+    "all_pipeline_errors_zero": true,
+    "game_and_host_closed": true,
+    "physical_headset_72_verified": false
+  },
+  "performance": {
+    "scope": "One fixed native Nuke/AUG scene with nine frozen bots, 2560-square eyes, 768 optic, XR Sim 72 Hz. No physical headset FPS guarantee.",
+    "phases": [
+      {
+        "label": "baseline_before",
+        "policy": 63,
+        "seconds": 10.015,
+        "source_issue_fps": 66.20069895157265,
+        "fresh_world_fps": 52.02196704942586,
+        "reused_world_hz": 19.87019470793809
+      },
+      {
+        "label": "candidate_30s",
+        "policy": 2623,
+        "seconds": 30.032,
+        "source_issue_fps": 70.25839104954714,
+        "fresh_world_fps": 56.40649973361747,
+        "reused_world_hz": 15.583377730420885
+      },
+      {
+        "label": "baseline_after",
+        "policy": 63,
+        "seconds": 10.0,
+        "source_issue_fps": 64.3,
+        "fresh_world_fps": 53.3,
+        "reused_world_hz": 18.8
+      }
+    ],
+    "baseline_fresh_fps": 52.66098352471293,
+    "candidate_fresh_fps": 56.40649973361747,
+    "fresh_gain_percent": 7.112507131863244,
+    "integration_acceptance_from_separate_clean_run": true,
+    "interrupted_run_scope": "Only completed validated FPS windows used; later capture check and cleanup were not accepted as a functional test."
+  },
+  "unit_checks": [
+    "PIXEL_STATE_OWNER_PRODUCTION checks=25 failures=0",
+    "FRAME_TRANSPORT_ABI_AND_SOURCE_LEASE checks=14 failures=0",
+    "RECORDED_REGION L=(0,165,825,859) R=(199,165,825,859)\nVIEW_REGION_PRODUCTION checks=26743 failures=0",
+    "WEAPON_BODY checks=4327 failures=0 real_game=0 real_gpu=0",
+    "XR content transition checks=14 failures=0"
+  ],
+  "physical_headset_verified": false,
+  "physical_72_fps_verified": false,
+  "headset_user_acceptance": "PENDING_F6_USER_PLAY"
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "nova.exact-target.v1",
+  "target": "CS:GO Legacy; offline local only",
+  "files": {
+    "csgo.exe": "de96c3b37e3aaedcf4d6a24c5f6c30acd60f3593e8d452dd9857d682ea3fb114",
+    "csgo/bin/client.dll": "183d42fac8a4ecc24dc02edf5f09122f37fe9e7533ca093a867718b25cfdeb03",
+    "bin/engine.dll": "bcca98731eab8b72d1ef34fa5fe420f26ac98e8dd1d91698171d0ecd9935faa6",
+    "csgo/bin/server.dll": "699757bb5c8ddb71193f68daba22f59f697491ddbd768bc8656ac2ce435c4db8",
+    "bin/inputsystem.dll": "43bbf7e726ffd511cd423538234bf3a30ec20eceec31987b0f867c0a6f17ef78"
+  }
+}

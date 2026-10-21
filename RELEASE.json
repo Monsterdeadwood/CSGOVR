@@ -1,0 +1,59 @@
+{
+  "schema": "nova.f6.release.v1",
+  "version": "NOVA-2026.10.21-F6",
+  "packaged_utc": "2026-10-21T07:08:48.796649+00:00",
+  "status": "EXPERIMENTAL_NATIVE_SIM_TESTED_HEADSET_USER_RETEST",
+  "core_sha256": {
+    "bin/msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+    "bin/nova_control32.exe": "5d8bd0ba2f3ef81df87faa6c7771f71efeedfde1d7cbd54ae68482190c7559f3",
+    "bin/nova_inject32.exe": "8188960978c735b316115d0abb0bf59c06f0ad844ef25e1d36f484d1b5d348aa",
+    "bin/nova_scene32_universal.dll": "a152db4bc61ae7a8ec6d1fee329d6e7ad61d5942a61a835d266894f4150a0718",
+    "bin/nova_xr64_palm.exe": "b0ce46466f50591882857b6533386d0cf514cc01f90ee239d5956617fc3d97ea",
+    "bin/nova_xr64_sim_palm.exe": "4a919265d8b924f1bc73ee6dd73abd84952a110e16cfb9df6534c51b2f4e0ff5",
+    "bin/openxr_loader.dll": "7d0a7cbb3fd2fe6bebd8fb6717e2434223483a9d79e0b93b47395f6dd65272ad",
+    "bin/vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+    "bin/vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+  },
+  "default_features": 2623,
+  "changes": [
+    "Four source-pair buffers preserve GPU completion and image/pose association",
+    "Repeated identical crop-state changes are coalesced",
+    "Telemetry separates source issues, fresh XR world images and reused images"
+  ],
+  "preserved": "Always-on weapon optics, universal palm, recoil, native muzzle/ballistics, controller layout, 2560-square Meta raw image preset",
+  "telemetry": "Automatic local report ZIP in REPORTS after exit, or RUN.bat --report. No automatic upload.",
+  "performance": {
+    "scope": "One fixed native Nuke/AUG scene with nine frozen bots, 2560-square eyes, 768 optic, XR Sim 72 Hz. No physical headset FPS guarantee.",
+    "phases": [
+      {
+        "label": "baseline_before",
+        "policy": 63,
+        "seconds": 10.015,
+        "source_issue_fps": 66.20069895157265,
+        "fresh_world_fps": 52.02196704942586,
+        "reused_world_hz": 19.87019470793809
+      },
+      {
+        "label": "candidate_30s",
+        "policy": 2623,
+        "seconds": 30.032,
+        "source_issue_fps": 70.25839104954714,
+        "fresh_world_fps": 56.40649973361747,
+        "reused_world_hz": 15.583377730420885
+      },
+      {
+        "label": "baseline_after",
+        "policy": 63,
+        "seconds": 10.0,
+        "source_issue_fps": 64.3,
+        "fresh_world_fps": 53.3,
+        "reused_world_hz": 18.8
+      }
+    ],
+    "baseline_fresh_fps": 52.66098352471293,
+    "candidate_fresh_fps": 56.40649973361747,
+    "fresh_gain_percent": 7.112507131863244,
+    "integration_acceptance_from_separate_clean_run": true,
+    "interrupted_run_scope": "Only completed validated FPS windows used; later capture check and cleanup were not accepted as a functional test."
+  }
+}
