@@ -14,7 +14,7 @@
 
 NOVA brings CS:GO Legacy into VR with head tracking, a controller-driven weapon, recoil and haptics. The 0.12 release launches a local 5v5 match with nine bots through your selected OpenXR runtime.
 
-**Current documented branch: 0.12 / NOVA-2026.10.21-F6.**
+**Package baseline on this page: 0.12 / NOVA-2026.10.21-F6.**
 
 ## Installation
 
@@ -48,6 +48,11 @@ NOVA brings CS:GO Legacy into VR with head tracking, a controller-driven weapon,
 The complete package control sheet takes precedence for its version and interaction profile.
 
 </details>
+
+## Features in newer test builds
+
+- **Throw grenades by moving your hand.** In a local test, the tracked right hand drove the game's throw for six grenade types, including smoke, flashbang and Molotov. XR Sim exercised moving throws, obstacles and reacquiring tracking.
+- **Seat a magazine by hand.** The development build tested the reload cycle with either hand on four original weapon models. The approach must match the magazine well before the magazine seats. These tests used XR Sim. Physical-headset handling remains open.
 
 ## Current status
 

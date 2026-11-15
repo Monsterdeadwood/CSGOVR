@@ -8,6 +8,15 @@ Reviewed **14 November 2026**. Documented branch: **0.12 / NOVA-2026.10.21-F6**.
 
 - The released F6/0.12 build has author-reported Meta play acceptance. A tester also reported good results on VDXR; wider device coverage remains limited.
 
+## Follow-up tests reviewed 16 November 2026
+
+The local NOVA R39 test completed eight both-hand reload cycles across four native models. R41 recorded ten native throws across six grenade types and recovered cleanly from pose loss with the pin held. These are development checks alongside the existing F6/0.12 release.
+
+Verification records used for this section
+
+- `NOVA_RELOAD_SEAT_20261115_221702.json`
+- `NOVA_GRENADE_THROW_20261116_005012.json`
+
 ## Current limits
 
 - The released left arm is not an independently tracked 6DoF hand. Some scope, audio/grenade orientation and enemy-visibility reports remain open.
