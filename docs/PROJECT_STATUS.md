@@ -1,4 +1,4 @@
-# NOVA · CS:GO Legacy VR — project status
+# NOVA · Counter-Strike: Global Offensive (Legacy) VR — project status
 
 [← Project page](../README.md) · [Flat2VR testing & discussion](https://discord.gg/P4q9zt7ek)
 

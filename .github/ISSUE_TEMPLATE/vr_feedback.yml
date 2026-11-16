@@ -1,5 +1,5 @@
 name: VR feedback
-description: Report a reproducible issue with NOVA · CS:GO Legacy VR
+description: "Report a reproducible issue with NOVA · Counter-Strike: Global Offensive (Legacy) VR"
 title: "[VR] "
 body:
   - type: markdown
