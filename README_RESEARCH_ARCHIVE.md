@@ -78,7 +78,6 @@ The ZIP is the installable release; its checksum is in
 - [Building the included sources](docs/BUILDING.md)
 - [Third-party notices](THIRD_PARTY.md)
 - [Publication status](PUBLISH_STATUS.md)
-- [Русская инструкция](README_RU.md)
 
 The release kit records a later Meta play session than the `PENDING` headset
 status inside the sealed ZIP. See the validation notes for that distinction.

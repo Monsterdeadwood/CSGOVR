@@ -39,10 +39,3 @@ This overview was reconciled against the project’s recorded package notes and 
 - `NOVA_PHYSICAL_CARRY_20261112_154317.json`
 
 Game execution, simulator validation and physical-headset feedback are reported separately above. Features from a separate experimental branch are identified explicitly.
-
-## Кратко по-русски
-
-NOVA переносит CS:GO Legacy в VR: трекинг головы, оружие от контроллера, отдача и вибрация. Версия 0.12 запускает локальный матч 5×5 с девятью ботами через выбранный OpenXR runtime.
-
-- Левая рука в опубликованной версии не является независимой 6DoF-рукой. Открыты отдельные вопросы оптики, ориентации звука/гранат и видимости врагов.
-- Версия рассчитана на локальные боты и зафиксированную сборку CS:GO; CS2 и подключения к серверам в её область не входят.
