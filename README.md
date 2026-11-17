@@ -1,9 +1,9 @@
 > [!IMPORTANT]
 > **TEST BUILDS & DISCUSSION**
 >
-> **[Join the Flat2VR Discord](https://discord.gg/P4q9zt7ek)**
+> **[Join the Flat2VR Discord](https://discord.gg/P4q9zt7ek)** · **[Open the CS:GO VR thread](https://discord.com/channels/747967102895390741/1561970983575887952)**
 >
-> Download 0.12 below. Use the **NOVA / CS:GO VR** discussion in Flat2VR for testing and feedback.
+> Download the pinned 0.12 build below. Use the Flat2VR thread for test updates and feedback.
 
 <p align="center">
   <img src="assets/vr-banner.png" alt="NOVA · Counter-Strike: Global Offensive (Legacy) VR" width="710">
