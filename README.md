@@ -14,8 +14,8 @@
 ## 📦 INSTALLATION
 
 1. Install [**CS:GO Legacy**](https://store.steampowered.com/app/4465480/) on Steam and set `-insecure` in its launch options.
-2. Get the mod from the CS:GO thread, extract it, and put **put me in a game folder** next to `csgo.exe`.
-3. Connect PC VR, select your OpenXR runtime, and run **`RUN.bat`**. Start a local bot match.
+2. **Put the mod archive next to `csgo.exe`.** Extract it there and keep the entire `put me in a game folder` folder.
+3. Connect PC VR, select your OpenXR runtime, and run **`RUN.bat`** from the extracted mod folder. Start a local bot match.
 
 <a name="features"></a>
 
